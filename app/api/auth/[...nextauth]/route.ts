@@ -2,13 +2,14 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import db from "@/app/lib/DBschema"
+import Twitter from "next-auth/providers/twitter"
 
 // Extend the JWT type
 declare module "next-auth/jwt" {
   interface JWT {
     userId?: string
     provider?: string
-    // Add any custom fields
+  
   }
 }
 
@@ -17,7 +18,10 @@ const handler  = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    }),Twitter({
+       clientId:process.env.X_CONSUMER_KEY!,
+       clientSecret:process.env.X_SECRET_KEY!
+    })
   ],
   session: {
     strategy: "jwt",
