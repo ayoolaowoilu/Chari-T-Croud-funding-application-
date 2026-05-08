@@ -6,7 +6,15 @@ export async function GET(){
         
     try{
          const [data]:any =await db.query(
-            `SELECT main_img,details,donation_count,goal,raised,category,name,id,center_name,center_id,location,date_to_completion,safety_rating FROM campaigns WHERE date_to_completion > ${Date.now()} ORDER BY RAND() LIMIT 3`
+   `        SELECT 
+  main_img, details, donation_count, goal, raised, category, 
+  name, id, center_name, center_id, location, 
+  date_to_completion, safety_rating 
+FROM campaigns 
+WHERE date_to_completion > ${Date.now()}
+  AND goal <> raised 
+ORDER BY RAND() 
+LIMIT 3`
         )
 
 

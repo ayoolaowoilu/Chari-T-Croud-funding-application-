@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: uDonate = await request.json();
 
-    // Validate amount
+    
     if (!body.amount || Number(body.amount) <= 0) {
       return NextResponse.json(
         { message: "Invalid donation amount" },

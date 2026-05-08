@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
     let sql: string;
     let params: any[] = [];
 
-    // Case 1: No filters — random 5 campaigns that haven't expired
+   
     if (category === "All" && !query) {
       sql = `
         SELECT main_img, details, donation_count, goal, raised, 
                category, name, id, center_name, center_id , location, date_to_completion,safety_rating
         FROM campaigns 
-        WHERE date_to_completion > ? 
+        WHERE date_to_completion > ?  AND goal <> raised 
         ORDER BY RAND() 
         LIMIT 15
       `;
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
                category, name, id, center_name, center_id , location,date_to_completion,safety_rating
         FROM campaigns 
         WHERE date_to_completion > ? 
-          AND category = ? 
+          AND category = ?  AND goal <> raised 
         ORDER BY RAND() 
         LIMIT 15
       `;
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
             OR details LIKE ? 
             OR center_name LIKE ? 
             OR category LIKE ?
-          ) 
+          )  AND goal <> raised 
         ORDER BY RAND() 
         LIMIT 15
       `;
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
             name LIKE ? 
             OR details LIKE ? 
             OR center_name LIKE ?
-          ) 
+          )   AND goal <> raised 
         ORDER BY RAND() 
         LIMIT 15
       `;
