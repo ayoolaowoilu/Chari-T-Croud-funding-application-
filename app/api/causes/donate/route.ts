@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const [campaign]: any = await db.query(
-      "SELECT raised, id, user_id, donation_count, donors, goal,center_id FROM campaigns WHERE id = ?",
+      "SELECT raised, id, user_id, donation_count, donors, goal,center_id,reported FROM campaigns WHERE id = ?",
       [body.campaign_id]
     );
 
@@ -65,6 +65,12 @@ export async function POST(request: NextRequest) {
 
 
     const updateCampaign = async (donors: any[]) => {
+      if(campaign[0].reported){
+          return  await db.query(
+          "UPDATE campaigns SET raised = ?, donation_count = ?, donors = ?, WHERE id = ?",
+          [raised, donationCount, JSON.stringify(donors), body.campaign_id]
+        );
+      }
 
       if (donated_rate > 50) {
         await db.query(

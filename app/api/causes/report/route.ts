@@ -1,9 +1,9 @@
 import db from "@/app/lib/DBschema";
+import { Campaign } from "@/app/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   const { _type, campaign_id, message, reporter_name } = await request.json();
-  console.log(_type, message);
 
   try {
     const [campaign]: any = await db.query(
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     await db.query(
-      "INSERT INTO reports (report_type, campaign_id, meaasge, reporter_name) VALUES (?, ?, ?, ?)",
+      "INSERT INTO reports (report_type, campaign_id, message, reporter_name) VALUES (?, ?, ?, ?)",
       [_type, campaign_id, message, reporter_name]
     );
 
@@ -43,27 +43,27 @@ export async function POST(request: NextRequest) {
     const misrepresentation = Number(counts.misrepresentation_count);
     const exploitative = Number(counts.exploitative_count);
 
-    let newRating = currentRating;
+    let newRating:Campaign["safety_rating"] = currentRating;
 
-    // Logic: escalate downward based on report severity and frequency
     if (fraud >= 3 || (fraud >= 1 && misrepresentation >= 2)) {
       newRating = "unsafe";
     } else if (fraud >= 1 || misrepresentation >= 3 || (exploitative >= 2 && total >= 4)) {
-      newRating = "likely_unsafe";
+      newRating = "likely_risky";
     } else if (total >= 5 && (currentRating === "likely_safe" || currentRating === "verified_safe")) {
       newRating = "uncertain";
     } else if (total >= 3 && currentRating === "uncertain") {
-      newRating = "likely_unsafe";
+      newRating = "likely_risky";
     } else if (total >= 1 && (currentRating === "likely_safe" || currentRating === "verified_safe")) {
      
       newRating = "uncertain";
     }
 
-    // Only update if rating changed
+ 
     if (newRating !== currentRating) {
+      console.log("updating..")
       await db.query(
-        "UPDATE campaigns SET safety_rating = ? WHERE id = ?",
-        [newRating, campaign_id]
+        "UPDATE campaigns SET safety_rating = ? , reported = ? WHERE id = ?",
+        [newRating,true, campaign_id]
       );
     }
 
