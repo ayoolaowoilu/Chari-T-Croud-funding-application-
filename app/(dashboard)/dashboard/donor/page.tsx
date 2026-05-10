@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { redirect, useSearchParams } from "next/navigation"
+import DonationsPage from "@/app/components/dashboad/donations"
 
 type TabId = "dashboard" | "explore" | "history" | "profile" | "charity"
 
@@ -41,7 +42,7 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
   switch (activeTab) {
     case "dashboard": return <Dash />
     case "explore": return <Explore />
-    case "history": return <div className="text-gray-600">Donation history content...</div>
+    case "history": return  <DonationsPage />
     case "profile": return <Profile />
     case "charity": return <div className="text-gray-600">Charity centers content...</div>
     default: return null
