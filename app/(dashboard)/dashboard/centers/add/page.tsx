@@ -7,6 +7,7 @@ import { FetchBanks, getSubAccountCode, SubAccountPayload, VerifyBankDetails } f
 import NavBar from '@/app/components/layout/NavBar'
 import { CenterRegistrationPayload } from '@/app/lib/types'
 import { UploadCenter } from '@/app/lib/fetchRequests'
+import { useSession } from 'next-auth/react'
 
 interface FormData {
   name: string
@@ -85,6 +86,7 @@ export default function CenterRegistration() {
 
   const bankDropdownRef = useRef<HTMLDivElement>(null)
   const bankInputRef = useRef<HTMLInputElement>(null)
+  const {data:session,status} = useSession()
 
   
   useEffect(() => {
@@ -329,21 +331,35 @@ export default function CenterRegistration() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!validate()) return
 
-    setSubmitting(true)
+  setSubmitting(true)
+  setErrors({}) // Clear previous errors
 
+  try {
     const subAccountpayload: SubAccountPayload = {
       business_name: form.bank_details.account_name,
       account_number: form.bank_details.account_number,
       settlement_bank: form.bank_details.bank_name,
       percentage_charge: 4
     }
-    const subAccountCode = await getSubAccountCode(subAccountpayload)
 
-    const payload:CenterRegistrationPayload = {
+    let subAccountCode: string | null = null
+    try {
+      subAccountCode = await getSubAccountCode(subAccountpayload)
+    } catch (subError: any) {
+      console.error('Sub-account creation failed:', subError)
+      setErrors(prev => ({
+        ...prev,
+        submit: 'Failed to create payment sub-account. Please check your bank details and try again.'
+      }))
+      setSubmitting(false)
+      return
+    }
+ 
+    const payload: CenterRegistrationPayload = {
       name: form.name,
       registration_number: form.registration_number,
       email: form.email,
@@ -371,20 +387,35 @@ export default function CenterRegistration() {
         original_name: d.originalName,
         compressed: d.compression?.wasCompressed || false,
         compression_ratio: d.compression?.compressionRatio || null
-      }))
+      })),
+      userEmail:session?.user.email as string
     }
-;
+
     console.log('=== CENTER REGISTRATION PAYLOAD ===')
     console.log(JSON.stringify(payload, null, 2))
     console.log('===================================')
 
     const resp = await UploadCenter(payload)
-    if(resp.error){
-        
+
+    if (resp.error) {
+      setErrors(prev => ({
+        ...prev,
+        submit: resp.message || 'Registration failed. Please try again.'
+      }))
+      return
     }
+
+    
+  } catch (err: any) {
+    console.error('Registration submission error:', err)
+    setErrors(prev => ({
+      ...prev,
+      submit: err.message || 'An unexpected error occurred. Please try again later.'
+    }))
+  } finally {
     setSubmitting(false)
-  
   }
+}
 
   const inputClass = (field: string) => `
     w-full px-4 py-2.5 bg-white border rounded-lg text-sm

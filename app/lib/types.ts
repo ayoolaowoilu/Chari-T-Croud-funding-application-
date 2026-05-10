@@ -111,6 +111,7 @@ interface CenterRegistrationPayload {
   name: string
   registration_number: string
   email: string
+  userEmail:string
   phone: string
   address: string
   website: string
