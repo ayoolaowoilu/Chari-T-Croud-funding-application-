@@ -1,7 +1,8 @@
 "use server"
 
+import { error } from "console";
 import { getSubAccountCode} from "./paystack";
-import { Campaign, KycFormData, UserData } from "./types"
+import { Campaign, CenterRegistrationPayload, KycFormData, UserData } from "./types"
 
 
 type causeData = Pick<Campaign , "name" | "details" | "story" | "goal" | "currency" | "category" | "bank_details" > & {
@@ -271,6 +272,20 @@ const DeleteCause = async(id:number) =>{
          }
   }
 
+  const UploadCenter =async(data:CenterRegistrationPayload)=>{
+          try{
+        const resp = await fetch(`${API_URL}/api/centers/add`,{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify(data)
+        })
+
+        return await resp.json()
+          }catch{
+                return {error:"Internet connection check network connection"}
+          }
+  }
+
 export {
     type Report,
      type verifyCenter,
@@ -289,5 +304,6 @@ export {
      UploadKyc,
      GetUserDetailsDyId,
     type kycPayload,
-    updateDonate
+    updateDonate,
+    UploadCenter
 }

@@ -87,4 +87,39 @@ interface KycFormData {
   documentNumber: string;
 }
 
-export type { Campaign, Donor, UserData , CloudinaryImage , bankDetails, PaystackBank , KycFormData}
+interface VerificationDocument {
+  url: string
+  public_id: string
+  width: number
+  height: number
+  original_name: string
+  compressed: boolean
+  compression_ratio: string | null
+}
+
+interface BankDetails {
+  account_name: string
+  account_number: string
+  bank_name: string
+  bank_code: string
+  branch: string
+  swift_code: string
+  subAccountCode: string
+}
+
+interface CenterRegistrationPayload {
+  name: string
+  registration_number: string
+  email: string
+  phone: string
+  address: string
+  website: string
+  is_verified_status: 'pending'
+  about: string
+  logourl: string | null
+  geo_location: string
+  bank_details: BankDetails
+  verification_documents: VerificationDocument[]
+}
+
+export type { Campaign, Donor, UserData , CloudinaryImage , bankDetails, PaystackBank , KycFormData , CenterRegistrationPayload}
