@@ -272,7 +272,7 @@ const DeleteCause = async(id:number) =>{
          }
   }
 
-  const UploadCenter =async(data:CenterRegistrationPayload)=>{
+  const UploadCenter =async(data:CenterRegistrationPayload & {type:string})=>{
           try{
         const resp = await fetch(`${API_URL}/api/centers/add`,{
               method:"POST",
@@ -286,6 +286,23 @@ const DeleteCause = async(id:number) =>{
           }
   }
 
+
+  const GetCenter = async(type:"ONE" | "OWNED" , email:string | number) =>{
+         try{
+             if(type == "OWNED"){
+                 const resp = await fetch(`${API_URL}/api/centers/get?email=${email}`)
+
+                 return (await resp.json())
+                 
+             }else{
+                  const resp  = await fetch(`${API_URL}/api/centers/one?id=${email}`)
+
+                  return (await resp.json())
+             }
+         }catch{
+               return {error:"Error Getting data"}
+         }
+  }
 export {
     type Report,
      type verifyCenter,
@@ -305,5 +322,6 @@ export {
      GetUserDetailsDyId,
     type kycPayload,
     updateDonate,
-    UploadCenter
+    UploadCenter,
+    GetCenter
 }

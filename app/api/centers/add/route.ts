@@ -7,13 +7,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import db from '@/app/lib/DBschema'
 import { CenterRegistrationPayload } from '@/app/lib/types'
 
-
-
+interface props extends CenterRegistrationPayload  {
+     type:string
+}
 
 export async function POST(request: NextRequest) {
 
   try {
-    const body: CenterRegistrationPayload = await request.json()
+    const body:props = await request.json()
 
     const requiredFields = [
       'name', 'registration_number', 'email', 'phone',
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest) {
     }
 
     const [row]:any = await db.query("SELECT id FROM users WHERE email = ?",[body.userEmail])
+
+    
 
     const userID = row[0].id
 
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
         body.about,
         body.logourl,
         body.geo_location,
-        JSON.stringify(body.bank_details),body.verification_documents,userID
+        JSON.stringify(body.bank_details),JSON.stringify(body.verification_documents),userID
       ]
     )
 

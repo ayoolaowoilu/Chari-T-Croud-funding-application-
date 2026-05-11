@@ -8,7 +8,6 @@ import { uploadImage } from "@/app/lib/upload"
 import { 
   ArrowRight, 
   FileText, 
-  Upload, 
   Image as ImageIcon, 
   CheckCircle2, 
   AlertCircle, 
@@ -26,7 +25,7 @@ import {
   ImagePlus,
   Compass,
   Info,
-  RotateCcw,
+
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { FetchProfile, uploadCause} from "@/app/lib/fetchRequests"
@@ -51,7 +50,7 @@ export default function Page() {
   const [Did, setDid] = useState<number | null>(null)
   const [drafts, setDrafts] = useState<any[]>([])
  
-  // Form state
+ 
   const [causeName, setCauseName] = useState("")
   const [details, setDetails] = useState("")
   const [story, setStory] = useState("")
@@ -63,7 +62,7 @@ export default function Page() {
   const [mainImage, setMainImage] = useState<UploadingImage | undefined>()
   const [location, setLocation] = useState("")
 
-  // Error & loading state
+
   const [errorType, setErrorType] = useState<"M_IMG" | "IMGS" | "NET" | "UPLOAD_IMG" | "UPLOAD_ERR" | "LOAD" | "IVP" | "C404" | "UVF" | "FOR" | "UEX">()
   const [errorMsg, setErrorMsg] = useState("")
   const [error, SetError] = useState(false)
@@ -1113,6 +1112,8 @@ if (status !== 'authenticated') return;
         onClick={() => {}}
         bankName=""
         accountNumber=""
+        subAccountCode=""
+        email={session?.user.email as string}
       />
 
       {loading ? (
