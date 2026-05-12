@@ -272,7 +272,7 @@ const DeleteCause = async(id:number) =>{
          }
   }
 
-  const UploadCenter =async(data:CenterRegistrationPayload & {type:string})=>{
+  const UploadCenter =async(data:CenterRegistrationPayload & {type:string , id:number})=>{
           try{
         const resp = await fetch(`${API_URL}/api/centers/add`,{
               method:"POST",

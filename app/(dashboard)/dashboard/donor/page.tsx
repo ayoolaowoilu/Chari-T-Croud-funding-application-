@@ -20,6 +20,7 @@ import {
 import { useSession } from "next-auth/react"
 import { redirect, useSearchParams } from "next/navigation"
 import DonationsPage from "@/app/components/dashboad/donations"
+import CharityProp from "@/app/components/dashboad/charity"
 
 type TabId = "dashboard" | "explore" | "history" | "profile" | "charity"
 
@@ -44,7 +45,7 @@ function TabContent({ activeTab }: { activeTab: TabId }) {
     case "explore": return <Explore />
     case "history": return  <DonationsPage />
     case "profile": return <Profile />
-    case "charity": return <div className="text-gray-600">Charity centers content...</div>
+    case "charity": return <CharityProp />
     default: return null
   }
 }

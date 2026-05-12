@@ -8,7 +8,7 @@ import db from '@/app/lib/DBschema'
 import { CenterRegistrationPayload } from '@/app/lib/types'
 
 interface props extends CenterRegistrationPayload  {
-     type:string
+     type:string , id:number
 }
 
 export async function POST(request: NextRequest) {
@@ -31,11 +31,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const [row]:any = await db.query("SELECT id FROM users WHERE email = ?",[body.userEmail])
-
-    
-
-    const userID = row[0].id
+  
 
    
     const bank = body.bank_details
@@ -73,8 +69,48 @@ export async function POST(request: NextRequest) {
     }
 
 
- console.log("creating ....")
-    const [centerResult]: any = await db.query(
+
+ if(body.type == "EDIT"){
+       
+   await  db.query(
+     "UPDATE centers SET name = ? , registration_number = ? , email = ? , phone = ? , address = ? , website = ? , about = ? , logourl = ? , geo_location = ?, bank_details = ? , verification_documents = ? WHERE id = ?"
+     ,[
+        body.name,
+        body.registration_number,
+        body.email,
+        body.phone,
+        body.address,
+        body.website,
+        body.about,
+        body.logourl,
+        body.geo_location,
+        JSON.stringify(body.bank_details),
+        JSON.stringify(body.verification_documents),
+        body.id
+
+     ]
+   )
+
+    
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Center registered successfully',
+        data: {
+          name: body.name,
+          registration_number: body.registration_number,
+          is_verified_status: body.is_verified_status
+        }
+      },
+      { status: 201 }
+    )
+ }else{
+    const [row]:any = await db.query("SELECT id FROM users WHERE email = ?",[body.userEmail])
+
+    
+
+    const userID = row[0].id
+   const [centerResult]: any = await db.query(
       `INSERT INTO centers (
         name, registration_number, email, phone, address,
         website, is_verified_status, about, logourl,
@@ -95,16 +131,11 @@ export async function POST(request: NextRequest) {
       ]
     )
 
-     console.log("created")
+   
 
     const centerId = centerResult.insertId
 
-     console.log(centerId)
-
     
-   
-  
-
     return NextResponse.json(
       {
         success: true,
@@ -118,6 +149,13 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     )
+   
+ }
+ 
+    
+   
+  
+
 
   } catch (error: any) {
   

@@ -101,6 +101,7 @@ export default function CenterRegistration() {
   const [loadError , setLoadError] = useState(false)
   const [centers,setCenters] = useState<any[]>([])
   const [stages , setStages] = useState<1 | 2 | 3 | 4 >(1)
+  const [id , setID] = useState<number>()
 
   const fetchUserData = async () => {
 if (status !== 'authenticated') return;
@@ -412,7 +413,7 @@ if (status !== 'authenticated') return;
       return
     }
  
-    const payload: CenterRegistrationPayload & {type:string} = {
+    const payload: CenterRegistrationPayload & {type:string , id:number} = {
       name: form.name,
       registration_number: form.registration_number,
       email: form.email,
@@ -441,7 +442,7 @@ if (status !== 'authenticated') return;
         compressed: d.compression?.wasCompressed || false,
         compression_ratio: d.compression?.compressionRatio || null
       })),
-      userEmail:session?.user.email as string,type:isEdit ? "EDIT" : "NO_EDIT"
+      userEmail:session?.user.email as string,type:isEdit ? "EDIT" : "NO_EDIT" , id:Number(id)
     }
 
     console.log('=== CENTER REGISTRATION PAYLOAD ===')
@@ -604,6 +605,8 @@ if(stages == 1){
                        setLogo({ cloudinary:{url:item.logourl , publicId:"" , width:200 , height:200},
                                  originalName:"Logo"
                       })
+
+                      setID(item.id)
                       setDocuments(item.verification_documents.map((d:any)=>{
                        return {
                          cloudinary:{url:d.url, publicId:d.public_id , width:d.width , height:d.height , compressed:d.compressed ,compression_ratio:d.compression_ratio } ,
@@ -735,7 +738,7 @@ if(stages == 1){
 
             {/* Location */}
             <section>
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Location</h2>
+              <h2 className="text-snigga nigga niggam font-semibold text-gray-900 uppercase tracking-wider mb-4">Location</h2>
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1083,21 +1086,23 @@ if(stages == 1){
 
 }else {
    return <>
-     <div className= 'w-screen h-screen bg-white' >
-          <NavBar />
+     <NavBar />
+     <div className= 'w-screen h-full bg-white' >
+        
        
-            <main className='my-50 flex flex-col justify-center items-center  '>
+            <main className='my-50 flex flex-col justify-center items-center  bg-white '>
                 <CheckCircle2 size={50} color='green' className='mx-auto my-10' />
 
-                <p className="text-gray-600  text-center">Your Center has been Added , Pending Verification. </p>
+                <p className="text-gray-600  text-center">Your Center has been {isEdit ? "Updated" : "Added"} , Pending Verification. </p>
 
                 <Button variant='secondary' onClick={()=>redirect("/dashboard/donor?goto=charity")} size='lg' className='my-8' details="Go to Dashboard" />
 
 
             </main>
            
-           <Footer />
+         
      </div>
+       <Footer />
   </>
 }
 
