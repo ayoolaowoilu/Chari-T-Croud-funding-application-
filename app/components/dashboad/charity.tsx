@@ -10,7 +10,9 @@ interface Center {
     website: string
     address: string
     is_verified_status: string
-    recived: string
+    recived: string 
+    logourl: string
+    id:number
 }
 
 export default function CharityProp() {
@@ -39,22 +41,39 @@ export default function CharityProp() {
         fetchData()
     }, [session])
 
-    const getStatusBadge = (status: string) => {
-        const normalized = status.toLowerCase()
-        const isVerified = normalized === "verified" || normalized === "true"
-
+     const getStatusBadge = (status: string) => {
+    if (status?.toLowerCase() === "verified") {
         return (
-            <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    isVerified
-                        ? "bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20"
-                        : "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20"
-                }`}
-            >
-                {isVerified ? "Verified" : "Pending"}
+            <span className="inline-flex items-center transition-transform duration-300 hover:scale-110" title="Verified Charity">
+                <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                </svg>
             </span>
         )
     }
+
+    if (status?.toLowerCase() === "pending") {
+        return (
+            <span className="inline-flex items-center transition-transform duration-300 hover:scale-110" title="Pending Verification">
+                <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </span>
+        )
+    }
+
+    if (status?.toLowerCase() === "rejected") {
+        return (
+            <span className="inline-flex items-center transition-transform duration-300 hover:scale-110" title="Not Approved">
+                <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </span>
+        )
+    }
+
+    return null
+}
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -169,7 +188,33 @@ export default function CharityProp() {
                     className="group relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                     <div className="mb-4 flex items-start justify-between">
-                        <div className="flex-1 pr-4">
+                        <div className="flex items-center gap-3 flex-1 pr-4 min-w-0">
+                            {center.logourl ? (
+                                <img
+                                    src={center.logourl}
+                                    alt={`${center.name} logo`}
+                                    className="h-10 w-10 shrink-0 rounded-lg object-cover border border-gray-100"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                />
+                            ) : (
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 border border-gray-100">
+                                    <svg
+                                        className="h-5 w-5 text-gray-400"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={1.5}
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </div>
+                            )}
                             <h3 className="text-base font-semibold text-gray-900 line-clamp-1">
                                 {center.name}
                             </h3>
@@ -239,13 +284,19 @@ export default function CharityProp() {
                         </div>
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 flex items-center gap-2">
                         <Button
                             variant={isVerified ? "primary" : "secondary"}
                             size="sm"
                             details="Run Campaign"
                             disabled={!isVerified}
                             onClick={() => isVerified && redirect(`/dashboard/campaigns/create?center=${encodeURIComponent(center.name)}`)}
+                        />
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            details="Public Profile"
+                            onClick={() => redirect(`/dashboard/centers/profile?id=${center.id}`)}
                         />
                     </div>
                 </div>

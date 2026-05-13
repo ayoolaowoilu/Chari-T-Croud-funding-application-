@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const updateCampaign = async (donors: any[]) => {
       if(campaign[0].reported){
           return  await db.query(
-          "UPDATE campaigns SET raised = ?, donation_count = ?, donors = ? WHERE id = ?",
+          "UPDATE campaigns SET raised = ?, donation_count = ?, donors = ?  WHERE id = ?",
           [raised, donationCount, JSON.stringify(donors), body.campaign_id]
         );
       }
