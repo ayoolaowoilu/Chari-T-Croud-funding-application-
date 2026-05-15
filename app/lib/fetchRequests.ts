@@ -1,17 +1,22 @@
 "use server"
 
-import { error } from "console";
 import { getSubAccountCode} from "./paystack";
 import { Campaign, CenterRegistrationPayload, KycFormData, UserData } from "./types"
 
 
-type causeData = Pick<Campaign , "name" | "details" | "story" | "goal" | "currency" | "category" | "bank_details" > & {
+type causeData = Pick<Campaign , "name" | "details"  | "category" | "bank_details" > & {
          deadline:number | undefined;
          mainImage:any;
-         images:any;
+         images?:any;
          user_email:string | null | undefined;
          _type?:string;
          location:string;
+         center_id?:number;
+         center_name?:string;
+         story?:string;
+         goal?:number;
+         currency?:string,
+
 }
 
 type verifyCenter = {
@@ -32,6 +37,8 @@ type Report = {
 const API_URL = process.env.API_URL || "http://localhost:3000"
 
 const uploadCause = async(data:causeData) =>{
+
+      
        try {
             const resp = await fetch(`${API_URL}/api/causes/uploadcause`,{
                  method:"POST",
@@ -303,6 +310,8 @@ const DeleteCause = async(id:number) =>{
                return {error:"Error Getting data"}
          }
   }
+
+ 
 export {
     type Report,
      type verifyCenter,

@@ -18,6 +18,8 @@ interface CenterProfile {
     about: string
     logourl: string | null
     geo_location: string
+    total_donators:number,
+    total_campaigns:number
 }
 
 export default function CenterProfilePage() {
@@ -28,7 +30,7 @@ export default function CenterProfilePage() {
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState(false)
     const [imageLoaded, setImageLoaded] = useState(false)
-    document.title = center?.name as string + " | Chari-T"
+ 
 
     const fetchCenter = async () => {
         if (!centerId) return
@@ -41,6 +43,7 @@ export default function CenterProfilePage() {
                if(resp.error){
                 return  setLoadError(true)
             }
+               document.title = resp.name as string + " | Chari-T"
             setCenter(resp)
         } catch (error) {
             console.error(error)
@@ -328,11 +331,11 @@ export default function CenterProfilePage() {
                             <h2 className="text-lg font-semibold text-gray-900">Impact</h2>
                             <div className="mt-3 grid grid-cols-2 gap-3">
                                 <div className="rounded-lg bg-gray-50 p-3 text-center transition-all duration-200 hover:bg-gray-100">
-                                    <p className="text-xl font-bold text-[#0a66c2]">0</p>
+                                    <p className="text-xl font-bold text-[#0a66c2]">{center.total_campaigns}</p>
                                     <p className="text-xs text-gray-500">Campaigns</p>
                                 </div>
                                 <div className="rounded-lg bg-gray-50 p-3 text-center transition-all duration-200 hover:bg-gray-100">
-                                    <p className="text-xl font-bold text-[#0a66c2]">0</p>
+                                    <p className="text-xl font-bold text-[#0a66c2]">{center.total_donators || 0}</p>
                                     <p className="text-xs text-gray-500">Donors</p>
                                 </div>
                             </div>

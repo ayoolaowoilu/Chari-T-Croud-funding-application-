@@ -361,7 +361,7 @@ export default function YourCam() {
                             {item.category}
                           </span>
                           <span className="text-gray-500">
-                            {item.currency} {item.raised.toLocaleString()} / {item.goal.toLocaleString()}
+                            {item.currency} {item.raised?.toLocaleString()} / {item.goal?.toLocaleString()}
                           </span>
                           <span className={`text-xs font-medium ${matured ? "text-red-600" : "text-gray-400"}`}>
                             Due: {formatDate(Number(item.date_to_completion))}

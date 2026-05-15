@@ -6,9 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
     const body = await request.json();
-    const { name, details, story, goal, currency, deadline, mainImage, images, user_email, _type, category, location, bank_details } = body;
+    const { name, details, story, goal, currency, deadline, mainImage, images, user_email, _type, category, location, bank_details , center_id , center_name} = body;
 
-    if (!name || !details || !goal || !deadline || !mainImage || !user_email) {
+  
+
+    if (!name || !details || !deadline || !mainImage || !user_email) {
         return NextResponse.json(
             JSON.stringify({ error: 'Missing required fields' }),
             { status: 400 }
@@ -20,25 +22,28 @@ export async function POST(request: NextRequest) {
 
         if (!_type) {
 
-            await db.query(
+    const [res]:any = await db.query(
                 "INSERT INTO campaigns(name, details , story ,main_img ,imgs ,goal ,user_id , date_to_completion ,currency , category , location , bank_details ) VALUES(?,?,?,?,?,?,?,?,? , ? , ? , ?)",
                 [name, details, story, JSON.stringify(mainImage), JSON.stringify(images), goal, userid[0].id, deadline, currency, category, location, JSON.stringify(bank_details)]
             )
 
             return NextResponse.json(
-                JSON.stringify({ msg: "Successfully Uploaded your cause" }),
+                JSON.stringify({ msg: "Successfully Uploaded your cause" ,link:`${process.env.API_URL}/causes/get?id=${res.insertId}`}),
                 { status: 200 }
             )
 
 
         } else {
-            await db.query(
-                "INSERT INTO campaigns(name, details , story ,main_img ,imgs ,goal ,user_id , date_to_completion ,currency,_type ) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                [name, details, story, JSON.stringify(mainImage), JSON.stringify(images), goal, userid[0].id, deadline, currency, _type]
+
+           await db.query(
+                "INSERT INTO campaigns(name, details , main_img  , user_id , date_to_completion ,center_id,center_name , bank_details , _type , goal , location ) VALUES(?,?,?,?,?,?,? , ? ,? , ? ,?)",
+                [name , details , JSON.stringify(mainImage), userid[0].id , deadline , center_id , center_name , JSON.stringify(bank_details)  , _type , 901 , location]
             )
 
+            await db.query("UPDATE centers SET total_campaigns = total_campaigns + 1  WHERE id = ?" , [center_id])
+
             return NextResponse.json(
-                JSON.stringify({ msg: "Successfully Uploaded your cause" }),
+                JSON.stringify({ msg: "Successfully Uploaded your cause" , link:`${process.env.API_URL}/dashboard/centers/profile?id=${center_id}`}),
                 { status: 200 }
             )
         }
