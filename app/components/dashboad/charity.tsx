@@ -85,7 +85,7 @@ export default function CharityProp() {
         </p>
     </div>
     <div className="flex flex-wrap items-center gap-3">
-        <Button variant="secondary" size="sm" onClick={()=>redirect("/dashboard/centers/add")} details="Charity Dashboard" />
+        <Button variant="secondary" size="sm" onClick={()=>redirect("/dashboard/centers/manage")} details="Charity Dashboard" />
         <span className="inline-flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600">
             {centers.length} center{centers.length !== 1 ? "s" : ""}
         </span>
@@ -171,7 +171,7 @@ export default function CharityProp() {
                     </p>
 
                     <div className="my-4">
-                         <Button variant="secondary" details="Add Center" size="md" onClick={()=>redirect("/dashboard/centers/add")} />
+                         <Button variant="secondary" details="Add Center" size="md" onClick={()=>redirect("/dashboard/centers/manage")} />
                     </div>
                 </div>
             )}
@@ -290,7 +290,7 @@ export default function CharityProp() {
                             size="sm"
                             details="Run Campaign"
                             disabled={!isVerified}
-                            onClick={() => isVerified && redirect(`/dashboard/campaigns/create?center=${encodeURIComponent(center.name)}`)}
+                            onClick={() => isVerified && redirect(`/dashboard/centers/campaign?id=${center.id}`)}
                         />
                         <Button
                             variant="secondary"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { FetchProfile } from "@/app/lib/fetchRequests";
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
@@ -125,7 +125,7 @@ export default function Profile() {
     bankName: "First Bank of Nigeria",
     accountNumber: "090001991",
     accountName: "John Doe",
-   bankCode:"090199"
+   bankCode:"090199",subAccountCode:"",email:""
   });
   const [tempBankDetails, setTempBankDetails] = useState<UserData["bank_details"]>(bankDetails);
 
@@ -223,6 +223,8 @@ export default function Profile() {
        onClick={() => window.location.href = "/dashboard/donor?goto=profile"}
        bankName={userData?.bank_details?.bankName}
        accountNumber={userData?.bank_details?.accountNumber}
+       subAccountCode=""
+       email=""
        />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">

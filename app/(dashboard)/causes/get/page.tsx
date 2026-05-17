@@ -14,7 +14,7 @@ import Button from "@/app/components/ui/button";
 import Footer from "@/app/components/layout/footer";
 import { useSearchParams } from "next/navigation";
 
-type Don = Pick<Campaign, "id" | "name" | "details" | "main_img" | "goal" | "raised" | "category" | "currency" | "center_name" | "donation_count" | "date_to_completion"> & {
+type Don = Pick<Campaign, "id" | "name" | "details" | "main_img" | "goal" | "raised" | "category" | "currency" | "center_name" | "donation_count" | "date_to_completion" | "center_id"> & {
   location:string,
   safety_rating: string;
 };
@@ -269,6 +269,9 @@ export default function Explore() {
                     location={item.location}
                     daysLeft={item.date_to_completion}
                     safety_level={item.safety_rating}
+                    center_id={item.center_id || null}
+                    center_name={item.center_name || null}
+                      centerName={item.center_name as string}
                   />
                 </motion.div>
               ))}

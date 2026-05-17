@@ -848,7 +848,7 @@ export default function CenterRegistration() {
             <button
               onClick={() => {
                 if (isVerified) {
-                  redirect(`/dashboard/campaigns/create?center=${encodeURIComponent(item.name)}`)
+                  redirect(`/dashboard/centers/campaign?id=${item.id}`)
                 }
               }}
               disabled={!isVerified}
@@ -923,7 +923,7 @@ export default function CenterRegistration() {
     </>
   }
 
-  // STAGE 3: Registration / Edit Form (UNCHANGED)
+
   else if(stages == 3){
     return (
       <>
@@ -1375,7 +1375,7 @@ export default function CenterRegistration() {
       <div className= 'w-screen h-full bg-white' >
         <main className='my-50 flex flex-col justify-center items-center  bg-white '>
           <CheckCircle2 size={50} color='green' className='mx-auto my-10' />
-          <p className="text-gray-600  text-center">Your Center has been {isEdit ? "Updated" : "Added"} , Pending Verification. </p>
+          <p className="text-gray-600  text-center font-bold">Your Center has been {isEdit ? "Updated" : "Added"} , Pending Verification. </p>
           <Button variant='secondary' onClick={()=>redirect("/dashboard/donor?goto=charity")} size='lg' className='my-8' details="Go to Dashboard" />
         </main>
       </div>

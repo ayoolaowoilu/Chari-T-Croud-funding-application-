@@ -298,6 +298,9 @@ function EmptyBankCard() {
       location={cause.location}
       daysLeft={cause.date_to_completion}
       safety_level={cause.safety_rating}
+      center_id={cause.center_id || null}
+      center_name={cause.center_name || null}
+      centerName={cause.center_name as string}
     />
  
 

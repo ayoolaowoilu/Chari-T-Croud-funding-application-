@@ -25,7 +25,9 @@ const BankVerification: React.FC<BankVerificationProps> = ({
 
     const [formData, setFormData] = useState<BankForm>({
         bankName: bankName,
-        accountNumber: accountNumber
+        accountNumber: accountNumber,
+        subAccountCode:"",
+        email:""
     })
 
     const [banks, setBanks] = useState<PaystackBank[]>([])
@@ -191,7 +193,7 @@ const BankVerification: React.FC<BankVerificationProps> = ({
                 accountNumber: formData.accountNumber,
                 accountName: verifiedName,
                 bankCode: selectedBank.code,
-                email: session?.user?.email as string,
+                email: session?.user?.email as string,subAccountCode:""
             }
 
            const response = await UpdateBankDetails(payload)

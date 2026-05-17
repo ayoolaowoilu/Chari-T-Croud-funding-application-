@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
             )
 
             return NextResponse.json(
-                JSON.stringify({ msg: "Successfully Uploaded your cause" ,link:`${process.env.API_URL}/causes/get?id=${res.insertId}`}),
+                JSON.stringify({ msg: "Successfully Uploaded your cause" ,link:`${process.env.API_URL}/causes/get?id=${res.insertId}` , id:res.insertId}),
                 { status: 200 }
             )
 

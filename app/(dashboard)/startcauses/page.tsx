@@ -2,7 +2,7 @@
 
 import NavBar from "@/app/components/layout/NavBar"
 import Button from "@/app/components/ui/button"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { redirect } from "next/navigation"
 import { uploadImage } from "@/app/lib/upload"
 import { 
@@ -21,14 +21,26 @@ import {
   Wallet,
   Clock,
   Loader2,
-  XCircleIcon,
+  XCircle,
   ImagePlus,
   Compass,
   Info,
-
+  MapPin,
+  Tag,
+  BookOpen,
+  Banknote,
+  Layers,
+  RotateCcw,
+  ExternalLink,
+  Eye,
+  Pencil,
+  Save,
+  Zap,
+  Upload,
+  X,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { FetchProfile, uploadCause} from "@/app/lib/fetchRequests"
+import { FetchProfile, uploadCause } from "@/app/lib/fetchRequests"
 import { getAll, remove, save } from "@/app/lib/indexedDb"
 import { CloudinaryImage, UserData } from "@/app/lib/types"
 import BankVerification from "@/app/components/layout/bankVerification"
@@ -36,7 +48,7 @@ import { DualRingSpinner } from "@/app/components/ui/loading"
 import LocationAutocomplete from "@/app/components/locationAutoComplete"
 import Footer from "@/app/components/layout/footer"
 import { compressImageIfNeeded, validateImageFile, formatFileSize, MAX_FILE_SIZE } from "@/app/lib/imageCompression"
-
+import { CampaignPayload } from "../dashboard/centers/campaign/page"
 
 interface UploadingImage extends CloudinaryImage {
   compressionStatus?: 'checking' | 'compressing' | 'compressed' | 'original' | 'failed';
@@ -45,136 +57,232 @@ interface UploadingImage extends CloudinaryImage {
   compressionError?: string;
 }
 
-export default function Page() {
-  const [stages, setStages] = useState<1 | 2 | 3 | 4 | 5 | 6>(1)
-  const [Did, setDid] = useState<number | null>(null)
-  const [drafts, setDrafts] = useState<any[]>([])
- 
- 
+interface DraftData {
+  id: number;
+  updatedAt: number;
+  causeName: string;
+  details: string;
+  story: string;
+  goal: number | undefined;
+  currency: string;
+  deadline: number | undefined;
+  images: UploadingImage[];
+  mainImage: UploadingImage | undefined;
+  category: string;
+  location: string;
+}
+
+type ErrorType = "M_IMG" | "IMGS" | "NET" | "UPLOAD_IMG" | "UPLOAD_ERR" | "LOAD" | "IVP" | "C404" | "UVF" | "FOR" | "UEX" | null;
+
+const CATEGORIES = [
+  { value: "Education", label: "Education", icon: BookOpen, description: "Schools, scholarships & training programs", color: "bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300" },
+  { value: "Community", label: "Community", icon: Globe, description: "Local development & community support", color: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-300" },
+  { value: "Crowdfunding", label: "Crowdfunding", icon: Zap, description: "General fundraising projects", color: "bg-violet-50 text-violet-700 border-violet-200 hover:border-violet-300" },
+  { value: "Business", label: "Business", icon: Banknote, description: "Startups & economic growth initiatives", color: "bg-sky-50 text-sky-700 border-sky-200 hover:border-sky-300" },
+  { value: "Health", label: "Health", icon: Target, description: "Medical aid & wellness programs", color: "bg-rose-50 text-rose-700 border-rose-200 hover:border-rose-300" },
+];
+
+const STEPS = [
+  { id: 1, label: "Drafts", description: "Continue or start new" },
+  { id: 2, label: "Details", description: "Name, story & goal" },
+  { id: 3, label: "Images", description: "Upload visuals" },
+  { id: 4, label: "Review", description: "Verify everything" },
+  { id: 5, label: "Publish", description: "Go live" },
+];
+
+export default function StartCausePage() {
+  const [stage, setStage] = useState<1 | 2 | 3 | 4 | 5 | 6>(1)
+  const [draftId, setDraftId] = useState<number | null>(null)
+  const [drafts, setDrafts] = useState<DraftData[]>([])
+  
+
   const [causeName, setCauseName] = useState("")
   const [details, setDetails] = useState("")
   const [story, setStory] = useState("")
   const [goal, setGoal] = useState<number | undefined>()
   const [currency, setCurrency] = useState<"NG">("NG")
   const [deadline, setDeadline] = useState<number | undefined>()
-  const [category, setCategory] = useState<"Education" | "Community" | "CroudFunding" | "Business" | "Health">()
+  const [category, setCategory] = useState<string>("")
   const [images, setImages] = useState<UploadingImage[]>([])
   const [mainImage, setMainImage] = useState<UploadingImage | undefined>()
   const [location, setLocation] = useState("")
 
-
-  const [errorType, setErrorType] = useState<"M_IMG" | "IMGS" | "NET" | "UPLOAD_IMG" | "UPLOAD_ERR" | "LOAD" | "IVP" | "C404" | "UVF" | "FOR" | "UEX">()
+  const [errorType, setErrorType] = useState<ErrorType>(null)
   const [errorMsg, setErrorMsg] = useState("")
-  const [error, SetError] = useState(false)
-  const [Edit, setEdit] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const [showBankModal, setShowBankModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [userData, setUserData] = useState<UserData>()
-  
-  // Upload-specific state
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [copied, setCopied] = useState(false)
+
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadQueue, setUploadQueue] = useState<string[]>([])
   const [compressionStats, setCompressionStats] = useState<{total: number, compressed: number, saved: number} | null>(null)
+  const [dragActive, setDragActive] = useState(false)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle")
 
-  const { data: session , status } = useSession();
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
+
+  const { data: session, status } = useSession();
+    const [link ,setLink]= useState(``)
+
+ 
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach(ctrl => ctrl.abort())
+      abortControllersRef.current.clear()
+    }
+  }, [])
 
 
-  const fetchUserData = async () => {
-if (status !== 'authenticated') return;
-  if (!session?.user?.email) return;
-    setLoading(true)
-    SetError(false)
+  const copyToClipboard = useCallback(async () => {
     try {
-      console.log(session)
-      const resp = await FetchProfile(session.user.email as string)
-      console.log(resp)
-      if (resp.error) {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      const textarea = document.createElement("textarea")
+      textarea.value = link
+      textarea.style.position = "fixed"
+      textarea.style.opacity = "0"
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textarea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  } , [link])
+
+
+  const fetchUserData = useCallback(async () => {
+    if (status !== 'authenticated' || !session?.user?.email) {
+      if (status === 'unauthenticated') setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    setHasError(false)
+
+    try {
+      const resp = await FetchProfile(session.user.email)
+      if (resp?.error) {
         setErrorMsg(resp.error)
-        SetError(true)
+        setHasError(true)
       } else {
-        
         setUserData(resp.userData)
-        if (!resp.userData.bank_details) {
-          setEdit(true)
+        if (!resp.userData?.bank_details) {
+          setShowBankModal(true)
         } else if (!resp.kyc) {
           window.location.href = "/dashboard/kyc?redir=/startcauses"
         }
       }
-    } catch (error) {
-      console.error(error)
-      setErrorMsg("Failed to fetch user data. Please check your network connection and try again.")
-      SetError(true)
+    } catch (err) {
+      setErrorMsg("Failed to fetch user data. Please check your connection and try again.")
+      setHasError(true)
     } finally {
       setLoading(false)
     }
-  }
+  }, [session, status])
 
   useEffect(() => {
-    if(status !== "authenticated") return;
-    fetchUserData()
-  }, [session])
+    if (status !== "loading") {
+      fetchUserData()
+    }
+  }, [fetchUserData, status])
 
- 
+  // Load drafts
   useEffect(() => {
-    const getDrafts = async () => {
-      const saved = await getAll()
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          setDrafts(Array.isArray(parsed) ? parsed : [parsed])
-        } catch {
-          setDrafts(Array.isArray(saved) ? saved : [saved])
+    const loadDrafts = async () => {
+      try {
+        const saved = await getAll()
+        if (saved) {
+          let parsed: any[]
+          try {
+            parsed = JSON.parse(saved)
+            if (!Array.isArray(parsed)) parsed = [parsed]
+          } catch {
+            parsed = Array.isArray(saved) ? saved : [saved]
+          }
+          setDrafts(parsed.filter(d => d && typeof d === 'object'))
         }
+      } catch (err) {
+        console.error("Failed to load drafts:", err)
       }
     }
-    getDrafts()
+    loadDrafts()
   }, [])
 
+  const saveToStorage = useCallback(async (data?: Partial<DraftData>) => {
+    if (!causeName.trim() && !details.trim()) return
 
-  const saveToStorage = useCallback(async (data?: any) => {
-    const draftData = {
-      id: Did || Math.floor(Math.random() * 1000000),
+    setAutoSaveStatus("saving")
+
+    const draftData: DraftData = {
+      id: draftId || Math.floor(Math.random() * 1000000),
       updatedAt: Date.now(),
-      causeName, details, story, goal, currency, deadline,
-      images, mainImage, category, location,
-      ...data
+      causeName,
+      details,
+      story,
+      goal,
+      currency,
+      deadline,
+      images,
+      mainImage,
+      category,
+      location,
+      ...data,
     }
 
-    if (Did) {
-      await remove(Did)
+    try {
+      if (draftId) {
+        await remove(draftId)
+      }
       await save(draftData)
+      if (!draftId) setDraftId(draftData.id)
+
       setDrafts(prev => {
-        const filtered = prev.filter((d: any) => d.id !== Did)
+        const filtered = prev.filter((d: any) => d.id !== draftData.id)
         return [...filtered, draftData]
       })
-    } else {
-      setDid(draftData.id)
-      await save(draftData)
+      setAutoSaveStatus("saved")
+      setTimeout(() => setAutoSaveStatus("idle"), 2000)
+    } catch (err) {
+      console.error("Auto-save failed:", err)
+      setAutoSaveStatus("idle")
     }
-  }, [Did, causeName, details, story, goal, currency, deadline, images, mainImage, category, location])
+  }, [draftId, causeName, details, story, goal, currency, deadline, images, mainImage, category, location])
 
+  // Auto-save debounce
   useEffect(() => {
-    if (causeName && details && Did) {
-      const timeout = setTimeout(() => saveToStorage(), 2000)
+    if (stage === 2 && (causeName || details)) {
+      const timeout = setTimeout(() => saveToStorage(), 3000)
       return () => clearTimeout(timeout)
     }
-  }, [images, mainImage, causeName, details, story, goal, deadline, category, location, saveToStorage, Did])
-
+  }, [causeName, details, story, goal, deadline, category, location, saveToStorage, stage])
 
   const handleNext = () => {
-    if (stages < 6) {
-      if (stages === 2 || stages === 3) saveToStorage()
-      setStages(prev => (prev + 1) as 2 | 3 | 4 | 5 | 6)
+    if (stage < 5) {
+      if (stage === 2 || stage === 3) saveToStorage()
+      setStage(prev => (prev + 1) as 2 | 3 | 4 | 5 | 6)
     }
   }
 
   const handleBack = () => {
-    if (stages > 1) {
-      setStages(prev => (prev - 1) as 1 | 2 | 3 | 4 | 5)
+    if (stage > 1) {
+      setStage(prev => (prev - 1) as 1 | 2 | 3 | 4 | 5)
     }
   }
 
-  document.title = "Start A Cause | Chari-T"
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [stage])
+
+  useEffect(() => {
+    document.title = "Start A Cause | Chari-T"
+  }, [])
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -183,21 +291,22 @@ if (status !== 'authenticated') return;
     setCompressionStats(null)
     let totalSaved = 0
     let compressedCount = 0
-    const newQueue: string[] = []
 
     for (const file of Array.from(files)) {
       const uploadId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      newQueue.push(uploadId)
-      
-   
+
       const validation = validateImageFile(file)
       if (!validation.valid) {
         setErrorType("UPLOAD_IMG")
-        setErrorMsg(validation.error!)
+        setErrorMsg(validation.error || "Invalid image file")
         setIsUploading(false)
         e.target.value = ''
         return
       }
+
+ 
+      const abortCtrl = new AbortController()
+      abortControllersRef.current.set(uploadId, abortCtrl)
 
       setImages(prev => [...prev, {
         url: '',
@@ -221,6 +330,7 @@ if (status !== 'authenticated') return;
           )
 
           compressionResult = await compressImageIfNeeded(file, (progress) => {
+            if (abortCtrl.signal.aborted) throw new Error("Upload cancelled")
             setImages(prev => 
               prev.map(img => 
                 img.publicId === uploadId
@@ -257,6 +367,7 @@ if (status !== 'authenticated') return;
           )
         }
 
+        if (abortCtrl.signal.aborted) throw new Error("Upload cancelled")
 
         setImages(prev => 
           prev.map(img => 
@@ -272,6 +383,7 @@ if (status !== 'authenticated') return;
 
         const result = await uploadImage(formData)
 
+        if (abortCtrl.signal.aborted) throw new Error("Upload cancelled")
 
         setImages(prev => 
           prev.map(img => 
@@ -289,7 +401,6 @@ if (status !== 'authenticated') return;
           )
         )
 
-    
         setMainImage(prev => prev || {
           url: result.url,
           publicId: result.publicId,
@@ -298,21 +409,23 @@ if (status !== 'authenticated') return;
         })
 
       } catch (error: any) {
-        
+        if (error.message === "Upload cancelled") {
+          setImages(prev => prev.filter(img => img.publicId !== uploadId))
+          continue
+        }
+
         setImages(prev => prev.filter(img => img.publicId !== uploadId))
-        
-        const errorMessage =  `Failed to upload ${file.name}`
         setErrorType("UPLOAD_IMG")
-        setErrorMsg(errorMessage)
-        
-        // Auto-clear error after 8 seconds
+        setErrorMsg(`Failed to upload "${file.name}". ${"Check internet connection"}`)
+
         setTimeout(() => {
-          setErrorType(undefined)
+          setErrorType(null)
           setErrorMsg("")
         }, 8000)
+      } finally {
+        abortControllersRef.current.delete(uploadId)
       }
     }
-
 
     if (compressedCount > 0) {
       setCompressionStats({
@@ -322,22 +435,50 @@ if (status !== 'authenticated') return;
       })
     }
 
-    setUploadQueue([])
     setIsUploading(false)
     e.target.value = ''
   }
 
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    const files = e.dataTransfer.files
+    if (!files?.length) return
+
+    const dt = new DataTransfer()
+    for (const file of Array.from(files)) {
+      dt.items.add(file)
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.files = dt.files
+      fileInputRef.current.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+  }, [])
 
   const removeImage = (idx: number) => {
     const removed = images[idx]
     const filtered = images.filter((_, i) => i !== idx)
     setImages(filtered)
-    
+
     if (mainImage?.publicId === removed.publicId) {
       setMainImage(filtered.length > 0 ? { ...filtered[0] } : undefined)
     }
   }
-
 
   const setAsMain = (img: UploadingImage) => {
     if (img.isUploading) return
@@ -349,167 +490,255 @@ if (status !== 'authenticated') return;
     return (oneDay * days) + Date.now()
   }
 
-  useEffect(()=>{
-     window.scrollTo({ top: 0, behavior: 'smooth' })
-  },[stages])
-
   const handleSubmit = async () => {
     setIsSubmitting(true)
+    setHasError(false)
+
     try {
       const uploadingImages = images.filter(img => img.isUploading)
       if (uploadingImages.length > 0) {
         setErrorType("UPLOAD_IMG")
-        setErrorMsg("Please wait for all images to finish uploading.")
-        setStages(3)
+        setErrorMsg("Please wait for all images to finish uploading before publishing.")
+        setStage(3)
         return
       }
 
       if (!mainImage) {
         setErrorType("M_IMG")
-        setErrorMsg("Please select a main cover image.")
-        setStages(3)
+        setErrorMsg("Please select a main cover image for your cause.")
+        setStage(3)
+        return
+      }
+
+      if (!goal || goal < 1000) {
+        setErrorType("IVP")
+        setErrorMsg("Funding goal must be at least ₦1,000.")
+        setStage(2)
+        return
+      }
+
+      if (!deadline || deadline < 1) {
+        setErrorType("IVP")
+        setErrorMsg("Campaign duration must be at least 1 day.")
+        setStage(2)
         return
       }
 
       const uploadPayload = {
-        name: causeName,
-        details: details,
-        story: story,
+        name: causeName.trim(),
+        details: details.trim(),
+        story: story.trim(),
         goal: Number(goal),
         currency: currency,
-        deadline: generateDeadlineNumber(deadline as number),
+        deadline: generateDeadlineNumber(deadline),
         mainImage: mainImage,
         images: images,
         user_email: session?.user?.email,
-        category: category as "Education" | "Community" | "CroudFunding" | "Business" | "Health",
-        location: location,
+        category: category as CampaignPayload["category"],
+        location: location.trim(),
         bank_details: userData?.bank_details as UserData["bank_details"],  
       }
-     
+
       const resp = await uploadCause(uploadPayload)
-   
-      if (Did) {
-        await remove(Did as number)
+
+         const causeId = JSON.parse(resp).id
+         console.log(causeId , resp)
+  setLink(`${window.location.origin}/causes/cause?id=${causeId}`)
+  console.log(causeId , resp)
+
+      if (draftId) {
+        await remove(draftId)
       }
-      
-      if (resp.error) {
+
+      if (resp?.error) {
         throw new Error(resp.error)
       }
-      
-      setStages(5)
+
+   
+
+      setStage(5)
     } catch (error: any) {
       setErrorType("UPLOAD_ERR")
-      setErrorMsg(`Failed to submit cause. ${error?.message || "Please try again"}`)
-      setStages(6)
+      setErrorMsg(`Failed to publish cause. ${"Please try again."}`)
+      setStage(6)
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const loadDraft = (draft: DraftData) => {
+    setCauseName(draft.causeName || "")
+    setDetails(draft.details || "")
+    setStory(draft.story || "")
+    setGoal(draft.goal)
+    setCurrency("NG")
+    setDeadline(draft.deadline)
+    setImages(draft.images || [])
+    setMainImage(draft.mainImage)
+    setDraftId(draft.id)
+    setCategory(draft.category || "")
+    setLocation(draft.location || "")
+    setStage(2)
+  }
+
+  const deleteDraft = async (id: number) => {
+    try {
+      await remove(id)
+      setDrafts(prev => prev.filter(d => d.id !== id))
+      if (draftId === id) {
+        setDraftId(null)
+      }
+    } catch (err) {
+      console.error("Failed to delete draft:", err)
+    }
+  }
+
+  const resetForm = () => {
+    setStage(1)
+    setDraftId(null)
+    setCauseName("")
+    setDetails("")
+    setStory("")
+    setGoal(undefined)
+    setDeadline(undefined)
+    setCategory("")
+    setImages([])
+    setMainImage(undefined)
+    setLocation("")
+    setErrorType(null)
+    setErrorMsg("")
+    setHasError(false)
+    setCompressionStats(null)
+  }
+
+
+  const isStage2Valid = causeName.trim().length >= 3 && 
+                        details.trim().length >= 10 && 
+                        story.trim().length >= 15 &&
+                        !!goal && goal >= 1000 &&
+                        !!deadline && deadline >= 1 &&
+                        !!category &&
+                        location.trim().length > 0
+
+  const isStage3Valid = images.length > 0 && !images.some(img => img.isUploading) && !!mainImage
+
 
   const renderStage1 = () => (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Drafts</h1>
-        <p className="text-gray-500">Continue where you left off or start a new cause</p>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
+            <Layers className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Your Drafts</h1>
+          </div>
+        </div>
+        <p className="text-slate-500 ml-13">Continue where you left off or start a fresh campaign</p>
       </div>
 
       {drafts.length === 0 ? (
-        <div className="border-dashed border-4 border-gray-500 rounded-xl">
-            <div className="text-center py-20 bg-white rounded-xl shadow-sm">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No drafts yet</h3>
-              <p className="text-gray-500 mb-8">Start creating your first fundraising cause</p>
-              <Button variant="primary" size="lg" onClick={() => setStages(2)} details="Create New Cause"/>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="text-center py-20 px-8">
+            <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-100">
+              <FileText className="w-10 h-10 text-slate-300" />
             </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No drafts yet</h3>
+            <p className="text-slate-500 mb-8 max-w-sm mx-auto">Start creating your first fundraising cause and make a real impact in your community.</p>
+            <button 
+              onClick={() => setStage(2)}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+            >
+              <Sparkles className="w-5 h-5" />
+              Create New Cause
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {drafts.map((draft, index) => (
             <div 
-              key={index} 
-              className="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer shadow-sm"
+              key={draft.id || index} 
+              className="group bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer shadow-sm"
+              onClick={() => loadDraft(draft)}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-600" />
+                <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
+                  <FileText className="w-6 h-6 text-slate-600" />
                 </div>
-                <span className="text-xs text-gray-400 font-medium">
-                  {new Date(draft.updatedAt).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 font-medium bg-slate-50 px-2 py-1 rounded-lg">
+                    {new Date(draft.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </span>
+                </div>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 truncate text-lg">
+              <h3 className="font-bold text-slate-900 mb-2 truncate text-lg">
                 {draft.causeName || "Untitled Cause"}
               </h3>
-              <p className="text-sm text-gray-500 line-clamp-2 mb-6 leading-relaxed">
-                {draft.details || "No description provided"}
+              <p className="text-sm text-slate-500 line-clamp-2 mb-6 leading-relaxed min-h-10">
+                {draft.details || "No description provided yet"}
               </p>
-              <div className="flex justify-between items-center">
-                <div 
-                  onClick={() => loadDraft(draft)}
-                  className="flex items-center text-sm text-blue-600 font-semibold cursor-pointer hover:text-blue-700"
-                >
-                  Continue Editing <ChevronRight className="w-4 h-4 ml-1" />
-                </div>
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <span className="flex items-center text-sm text-slate-900 font-semibold group-hover:text-slate-700 transition-colors">
+                  Continue Editing <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                </span>
                 <button 
-                  onClick={async () => {
-                    await remove(draft.id)
-                    setDrafts(drafts.filter((d: any) => d.id !== draft.id))
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteDraft(draft.id)
                   }}
-                  className="p-2 bg-gray-100 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"
+                  className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                  title="Delete draft"
                 >
-                  <Trash2 size={15} />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
           ))}
-          
-          <div 
-            className="flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-6 hover:border-gray-400 hover:bg-gray-100 transition-all cursor-pointer min-h-60"
-            onClick={() => setStages(2)}
+
+          <button 
+            onClick={() => setStage(2)}
+            className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 p-6 hover:border-slate-400 hover:bg-slate-100 transition-all cursor-pointer min-h-65 group"
           >
-            <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-3 shadow-sm">
-              <Sparkles className="w-5 h-5 text-gray-600" />
+            <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mb-4 shadow-sm group-hover:shadow-md transition-shadow">
+              <Sparkles className="w-6 h-6 text-slate-600" />
             </div>
-            <span className="font-semibold text-gray-700">Create New Cause</span>
-            <span className="text-sm text-gray-400 mt-1">Start fresh campaign</span>
-          </div>
+            <span className="font-bold text-slate-700 text-lg">Create New Cause</span>
+            <span className="text-sm text-slate-400 mt-1">Start a fresh campaign</span>
+          </button>
         </div>
       )}
     </div>
   )
 
-  // Helper to load draft
-  const loadDraft = (draft: any) => {
-    setCauseName(draft.causeName || "")
-    setDetails(draft.details || "")
-    setStory(draft.story || "")
-    setGoal(draft.goal)
-    setCurrency(draft.currency || "NG")
-    setDeadline(draft.deadline)
-    setImages(draft.images || [])
-    setMainImage(draft.mainImage)
-    setDid(draft.id)
-    setCategory(draft.category)
-    setLocation(draft.location)
-    setStages(2)
-  }
-
-  // ─── Stage 2: Cause Details ─────────────────────────────────────
   const renderStage2 = () => (
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Cause Details</h2>
-        <p className="text-gray-500">Provide the essential information about your campaign</p>
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Cause Details</h2>
+        <p className="text-slate-500">Provide the essential information about your campaign</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 space-y-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-8">
+        {/* Auto-save indicator */}
+        <div className="flex items-center justify-end gap-2 -mt-4">
+          {autoSaveStatus === "saving" && (
+            <span className="flex items-center gap-1.5 text-xs text-slate-400">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Saving draft...
+            </span>
+          )}
+          {autoSaveStatus === "saved" && (
+            <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+              <CheckCircle2 className="w-3 h-3" />
+              Draft saved
+            </span>
+          )}
+        </div>
+
         {/* Cause Name */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-            <Type className="w-4 h-4 text-gray-500" />
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Type className="w-4 h-4 text-slate-500" />
             Cause Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -518,97 +747,130 @@ if (status !== 'authenticated') return;
             onChange={(e) => setCauseName(e.target.value)}
             placeholder="e.g., Build a Community Library"
             maxLength={100}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all placeholder:text-slate-400 text-slate-900"
           />
-          <p className="text-xs text-gray-400 text-right">{causeName.length}/100</p>
+          <div className="flex justify-between">
+            <p className="text-xs text-slate-500">Keep it clear and compelling</p>
+            <p className="text-xs text-slate-400">{causeName.length}/100</p>
+          </div>
         </div>
 
         {/* Short Description */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-            <FileText className="w-4 h-4 text-gray-500" />
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <FileText className="w-4 h-4 text-slate-500" />
             Short Description <span className="text-red-500">*</span>
           </label>
           <textarea
             value={details}
             onChange={(e) => setDetails(e.target.value)}
-            placeholder="Brief overview of your cause..."
+            placeholder="A brief overview that appears in search results and previews..."
             rows={3}
             maxLength={300}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none placeholder:text-gray-400 text-gray-900"
+            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all resize-none placeholder:text-slate-400 text-slate-900"
           />
-          <p className="text-xs text-gray-400 text-right">{details.length}/300</p>
+          <p className="text-xs text-slate-400 text-right">{details.length}/300</p>
         </div>
 
         {/* Full Story */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-            <Globe className="w-4 h-4 text-gray-500" />
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <BookOpen className="w-4 h-4 text-slate-500" />
             Full Story <span className="text-red-500">*</span>
           </label>
           <textarea
             value={story}
             onChange={(e) => setStory(e.target.value)}
-            placeholder="Share the complete story behind your cause, why it matters, and how funds will be used..."
-            rows={6}
+            placeholder="Share the complete story — why this matters, who it helps, and how the funds will make a difference..."
+            rows={8}
             maxLength={5000}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none placeholder:text-gray-400 text-gray-900"
+            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all resize-none placeholder:text-slate-400 text-slate-900"
           />
-          <p className="text-xs text-gray-400 text-right">{story.length}/5000</p>
+          <div className="flex justify-between">
+            <p className="text-xs text-slate-500">Be specific and emotional — stories drive donations</p>
+            <p className="text-xs text-slate-400">{story.length}/5000</p>
+          </div>
         </div>
 
         {/* Location */}
-        <LocationAutocomplete onChange={setLocation} value={location} />
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <MapPin className="w-4 h-4 text-slate-500" />
+           
+          </label>
+          <LocationAutocomplete onChange={setLocation} value={location} />
+        </div>
 
         {/* Category */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-            <Globe className="w-4 h-4 text-gray-500" />
+        <div className="space-y-3">
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Tag className="w-4 h-4 text-slate-500" />
             Category <span className="text-red-500">*</span>
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as typeof category)}
-            className="px-3 py-3 rounded-lg border border-gray-300 w-full bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold text-gray-700"
-          >
-            <option value="">Select a category</option>
-            <option value="CroudFunding">Crowdfunding</option>
-            <option value="Education">Education</option>
-            <option value="Community">Community</option>
-            <option value="Business">Business</option>
-            <option value="Health">Health</option>
-          </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon
+              const isSelected = category === cat.value
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => setCategory(cat.value)}
+                  className={`relative p-4 border-2 rounded-xl text-left transition-all duration-200 group ${
+                    isSelected
+                      ? "border-slate-900 bg-slate-50 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg transition-colors ${isSelected ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className={`font-semibold text-sm ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
+                        {cat.label}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">{cat.description}</p>
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <div className="absolute top-3 right-3">
+                      <div className="w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-3 h-3 text-white" />
+                      </div>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-         
+
         {/* Goal & Duration */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Wallet className="w-4 h-4 text-gray-500" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <Wallet className="w-4 h-4 text-slate-500" />
               Funding Goal <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as "NG")}
-                className="px-3 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold text-gray-700"
-              >
-                <option value="NG">NGN (₦)</option>
-              </select>
+              <div className="px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-700 font-bold text-sm flex items-center">
+                NG ₦
+              </div>
               <input
                 type="number"
                 value={goal || ""}
                 onChange={(e) => setGoal(Number(e.target.value))}
-                placeholder="0.00"
+                placeholder="50,000"
                 min={1000}
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                className="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all placeholder:text-slate-400 text-slate-900"
               />
             </div>
+            <p className="text-xs text-slate-500">Minimum ₦1,000</p>
           </div> 
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Clock className="w-4 h-4 text-gray-500" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <Clock className="w-4 h-4 text-slate-500" />
               Campaign Duration <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -619,174 +881,178 @@ if (status !== 'authenticated') return;
                 placeholder="30"
                 min={1}
                 max={365}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900"
+                className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all placeholder:text-slate-400 text-slate-900"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">days</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">days</span>
             </div>
+            <p className="text-xs text-slate-500">1 to 365 days</p>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end mt-8">
-        <Button 
-          variant="primary" 
-          size="lg" 
+        <button
           onClick={handleNext}
-          disabled={!causeName || !details || !goal || !story || !location || !category || !deadline}
-          details="Continue"
-        />
+          disabled={!isStage2Valid}
+          className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-slate-200 disabled:shadow-none"
+        >
+          Continue to Images
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   )
 
-  // ─── Stage 3: Image Upload ──────────────────────────────────────
+
   const renderStage3 = () => (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Images</h2>
-        <p className="text-gray-500">Add compelling visuals to support your cause</p>
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Upload Images</h2>
+        <p className="text-slate-500">Add compelling visuals to support your cause</p>
       </div>
 
-      {/* Compression Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-        <Sparkles className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+      {/* Smart Compression Banner */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6 flex items-start gap-4">
+        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-slate-200 shadow-sm shrink-0">
+          <Sparkles className="w-5 h-5 text-slate-600" />
+        </div>
         <div>
-          <h4 className="text-sm font-semibold text-blue-900">Smart Image Compression</h4>
-          <p className="text-xs text-blue-700 mt-1 leading-relaxed">
-            Images larger than <strong>1MB</strong> are automatically compressed before upload. 
-            Your image quality is preserved while ensuring fast uploads.
+          <h4 className="text-sm font-bold text-slate-900">Smart Image Compression</h4>
+          <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+            Images larger than <strong className="text-slate-700">1MB</strong> are automatically compressed before upload. 
+            Your image quality is preserved while ensuring fast, reliable uploads.
           </p>
         </div>
       </div>
 
       {/* Error Toast */}
       {errorType === "UPLOAD_IMG" && errorMsg && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start gap-3 animate-in slide-in-from-top-2">
-          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
           <div className="flex-1">
-            <p className="text-sm text-red-800 font-medium">{errorMsg}</p>
+            <p className="text-sm font-semibold text-red-800">{errorMsg}</p>
             {errorMsg.includes('too large') && (
               <p className="text-xs text-red-600 mt-1">
-                💡 Tip: Try resizing your image to under 1920px wide, or use JPG instead of PNG.
+                Try resizing your image to under 1920px wide, or use JPG instead of PNG.
               </p>
             )}
           </div>
           <button 
-            onClick={() => { setErrorType(undefined); setErrorMsg(""); }}
-            className="text-red-400 hover:text-red-600"
+            onClick={() => { setErrorType(null); setErrorMsg(""); }}
+            className="text-red-400 hover:text-red-600 p-1"
           >
-            <XCircleIcon className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       )}
 
       {/* Compression Stats */}
       {compressionStats && compressionStats.compressed > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-          <Compass className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-green-800">
-            <strong>{compressionStats.compressed}</strong> image(s) compressed, saving{' '}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <Zap className="w-5 h-5 text-emerald-600 shrink-0" />
+          <p className="text-sm text-emerald-800">
+            <strong>{compressionStats.compressed}</strong> image{compressionStats.compressed !== 1 ? 's' : ''} compressed, saving{' '}
             <strong>{formatFileSize(compressionStats.saved)}</strong> of upload data.
           </p>
           <button 
             onClick={() => setCompressionStats(null)}
-            className="ml-auto text-green-400 hover:text-green-600"
+            className="ml-auto text-emerald-400 hover:text-emerald-600 p-1"
           >
-            <XCircleIcon className="w-4 h-4" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-        {/* Image Grid */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+        {/* Drag & Drop Zone + Image Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all group cursor-pointer ${
+              className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all group cursor-pointer ${
                 mainImage?.publicId === img.publicId && !img.isUploading
-                  ? 'border-blue-500 ring-2 ring-blue-100' 
+                  ? 'border-slate-900 ring-2 ring-slate-100 shadow-md' 
                   : img.isUploading 
-                    ? 'border-gray-200 opacity-80' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-slate-200 opacity-90' 
+                    : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
               }`}
               onClick={() => !img.isUploading && setAsMain(img)}
             >
               {img.isUploading ? (
-                <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 p-3">
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 p-4">
                   {img.compressionStatus === 'compressing' ? (
                     <>
-                      <Compass className="w-6 h-6 text-amber-500 animate-pulse mb-2" />
-                      <span className="text-xs text-amber-600 font-semibold text-center">
+                      <Compass className="w-8 h-8 text-amber-500 animate-pulse mb-3" />
+                      <span className="text-xs font-bold text-amber-700 text-center">
                         Compressing...
                       </span>
-                      <span className="text-[10px] text-gray-400 mt-1 text-center">
-                        {img.originalSize ? formatFileSize(img.originalSize) : 'Large image'} → &lt;1MB
+                      <span className="text-[10px] text-slate-400 mt-1 text-center">
+                        {img.originalSize ? formatFileSize(img.originalSize) : 'Large file'} → optimized
                       </span>
                     </>
                   ) : img.compressionStatus === 'checking' ? (
                     <>
-                      <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-2" />
-                      <span className="text-xs text-blue-600 font-semibold">Checking size...</span>
+                      <Loader2 className="w-8 h-8 text-slate-500 animate-spin mb-3" />
+                      <span className="text-xs font-bold text-slate-600">Checking size...</span>
                     </>
                   ) : (
                     <>
-                      <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-2" />
-                      <span className="text-xs text-blue-600 font-semibold">Uploading...</span>
+                      <Upload className="w-8 h-8 text-blue-500 mb-3" />
+                      <span className="text-xs font-bold text-blue-700">Uploading...</span>
                     </>
                   )}
-                  
-                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-3">
+
+                  <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mt-4">
                     <div 
-                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      className="h-full bg-slate-900 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(img.uploadProgress, 100)}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-gray-400 mt-1">{Math.round(Math.min(img.uploadProgress, 100))}%</span>
+                  <span className="text-[10px] text-slate-400 mt-2 font-mono">{Math.round(Math.min(img.uploadProgress, 100))}%</span>
                 </div>
               ) : (
                 <>
                   <img src={img.url} alt="" className="w-full h-full object-cover" />
-                  
+
                   {/* Compression badge */}
                   {img.compressionStatus === 'compressed' && (
-                    <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
-                      <Compass className="w-3 h-3" />
+                    <div className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+                      <Zap className="w-3 h-3" />
                       Compressed
                     </div>
                   )}
 
                   {/* Main image badge */}
                   {mainImage?.publicId === img.publicId && (
-                    <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                      <CheckCircle2 className="w-3 h-3" /> Main
+                    <div className="absolute top-2 right-2 bg-slate-900 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-lg">
+                      <CheckCircle2 className="w-3 h-3" /> Cover
                     </div>
                   )}
-                  
+
                   {/* Delete button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       removeImage(idx)
                     }}
-                    className="absolute top-2 right-2 p-1.5 bg-white text-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:text-red-600 shadow-sm border border-gray-200"
-                    style={mainImage?.publicId === img.publicId ? { top: '2.5rem' } : {}}
+                    className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm text-slate-700 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:text-red-600 shadow-sm border border-slate-200"
+                    style={mainImage?.publicId === img.publicId ? { top: '2.75rem' } : {}}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
 
-                  {/* Size info tooltip */}
+                  {/* Size info */}
                   {img.compressedSize && img.originalSize && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px] p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white text-[10px] p-2 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
                       {formatFileSize(img.originalSize)} → {formatFileSize(img.compressedSize)}
                     </div>
                   )}
 
                   {/* Set as main overlay */}
                   {mainImage?.publicId !== img.publicId && (
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                      <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">
-                        Set as Main
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                      <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg bg-black/50 px-3 py-1.5 rounded-full">
+                        Set as Cover
                       </span>
                     </div>
                   )}
@@ -796,19 +1062,29 @@ if (status !== 'authenticated') return;
           ))}
 
           {/* Upload Button */}
-          <label className={`aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex flex-col items-center justify-center cursor-pointer transition-all group ${
-            isUploading ? 'opacity-50 pointer-events-none' : ''
-          }`}>
+          <label 
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all group ${
+              dragActive 
+                ? "border-slate-900 bg-slate-50 scale-[1.02]" 
+                : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+            } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          >
             {isUploading ? (
-              <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-2" />
+              <Loader2 className="w-8 h-8 text-slate-400 animate-spin mb-2" />
             ) : (
-              <ImagePlus className="w-6 h-6 text-gray-400 group-hover:text-blue-500 mb-2 transition-colors" />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-colors ${dragActive ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                <ImagePlus className="w-6 h-6" />
+              </div>
             )}
-            <span className="text-sm text-gray-500 group-hover:text-blue-600 font-medium">
-              {isUploading ? 'Processing...' : 'Upload'}
+            <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
+              {isUploading ? 'Processing...' : dragActive ? 'Drop here' : 'Add Images'}
             </span>
-            <span className="text-[10px] text-gray-400 mt-1">Max 1MB each</span>
+            <span className="text-[10px] text-slate-400 mt-1">JPG, PNG, WEBP, GIF</span>
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
               multiple
@@ -821,129 +1097,170 @@ if (status !== 'authenticated') return;
 
         {/* Helper Text */}
         {images.length > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
-            <Info className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50 rounded-xl p-4 border border-slate-100">
+            <Info className="w-5 h-5 text-slate-400 shrink-0" />
             <span>
               {images.some(img => img.isUploading) 
-                ? "Please wait for all images to finish uploading..." 
+                ? "Please wait for all images to finish uploading before continuing..." 
                 : images.length > 1 
-                  ? `Click any image to set as the main cover photo. ${images.length} image(s) uploaded.`
-                  : "Click the image to set as main cover photo."
+                  ? `Click any image to set as the cover photo. ${images.length} image${images.length !== 1 ? 's' : ''} uploaded.`
+                  : "Click the image to set as the cover photo."
               }
             </span>
           </div>
         )}
 
-        {/* Empty state hint */}
+        {/* Empty state */}
         {images.length === 0 && !isUploading && (
-          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
-            <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">No images yet. Upload at least one image to continue.</p>
-            <p className="text-gray-400 text-xs mt-1">Supported: JPG, PNG, WEBP, GIF (max 1MB each)</p>
+          <div 
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            className={`text-center py-16 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+              dragActive ? "border-slate-900 bg-slate-50" : "border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center transition-colors ${dragActive ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-300"}`}>
+              <ImageIcon className="w-8 h-8" />
+            </div>
+            <p className="text-slate-700 font-semibold mb-1">
+              {dragActive ? "Drop your images here" : "No images yet"}
+            </p>
+            <p className="text-slate-400 text-sm">Upload at least one image to continue</p>
+            <p className="text-slate-400 text-xs mt-1">Supported: JPG, PNG, WEBP, GIF (max 1MB each)</p>
           </div>
         )}
       </div>
 
       <div className="flex justify-between mt-8">
-        <Button variant="secondary" size="lg" onClick={handleBack} details="Back" />
-      
+        <button
+          onClick={handleBack}
+          className="px-6 py-4 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+        >
+          <ArrowRight className="w-4 h-4 rotate-180" />
+          Back
+        </button>
+
         <button 
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed px-6 py-3 rounded-lg text-white font-semibold flex items-center gap-2 transition-colors"
           onClick={handleNext}
-          disabled={images.length === 0 || images.some(img => img.isUploading) || !mainImage}
+          disabled={!isStage3Valid}
+          className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-slate-200 disabled:shadow-none"
         >
           {images.some(img => img.isUploading) ? (
-            <span className="flex items-center gap-2">
+            <>
               <Loader2 className="w-4 h-4 animate-spin" />
               Uploading...
-            </span>
+            </>
           ) : (
-            <span className="flex items-center gap-2">
-              Continue <ArrowRight className="w-4 h-4" />
-            </span>
+            <>
+              Review Cause
+              <ArrowRight className="w-4 h-4" />
+            </>
           )}
         </button>
       </div>
     </div>
   )
 
-  // ─── Stage 4: Review ────────────────────────────────────────────
+  
   const renderStage4 = () => (
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Review Your Cause</h2>
-        
-        <div className="space-y-8">
-          {/* Main Image */}
-          <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-            {mainImage ? (
-              <img src={mainImage.url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <ImageIcon className="w-12 h-12" />
-              </div>
-            )}
-          </div>
+      <div className="mb-10">
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Review Your Cause</h2>
+        <p className="text-slate-500">Double-check everything before going live</p>
+      </div>
 
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Cover Image */}
+        <div className="aspect-video bg-slate-100 border-b border-slate-200 relative">
+          {mainImage ? (
+            <img src={mainImage.url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-300">
+              <ImageIcon className="w-16 h-16" />
+            </div>
+          )}
+          <div className="absolute bottom-4 left-4">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-slate-900 text-xs font-bold shadow-sm border border-slate-200">
+              <Eye className="w-3 h-3 mr-1.5" />
+              Cover Photo
+            </span>
+          </div>
+        </div>
+
+        <div className="p-8 space-y-8">
           {/* Cause Name */}
           <div>
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Cause Name</h3>
-            <p className="text-xl font-bold text-gray-900">{causeName || "Untitled Cause"}</p>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cause Name</h3>
+            <p className="text-2xl font-bold text-slate-900">{causeName || "Untitled Cause"}</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-              <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-1">
-                <Target className="w-3 h-3" /> Funding Goal
-              </h3>
-              <p className="text-2xl font-bold text-gray-900">
-                {currency === "NG" && "₦"}
-                {goal?.toLocaleString() || "0"}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-slate-500" />
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Funding Goal</h3>
+              </div>
+              <p className="text-2xl font-bold text-slate-900">
+                ₦{goal?.toLocaleString() || "0"}
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Duration
-              </h3>
-              <p className="text-2xl font-bold text-gray-900">{deadline || "0"} days</p>
+            <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-slate-500" />
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Duration</h3>
+              </div>
+              <p className="text-2xl font-bold text-slate-900">{deadline || "0"} days</p>
             </div>
           </div>
 
           {/* Category & Location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Category</h3>
-              <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</h3>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-sm font-semibold">
+                {CATEGORIES.find(c => c.value === category)?.icon && (
+                  (() => {
+                    const Icon = CATEGORIES.find(c => c.value === category)!.icon
+                    return <Icon className="w-4 h-4" />
+                  })()
+                )}
                 {category}
               </span>
             </div>
-            <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Location</h3>
-              <p className="text-gray-900 font-medium">{location}</p>
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Location</h3>
+              <p className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-slate-500" />
+                {location}
+              </p>
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Description</h3>
-            <p className="text-gray-700 leading-relaxed">{details || "No description provided"}</p>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Short Description</h3>
+            <p className="text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-100">{details || "No description provided"}</p>
           </div>
 
           {/* Story */}
           <div>
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Story</h3>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{story || "No story provided"}</p>
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Story</h3>
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 max-h-64 overflow-y-auto">
+              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{story || "No story provided"}</p>
+            </div>
           </div>
 
           {/* Image Gallery */}
           {images.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Image Gallery ({images.length})</h3>
-              <div className="grid grid-cols-4 gap-3">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Image Gallery ({images.length})</h3>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                 {images.map((img, idx) => (
-                  <div key={idx} className={`aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 ${
-                    mainImage?.publicId === img.publicId ? 'border-blue-500' : 'border-gray-200'
+                  <div key={idx} className={`aspect-square rounded-lg overflow-hidden bg-slate-100 border-2 ${
+                    mainImage?.publicId === img.publicId ? 'border-slate-900' : 'border-slate-200'
                   }`}>
                     <img src={img.url} alt="" className="w-full h-full object-cover" />
                   </div>
@@ -953,150 +1270,248 @@ if (status !== 'authenticated') return;
           )}
         </div>
 
-        <div className="flex justify-between mt-10 pt-6 border-t border-gray-200">
-          <Button variant="secondary" size="md" onClick={() => setStages(2)} details="Edit Details" />
-          <Button variant="secondary" size="md" onClick={() => setStages(3)} details="Edit Images" />
+        {/* Action Buttons */}
+        <div className="p-8 pt-0">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-200">
+            <button
+              onClick={() => setStage(2)}
+              className="px-6 py-3.5 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit Details
+            </button>
+            <button
+              onClick={() => setStage(3)}
+              className="px-6 py-3.5 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+            >
+              <ImageIcon className="w-4 h-4" />
+              Edit Images
+            </button>
+            <button 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex-1 px-6 py-3.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200 disabled:shadow-none"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  Publish Cause
+                  <CheckCircle2 className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
-          <button 
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed px-6 py-3 rounded-lg text-white font-semibold flex items-center gap-2 transition-colors"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
+  const renderStage5 = () => (
+    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-white rounded-2xl border border-emerald-200 shadow-sm p-10 text-center">
+        {/* Success Animation */}
+        <div className="relative mb-8">
+          <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-100">
+            <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+          </div>
+          <div className="absolute inset-0 w-24 h-24 mx-auto pointer-events-none">
+            <div className="w-full h-full rounded-full border-2 border-emerald-300 animate-ping opacity-20" />
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Cause Published!</h2>
+        <p className="text-slate-500 mb-10 max-w-sm mx-auto">
+          <span className="font-semibold text-slate-900">"{causeName}"</span> is now live and ready to receive donations.
+        </p>
+         
+         
+                       
+
+                        {/* Campaign Link */}
+                        <div className="max-w-lg mx-auto">
+                            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200 flex items-center gap-2">
+                                <div className="flex-1 min-w-0 px-3 py-2">
+                                    <p className="text-sm text-slate-600 truncate font-mono">
+                                        {String(link) || "Generating link..."}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={copyToClipboard}
+                                      disabled={!link}
+                                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${
+                                        copied 
+                                            ? "bg-emerald-600 text-white" 
+                                            : "bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300"
+                                    }`}
+                                >
+                                    {copied ? (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Copied!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                            Copy Link
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-3">Share this link with supporters to start receiving donations immediately</p>
+                        </div>
+        {/* Stats Summary */}
+        <div className="bg-slate-50 rounded-xl p-5 mb-8 text-left space-y-3 border border-slate-100">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500">Funding Goal</span>
+            <span className="font-bold text-slate-900">₦{goal?.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500">Duration</span>
+            <span className="font-bold text-slate-900">{deadline} days</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500">Images</span>
+            <span className="font-bold text-slate-900">{images.length} uploaded</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500">Category</span>
+            <span className="font-bold text-slate-900">{category}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => redirect("/dashboard/donor")}
+            className="w-full py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
           >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Publishing...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                Publish Cause <CheckCircle2 className="w-4 h-4" />
-              </span>
-            )}
+            <ExternalLink className="w-5 h-5" />
+            Go to Dashboard
+          </button>
+          <button
+            onClick={resetForm}
+            className="w-full py-4 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Create Another Cause
           </button>
         </div>
       </div>
     </div>
   )
 
-  
-  const renderStage5 = () => (
-    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-xl border border-green-200 shadow-sm p-8 text-center">
-        <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-7 h-7 text-green-600" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Cause Published!</h2>
-        <p className="text-gray-600 mb-8">
-          Your cause <span className="font-semibold text-gray-900">"{causeName}"</span> has been successfully created and is now live.
-        </p>
-        
-        <div className="bg-gray-50 rounded-lg p-4 mb-8 text-left space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Funding Goal</span>
-            <span className="font-semibold text-gray-900">
-              {currency === "NG" && "₦"}
-              {goal?.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Duration</span>
-            <span className="font-semibold text-gray-900">{deadline} days</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Images</span>
-            <span className="font-semibold text-gray-900">{images.length} uploaded</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Category</span>
-            <span className="font-semibold text-gray-900">{category}</span>
-          </div>
-        </div>
-
-        <Button variant="primary" size="lg" onClick={() => redirect("/dashboard/donor")} details="Go to Dashboard"/>
-      </div>
-    </div>
-  )
 
   const renderStage6 = () => (
     <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-xl border border-red-200 shadow-sm p-8 text-center">
-        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="w-7 h-7 text-red-600" />
+      <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-10 text-center">
+        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-red-100">
+          <AlertCircle className="w-10 h-10 text-red-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Submission Error</h2>
-        
-        {errorType === "UPLOAD_IMG" && errorMsg?.includes('compress') ? (
-          <>
-            <p className="text-gray-600 mb-2 font-medium">Image too large to compress</p>
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-left">
-              <p className="text-sm text-amber-800">{errorMsg}</p>
-              <p className="text-xs text-amber-600 mt-2">
-                💡 Tip: Try resizing your image to under 1920px wide, or use a JPG instead of PNG.
-              </p>
-            </div>
-          </>
-        ) : (
-          <p className="text-gray-600 mb-2 font-medium">
-            {errorType === "M_IMG" && "Main image is required"}
-            {errorType === "IMGS" && "At least one image is required"}
-            {errorType === "NET" && "Network connection error"}
-            {errorType === "UPLOAD_IMG" && "Failed to upload images"}
-            {errorType === "UPLOAD_ERR" && "Upload failed"}
-            {errorType === "LOAD" && "Failed to load data"}
-            {errorType === "IVP" && "Invalid parameters"}
-            {errorType === "C404" && "Cause not found"}
-            {errorType === "UVF" && "User verification failed"}
-            {errorType === "FOR" && "Forbidden"}
-            {errorType === "UEX" && "Unknown error"}
-          </p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Submission Failed</h2>
+
+        <p className="text-slate-600 mb-2 font-medium">
+          {errorType === "M_IMG" && "Main image is required"}
+          {errorType === "IMGS" && "At least one image is required"}
+          {errorType === "NET" && "Network connection error"}
+          {errorType === "UPLOAD_IMG" && "Failed to upload images"}
+          {errorType === "UPLOAD_ERR" && "Publishing failed"}
+          {errorType === "LOAD" && "Failed to load data"}
+          {errorType === "IVP" && "Invalid parameters provided"}
+          {errorType === "C404" && "Cause not found"}
+          {errorType === "UVF" && "User verification failed"}
+          {errorType === "FOR" && "Action not permitted"}
+          {errorType === "UEX" && "An unknown error occurred"}
+          {!errorType && "Something went wrong"}
+        </p>
+
+        {errorMsg && (
+          <p className="text-slate-500 text-sm mb-8 bg-slate-50 rounded-lg p-3 border border-slate-100">{errorMsg}</p>
         )}
-        
-        {errorMsg && !errorMsg.includes('compress') && (
-          <p className="text-gray-500 text-sm">{errorMsg}</p>
-        )}
-        
-        <div className="flex justify-center gap-3 mt-8">
-          <Button variant="secondary" size="md" onClick={handleBack} details="Go Back" />
-          <Button 
-            variant="primary" 
-            size="md" 
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleBack}
+            className="flex-1 py-3.5 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all"
+          >
+            Go Back
+          </button>
+          <button
             onClick={() => {
-              setErrorType(undefined)
+              setErrorType(null)
               setErrorMsg("")
-              setStages(errorType === "UPLOAD_IMG" ? 3 : 4)
+              setHasError(false)
+              setStage(errorType === "UPLOAD_IMG" || errorType === "M_IMG" || errorType === "IMGS" ? 3 : 4)
             }}
-            details="Try Again"
-          />
+            className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try Again
+          </button>
         </div>
       </div>
     </div>
   )
 
-
+ 
   const renderProgress = () => {
-    const steps = [
-      { num: 1, label: 'Drafts' },
-      { num: 2, label: 'Details' },
-      { num: 3, label: 'Images' },
-      { num: 4, label: 'Review' },
-      { num: 5, label: 'Publish' },
-    ]
-
-    const currentStep = stages === 6 ? 4 : stages
+    const currentStep = stage === 6 ? 4 : stage
+    const progressPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100
 
     return (
-      <div className="w-full fixed top-14">
-        <div className="flex items-center justify-between relative">
-       
-          <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-200 -translate-y-1/2 " />
-          
-        
-          <div 
-            className="absolute top-1/2 left-0 h-2 bg-blue-600 -translate-y-1/2  transition-all duration-500"
-            style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-          />
-          
-         
+      <div className="w-full bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between mb-3">
+            {STEPS.map((s, index) => {
+              const isActive = currentStep >= s.id
+              const isCurrent = currentStep === s.id
+              return (
+                <div key={s.id} className="flex items-center flex-1 last:flex-none">
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                        currentStep > s.id
+                          ? "bg-emerald-600 text-white"
+                          : isCurrent
+                          ? "bg-slate-900 text-white ring-4 ring-slate-100"
+                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      }`}
+                    >
+                      {currentStep > s.id ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : (
+                        s.id
+                      )}
+                    </div>
+                    <span className={`text-[10px] font-semibold mt-1.5 hidden sm:block ${isActive ? "text-slate-900" : "text-slate-400"}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                  {index < STEPS.length - 1 && (
+                    <div className="flex-1 h-0.5 mx-2 sm:mx-4 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                        style={{ width: currentStep > s.id ? "100%" : "0%" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          {/* Progress bar */}
+          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-slate-900 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
       </div>
     )
@@ -1104,42 +1519,53 @@ if (status !== 'authenticated') return;
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <NavBar />
 
       <BankVerification 
-        isOpen={Edit} 
-        onClick={() => {}}
+        isOpen={showBankModal} 
+        onClick={() => setShowBankModal(false)}
         bankName=""
         accountNumber=""
         subAccountCode=""
-        email={session?.user.email as string}
+        email={session?.user?.email as string}
       />
 
       {loading ? (
-        <div className="w-full h-60 flex items-center justify-center">
+        <div className="w-full min-h-[60vh] flex flex-col items-center justify-center">
           <DualRingSpinner />
+          <p className="mt-4 text-sm text-slate-500 font-medium">Loading your dashboard...</p>
         </div>
-      ) : error ? (
-        <div className="w-full h-60 flex flex-col items-center justify-center px-4">
-          <XCircleIcon className="w-12 h-12 text-red-500 mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Data</h2>
-          <p className="text-gray-600 mb-4 text-center max-w-md">{errorMsg}</p>
-          <Button variant="primary" size="md" onClick={fetchUserData} details="Retry" />
+      ) : hasError && stage !== 6 ? (
+        <div className="w-full min-h-[60vh] flex items-center justify-center px-4">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Unable to Load</h2>
+            <p className="text-slate-600 mb-6">{errorMsg}</p>
+            <button
+              onClick={fetchUserData}
+              className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Try Again
+            </button>
+          </div>
         </div>
       ) : (
-        <main className="pt-10 pb-16">
-          {stages !== 1 && stages !== 5 && stages !== 6 && renderProgress()}
-          
-          {stages === 1 && renderStage1()}
-          {stages === 2 && renderStage2()}
-          {stages === 3 && renderStage3()}
-          {stages === 4 && renderStage4()}
-          {stages === 5 && renderStage5()}
-          {stages === 6 && renderStage6()}
+        <main>
+          {stage !== 1 && stage !== 5 && stage !== 6 && renderProgress()}
+
+          {stage === 1 && renderStage1()}
+          {stage === 2 && renderStage2()}
+          {stage === 3 && renderStage3()}
+          {stage === 4 && renderStage4()}
+          {stage === 5 && renderStage5()}
+          {stage === 6 && renderStage6()}
         </main>
       )}
-       
+
       <Footer />
     </div>
   )
