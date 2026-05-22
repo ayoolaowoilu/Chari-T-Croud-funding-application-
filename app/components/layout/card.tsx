@@ -30,7 +30,7 @@ const currencySymbols: Record<string, string> = {
     USD: "$"
 };
 
-const formatNumber = (num: number): string => {
+export const formatNumber = (num: number): string => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num?.toString();
@@ -186,13 +186,13 @@ const CenterCard: React.FC<Don> = ({
     id,
     centerName,
     location,
-    center_id,
-    daysLeft
+    daysLeft,
+    raised,
+    donors
 }) => {
-
-    
     const daysleftt = Math.floor((Number(daysLeft) - Date.now()) / (1000 * 60 * 60 * 24));
     const isNearDeadline = daysLeft !== undefined && daysleftt <= 7 && daysleftt > 0;
+
     return (
         <motion.div
             className="bg-white w-full h-125 rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group flex flex-col"
@@ -202,7 +202,7 @@ const CenterCard: React.FC<Don> = ({
             transition={{ duration: 0.4 }}
             whileHover={{ y: -2 }}
         >
-            {/* Image Section */}
+            {/* ── Image Section ─────────────────────────────── */}
             <div className="relative h-48 shrink-0 overflow-hidden">
                 <img
                     src={img}
@@ -218,43 +218,46 @@ const CenterCard: React.FC<Don> = ({
                     </span>
                 </div>
 
-                 <div className="absolute bottom-3 right-3">
+                {/* Center Type Badge */}
+                <div className="absolute bottom-3 right-3">
                     <span className="bg-gray-900/95 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
                         Charity center
                     </span>
                 </div>
 
-                  {daysLeft !== undefined && (
+                {/* Days Left Badge */}
+                {daysLeft !== undefined && (
                     <div className="absolute bottom-9 right-3">
-                        <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full text-white ${isNearDeadline ? 'bg-red-500/90' : 'bg-black/40 backdrop-blur-sm'}`}>
+                        <span className={`
+                            text-[11px] font-medium px-2.5 py-1 rounded-full text-white
+                            ${isNearDeadline ? 'bg-red-500/90' : 'bg-black/40 backdrop-blur-sm'}
+                        `}>
                             {daysleftt > 0 ? `${daysleftt}d left` : "Ended"}
                         </span>
                     </div>
                 )}
             </div>
 
-            {/* Content Section */}
+
             <div className="flex flex-col grow p-5">
-                {/* Center Name with Verification */}
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <h3 className="text-base font-bold text-gray-900 leading-snug line-clamp-1">
-                        {title}
-                    </h3>
-                   
-                       
-                 
-                </div>
+                {/* Title */}
+                <h3 className="text-base font-bold text-gray-900 leading-snug line-clamp-1 mb-2">
+                    {title}
+                </h3>
+
+                {/* Center Name + Verification */}
                 <div className="flex items-center gap-1.5 mb-2">
-                    <h3 className="text-xs  text-gray-600 leading-snug line-clamp-1">
+                    <span className="text-xs text-gray-600 leading-snug line-clamp-1">
                         {centerName}
-                    </h3>
-                   
-                         <span className="inline-flex items-center transition-transform duration-300 hover:scale-110" title="Verified Charity">
-                <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
-                </svg>
-            </span>
-                 
+                    </span>
+                    <span 
+                        className="inline-flex items-center transition-transform duration-300 hover:scale-110" 
+                        title="Verified Charity"
+                    >
+                        <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                        </svg>
+                    </span>
                 </div>
 
                 {/* Location */}
@@ -265,21 +268,39 @@ const CenterCard: React.FC<Don> = ({
                     </div>
                 )}
 
-             
+                {/* Description */}
                 <p className="text-gray-600 text-sm leading-relaxed line-clamp-5 mb-4 grow">
-                  {desc}
+                    {desc}
                 </p>
 
-                 
+               
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm font-semibold text-gray-900">
+                            ₦{formatNumber(Number(raised))}
+                        </span>
+                        <span className="text-xs text-gray-500">raised</span>
+                    </div>
+                    {donors !== undefined && (
+                        <div className="flex items-center gap-1">
+                            <span className="text-sm font-semibold text-gray-900">
+                                {donors}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                {donors === 1 ? 'donor' : 'donors'}
+                            </span>
+                        </div>
+                    )}
+                </div>
 
-             
+                {/* CTA Button */}
                 <div className="mt-auto">
                     <Button
-                        details="View Center Profile"
+                        details="View Details"
                         variant="outline"
                         size="md"
                         className="w-full"
-                        onClick={() => redirect(`/dashboard/centers/profile?id=${center_id}`)}
+                        onClick={() => redirect(`/causes/cause?id=${id}`)}
                     />
                 </div>
             </div>

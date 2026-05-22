@@ -11,6 +11,11 @@ import { useSession } from 'next-auth/react';
 import { Campaign, Donor, UserData } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
+import { formatNumber } from '@/app/components/layout/card';
+
+  export const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('en-US').format(amount);
+  };
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -22,22 +27,17 @@ export default function Page() {
   const [reportType, setReportType] = useState('');
   const [reportMessage, setReportMessage] = useState('');
   const { data: session } = useSession();
-const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const [userCache, setUserCache] = useState<Record<number, { full_name: string; image: string }>>({});
+  const [centerCache, setCenterCache] = useState<Record<number, { full_name: string; image: string }>>({});
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [displayedMainImg, setDisplayedMainImg] = useState<string>("");
 
-  useEffect(() => {
-    if (name && campaign) {
-      window.document.title = "Chari-T | " + name;
-    } else if (campaign) {
-      window.document.title = "Chari-T | " + campaign.name;
-    }else{
-       window.document.title = "404 campaign not found"
-    }
-  }, [name, campaign ]);
+  const isCenter = campaign?._type === 'center';
+
+
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -110,12 +110,28 @@ const [isExpanded, setIsExpanded] = useState(false);
   }, [id]);
 
   useEffect(() => {
-    if (campaign?.user_id && !userCache[campaign.user_id]) {
+    if (isCenter && campaign?.center_id && !centerCache[Number(campaign.center_id)]) {
+      const getCenter = async () => {
+        try {
+          const resp = await GetUserDetailsDyId(Number(campaign.center_id) , true);
+          if (resp.error) {
+            console.error("Failed to fetch center:", resp.error);
+            return;
+          }
+          setCenterCache(prev => ({ ...prev, [campaign.center_id!]: resp }));
+        } catch (err) {
+          console.error("Error fetching center:", err);
+        }
+      };
+      getCenter();
+    }
+  }, [campaign?.center_id, centerCache, isCenter]);
+
+  useEffect(() => {
+    if (!isCenter && campaign?.user_id && !userCache[campaign.user_id]) {
       const getUser = async () => {
         try {
-         
-          const resp = await GetUserDetailsDyId(campaign.user_id);
-      
+          const resp = await GetUserDetailsDyId(campaign.user_id , false);
           if (resp.error) {
             console.error("Failed to fetch user:", resp.error);
             return;
@@ -127,7 +143,7 @@ const [isExpanded, setIsExpanded] = useState(false);
       };
       getUser();
     }
-  }, [campaign?.user_id, userCache]);
+  }, [campaign?.user_id, userCache, isCenter]);
 
   useEffect(() => {
     if (!campaign) return;
@@ -139,9 +155,9 @@ const [isExpanded, setIsExpanded] = useState(false);
     }
   }, [campaign?.main_img]);
 
-
-
   const renderReport = () => {
+    if (isCenter) return null;
+
     return (
       <div className="fixed z-40 bottom-4 sm:bottom-5 right-4 sm:right-5 w-[calc(100%-2rem)] sm:w-auto md:max-w-sm p-4 sm:p-5 rounded-2xl bg-white shadow-2xl border border-gray-100">
         <AnimatePresence mode="wait">
@@ -357,7 +373,7 @@ const [isExpanded, setIsExpanded] = useState(false);
     );
   }
 
-  if (campaign.goal === campaign.raised && campaign.raised > 0) {
+  if (!isCenter && campaign.goal === campaign.raised && campaign.raised > 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <NavBar />
@@ -399,11 +415,11 @@ const [isExpanded, setIsExpanded] = useState(false);
     galleryImgs = [];
   }
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US').format(amount);
-  };
 
-  const user = userCache[campaign.user_id];
+
+  const user = isCenter ? centerCache[Number(campaign.center_id)!] : userCache[campaign.user_id];
+  const userName = isCenter ? campaign.center_name : user?.full_name;
+  const userId = isCenter ? campaign.center_id : campaign.user_id;
 
   const handleCategoryClick = () => {
     router.push(`/causes/get?category=${campaign.category}`);
@@ -417,9 +433,9 @@ const [isExpanded, setIsExpanded] = useState(false);
     setDisplayedMainImg(img);
   };
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_API_URL}/causes/cause?id=${id}&name=${name}`;
-  const twitterShareText = `${name?.toLocaleUpperCase()}\n\n${campaign.details}\n\n${campaign.story}\n\nDonate now ${shareUrl}`;
-  const nativeShareText = `${name?.toLocaleUpperCase()}\n\n${campaign.details}\n\n${campaign.story}\n\nDonate now ${shareUrl}`;
+  const shareUrl = `${window.location.origin}/causes/cause?id=${id}&name=${campaign.name}`;
+  const twitterShareText = `${campaign.name?.toLocaleUpperCase()} | Chari-T \n\n${campaign.details}\n\nDonate now ${shareUrl}`;
+  const nativeShareText = `${campaign.name?.toLocaleUpperCase()} | Chari-T\n\n${campaign.details}\n\nDonate now ${shareUrl}`;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
@@ -435,16 +451,19 @@ const [isExpanded, setIsExpanded] = useState(false);
             >
               {campaign.category}
             </button>
-            <span className={`px-3 py-1 ${campaign.safety_rating === 'verified_safe' || campaign.safety_rating === 'likely_safe' ? 'bg-green-100 text-green-700' : campaign.safety_rating === 'uncertain' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'} text-xs font-semibold rounded-full  tracking-wide`}>
-              <div>
-                <Explain
-                  topic={campaign.safety_rating}
-                  details={campaign.safety_rating == "likely_risky" ? "A few amount of people has already reported this campaign , tagging it a scam scheme and it has not been confirmed yet" : campaign.safety_rating == "likely_safe" ? "This campaign is likely safe meaning that little to no people have reported this campaign" : campaign.safety_rating == "verified_safe" ? "This campaign is verified and its cause is of real importance to this user" : campaign.safety_rating == "unsafe" ? "This campaign is unsafe to donate to as it has recived a large amount of reports tagging it a scam scheme" : "This campaign has not been verified yet but it is also not tagged as a risky campaign either , so be sure to do your research before donating to this campaign"}
-                  link="/docs/safety-ratings"
-                  link_details='View Docs'
-                />
-              </div>
-            </span>
+            {!isCenter && (
+              <span className={`px-3 py-1 ${campaign.safety_rating === 'verified_safe' || campaign.safety_rating === 'likely_safe' ? 'bg-green-100 text-green-700' : campaign.safety_rating === 'uncertain' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'} text-xs font-semibold rounded-full  tracking-wide`}>
+                <div>
+                  <Explain
+                    topic={campaign.safety_rating}
+                    details={campaign.safety_rating == "likely_risky" ? "A few amount of people has already reported this campaign , tagging it a scam scheme and it has not been confirmed yet" : campaign.safety_rating == "likely_safe" ? "This campaign is likely safe meaning that little to no people have reported this campaign" : campaign.safety_rating == "verified_safe" ? "This campaign is verified and its cause is of real importance to this user" : campaign.safety_rating == "unsafe" ? "This campaign is unsafe to donate to as it has recived a large amount of reports tagging it a scam scheme" : "This campaign has not been verified yet but it is also not tagged as a risky campaign either , so be sure to do your research before donating to this campaign"}
+                    link="/docs/safety-ratings"
+                    link_details='View Docs'
+                  />
+                </div>
+              </span>
+            )}
+           
 
             <span className="text-gray-400 text-sm">•</span>
             <span className="text-gray-500 text-sm">
@@ -489,51 +508,94 @@ const [isExpanded, setIsExpanded] = useState(false);
                 onClick={handleDonateClick}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
               >
-                Donate Now — {symbol}{formatAmount(campaign.goal - campaign.raised)} to go
+                {isCenter 
+                  ? `Donate Now — ${symbol}${formatAmount(campaign.raised)} raised` 
+                  : `Donate Now — ${symbol}${formatAmount(campaign.goal - campaign.raised)} to go`}
               </button>
               <p className="text-center text-xs text-gray-400 mt-2">
                 Secure payment processing • {campaign.donation_count} people donated
               </p>
             </div>
 
-       <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
-  <div className="flex items-center gap-2 mb-4">
-    <h2 className="text-xl font-bold text-gray-900">Our Story</h2>
-    <span className="text-gray-400">·</span>
-    <span className="text-sm text-gray-500">By</span>
-    {user ? (
-      <span className="font-semibold text-gray-900 text-sm inline-flex items-center">
-        <div className="rounded-full border border-gray-200 w-6 h-6 overflow-hidden mr-2 inline-flex items-center justify-center shrink-0">
-          <img src={user.image} alt={user.full_name} className="w-6 h-6 rounded-full object-cover" />
-        </div>
-       <Explain 
-        topic={user.full_name}
-        details="This is a public profile"
-        link={`/profile?id=${campaign.user_id}`}
-        link_details={"View profile"}
-       />
-      </span>
-    ) : (
-      <span className="text-sm text-gray-400">Undefined</span>
-    )}
-  </div>
-  <div className="relative">
-    <p className={`text-gray-700 leading-relaxed text-base whitespace-pre-line transition-all duration-300 ${isExpanded ? '' : 'max-h-48 overflow-hidden'}`}>
-      {campaign.story}
-    </p>
-    {!isExpanded && (
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-    )}
-  </div>
-  {campaign.story && campaign.story.length > 300 && (
-    <button
-      onClick={() => setIsExpanded(!isExpanded)}
-      className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-    >
-      {isExpanded ? 'Show less' : 'Read more'}
-    </button>
-  )}
-</div>
+            {!isCenter && (
+              <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">Our Story</h2>
+                  <span className="text-gray-400">·</span>
+                  <span className="text-sm text-gray-500">By</span>
+                  {user ? (
+                    <span className="font-semibold text-gray-900 text-sm inline-flex items-center">
+                      <div className="rounded-full border border-gray-200 w-6 h-6 overflow-hidden mr-2 inline-flex items-center justify-center shrink-0">
+                        <img src={user.image} alt={userName as string} className="w-6 h-6 rounded-full object-cover" />
+                      </div>
+                      <Explain
+                        topic={userName as string }
+                        details="This is a public profile"
+                        link={`dashboard/center/profile?id=${userId}`}
+                        link_details={"View profile"}
+                      />
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">Undefined</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <p className={`text-gray-700 leading-relaxed text-base whitespace-pre-line transition-all duration-300 ${isExpanded ? '' : 'max-h-48 overflow-hidden'}`}>
+                    {campaign.story}
+                  </p>
+                  {!isExpanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent pointer-events-none" />
+                  )}
+                </div>
+                {campaign.story && campaign.story.length > 300 && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    {isExpanded ? 'Show less' : 'Read more'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {isCenter && (
+              <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">About</h2>
+                  <span className="text-gray-400">·</span>
+                  <span className="text-sm text-gray-500">By</span>
+                  {user ? (
+                    <span className="font-semibold text-gray-900 text-sm inline-flex items-center">
+                      <div className="rounded-full border border-gray-200 w-6 h-6 overflow-hidden mr-2 inline-flex items-center justify-center shrink-0">
+                        <img src={user.image} alt={userName as string} className="w-6 h-6 rounded-full object-cover" />
+                      </div>
+                      <Explain
+                        topic={userName as string}
+                        details="This is a charity center profile"
+                        link={`/dashboard/centers/profile?id=${userId}`}
+                        link_details={"View profile"}
+                      />
+
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">Undefined</span>
+                  )}
+
+                                      <span 
+                        className="inline-flex items-center transition-transform duration-300 hover:scale-110" 
+                        title="Verified Charity"
+                    >
+                        <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                        </svg>
+                    </span>
+
+                </div>
+                <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line">
+                  {campaign.details}
+                </p>
+              </div>
+            )}
 
             <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-sm">
               <h2 className="text-xl font-bold mb-4 text-gray-900">Campaign Details</h2>
@@ -541,11 +603,13 @@ const [isExpanded, setIsExpanded] = useState(false);
                 {campaign.details}
               </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-gray-100">
-                <div className="text-center sm:text-left">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Goal</p>
-                  <p className="text-lg font-bold text-gray-900">{symbol}{formatAmount(campaign.goal)}</p>
-                </div>
+              <div className={`grid grid-cols-2 ${isCenter ? 'sm:grid-cols-3' : 'sm:grid-cols-4'} gap-4 pt-6 border-t border-gray-100`}>
+                {!isCenter && (
+                  <div className="text-center sm:text-left">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Goal</p>
+                    <p className="text-lg font-bold text-gray-900">{symbol}{formatAmount(campaign.goal)}</p>
+                  </div>
+                )}
                 <div className="text-center sm:text-left">
                   <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Raised</p>
                   <p className="text-lg font-bold text-green-600">{symbol}{formatAmount(campaign.raised)}</p>
@@ -554,10 +618,12 @@ const [isExpanded, setIsExpanded] = useState(false);
                   <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Donors</p>
                   <p className="text-lg font-bold text-gray-900">{totalDonors}</p>
                 </div>
-                <div className="text-center sm:text-left">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Days Left</p>
-                  <p className="text-lg font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 'Ended'}</p>
-                </div>
+              
+                  <div className="text-center sm:text-left">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Days Left</p>
+                    <p className="text-lg font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 'Ended'}</p>
+                  </div>
+            
               </div>
             </div>
 
@@ -598,7 +664,9 @@ const [isExpanded, setIsExpanded] = useState(false);
                 onClick={handleDonateClick}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
               >
-                Donate Now — Join {totalDonors} others
+                {isCenter 
+                  ? `Donate Now — Join ${totalDonors} others` 
+                  : `Donate Now — Join ${totalDonors} others`}
               </button>
               <p className="text-center text-xs text-gray-400 mt-2">
                 Every contribution brings us closer to our goal
@@ -609,19 +677,28 @@ const [isExpanded, setIsExpanded] = useState(false);
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               <div className="hidden lg:block bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="mb-6">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-semibold text-gray-900">{symbol}{formatAmount(campaign.raised)}</span>
-                    <span className="text-gray-500">of {symbol}{formatAmount(campaign.goal)}</span>
+                {!isCenter && (
+                  <div className="mb-6">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="font-semibold text-gray-900">{symbol}{formatAmount(campaign.raised)}</span>
+                      <span className="text-gray-500">of {symbol}{formatAmount(campaign.goal)}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">{progressPercent.toFixed(1)}% funded</p>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                    <div
-                      className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                      style={{ width: `${progressPercent}%` }}
-                    />
+                )}
+
+                {isCenter && (
+                  <div className="mb-6 text-center">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Total Raised</p>
+                    <p className="text-3xl font-bold text-green-600">{symbol}{formatAmount(campaign.raised)}</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">{progressPercent.toFixed(1)}% funded</p>
-                </div>
+                )}
 
                 <button
                   onClick={handleDonateClick}
@@ -639,10 +716,18 @@ const [isExpanded, setIsExpanded] = useState(false);
                     <p className="text-2xl font-bold text-gray-900">{totalDonors}</p>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Donors</p>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 0}</p>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Days Left</p>
-                  </div>
+                
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 0}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Days Left</p>
+                    </div>
+              
+                  {isCenter && (
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">{symbol}{formatNumber(campaign.raised)}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Raised</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -665,12 +750,14 @@ const [isExpanded, setIsExpanded] = useState(false);
                     <span className="text-gray-500">Type</span>
                     <span className="font-medium text-gray-900 capitalize">{campaign._type}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-50">
-                    <span className="text-gray-500">Ends</span>
-                    <span className="font-medium text-gray-900">
-                      in {daysLeft > 0 ? daysLeft : 0} Days
-                    </span>
-                  </div>
+             
+                    <div className="flex justify-between py-2 border-b border-gray-50">
+                      <span className="text-gray-500">Ends</span>
+                      <span className="font-medium text-gray-900">
+                        in {daysLeft > 0 ? daysLeft : 0} Days
+                      </span>
+                    </div>
+                
                 </div>
               </div>
 
@@ -690,7 +777,7 @@ const [isExpanded, setIsExpanded] = useState(false);
                     Tweet
                   </button>
                   <button
-                    onClick={() => shareText(nativeShareText, name || 'Share')}
+                    onClick={() => shareText(nativeShareText, campaign.name || "share")}
                     className="flex items-center justify-center py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
                   >
                     Share

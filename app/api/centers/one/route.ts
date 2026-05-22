@@ -7,9 +7,9 @@ export async function GET(request:NextRequest){
 
      try {
         const [center]:any = await db.query("SELECT * FROM centers WHERE id = ? " , [id])
-
+         const [campaigns]:any = await db.query("SELECT main_img , name , details , id , category , raised FROM campaigns WHERE center_id = ? " , [center[0].id])
         return NextResponse.json(
-             center[0],
+             {...center[0],campaigns},
              {status:200}
         )
   

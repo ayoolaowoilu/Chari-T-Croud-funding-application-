@@ -10,7 +10,7 @@ interface Campaign {
   raised: number;
   _type: string;
   center_name: string | null;
-  center_id: string | null;
+  center_id: string | number;
   user_id: number;
   date_to_completion: string; 
   created_at: string;

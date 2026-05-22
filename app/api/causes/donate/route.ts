@@ -15,42 +15,100 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [campaign]: any = await db.query(
+       const updateDonationForCenters =async() =>{
+           const [center]:any =await db.query("SELECT recived , total_donators FROM centers WHERE id = ?",[body.center_id])
+      const newRecived = Number(center[0].recived) + Number(body.amount)
+      const oldDonators = Number(center[0].total_donators) || 0 
+      if(!center){
+             return NextResponse.json(
+        { error: "Center not found" },
+        { status: 404 }
+      ); 
+      }
+ await db.query("UPDATE centers SET recived = ? , total_donators = ? WHERE id = ?",[newRecived , oldDonators + 1 , body.center_id])
+
+
+
+    }
+    
+
+const updateTransacts1st = async() =>{
+  const [resp]:any = await db.query("SELECT id , donations FROM users WHERE email = ?",[body.email])
+
+     const id = body.isAuthed ? ( resp[0].id || null) : null;
+    
+
+      const payer_donations = Number(resp[0].donations) + Number(body.amount);
+
+          await db.query(
+        "UPDATE users SET donations = ? WHERE id = ?",
+        [payer_donations, resp[0].id]
+      );
+
+     await db.query(
+        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , _to , user_id_from ) VALUES (?, ?, ?, ? , ? , ?)",
+         [body.center_id , body.amount , body.donor_name || "unknown" , body.transaction_id , "center" , id]
+      );
+      await db.query(
+        "INSERT INTO transactions (refrence, owner_id, ammount , paid_to , payer_id) VALUES (?, ?, ? , ? , ?)",
+        [body.transaction_id  , body.center_id , body.amount , "center" , id]
+      );
+
+    
+
+}
+      if(body.center_id && !body.campaign_id){
+         updateDonationForCenters()
+         updateTransacts1st()
+
+         return NextResponse.json(
+        { message: "Donation successful" },
+        { status: 200 }
+      );
+      }
+       const [campaign]: any = await db.query(
       "SELECT raised, id, user_id, donation_count, donors, goal,center_id,reported FROM campaigns WHERE id = ?",
       [body.campaign_id]
     );
 
-    if (!campaign || campaign.length === 0) {
+    if (!campaign && !body.center_id) {
       return NextResponse.json(
-        { message: "Campaign not found" },
+        { error: "Campaign not found" },
         { status: 404 }
       );
     }
-
     const raised = Number(campaign[0].raised) + Number(body.amount);
     const donationCount = Number(campaign[0].donation_count) + 1;
 
-    const [owner_details]: any = await db.query(
-      "SELECT id, recived FROM users WHERE id = ?",
-      [campaign[0].user_id]
+ 
+
+   const [owner_details]: any = await db.query(
+      body.center_id ?   "SELECT id, recived FROM centers WHERE id = ?" :   "SELECT id, recived FROM users WHERE id = ?",
+      [campaign[0].user_id || campaign.center_id]
     );
 
     if (!owner_details || owner_details.length === 0) {
       return NextResponse.json(
-        { message: "Campaign owner not found" },
+        { message: "Campaign owner or center not found" },
         { status: 404 }
       );
     }
 
     const recived = Number(owner_details[0].recived) + Number(body.amount);
-
-
     const donated_rate = Math.floor((raised / campaign[0].goal) * 100);
 
+
+
+
+if(!body.center_id){
+    
     await db.query(
       "UPDATE users SET recived = ? WHERE id = ?",
       [recived, owner_details[0].id]
     );
+}else{
+  updateDonationForCenters()
+}
 
     const buildDonors = (name: string) => {
       const newDonor = { name, amount: body.amount, message: body.message };
@@ -63,6 +121,7 @@ export async function POST(request: NextRequest) {
       return [...existing, newDonor];
     };
 
+ 
 
     const updateCampaign = async (donors: any[]) => {
       if(campaign[0].reported){
@@ -92,16 +151,29 @@ export async function POST(request: NextRequest) {
 
    
     if (!body.isAuthed && body.isBlind) {
-      const donors = buildDonors("Unknown");
+   
+        const donors = buildDonors("Unknown");
       await updateCampaign(donors);
+  
+  let donationProps;
+  let transactionProps;
 
+  if(body.center_id){
+     donationProps =   [body.center_id, body.amount, "Unknown", body.transaction_id , "center"]
+     transactionProps =  [body.transaction_id, body.center_id, body.amount , "center"]
+  }else{
+     donationProps =   [campaign[0].user_id, body.amount, "Unknown", body.transaction_id , "normal"]
+     transactionProps =  [body.transaction_id, campaign[0].user_id, body.amount , "normal"]
+  }
+
+  
       await db.query(
-        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id) VALUES (?, ?, ?, ?)",
-        [campaign[0].user_id, body.amount, "Unknown", body.transaction_id]
+        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , _to) VALUES (?, ?, ?, ? , ?)",
+         donationProps
       );
       await db.query(
-        "INSERT INTO transactions (refrence, owner_id, ammount) VALUES (?, ?, ?)",
-        [body.transaction_id, campaign[0].user_id, body.amount]
+        "INSERT INTO transactions (refrence, owner_id, ammount , paid_to) VALUES (?, ?, ? , ?)",
+       transactionProps
       );
 
       return NextResponse.json(
@@ -110,7 +182,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Case 2: Authed + Blind
+  
     if (body.isAuthed && body.isBlind) {
       const [payer_details]: any = await db.query(
         "SELECT id, donations FROM users WHERE email = ?",
@@ -125,20 +197,32 @@ export async function POST(request: NextRequest) {
       }
 
       const payer_donations = Number(payer_details[0].donations) + Number(body.amount);
-      const donors = buildDonors("Unknown");
+  
+        const donors = buildDonors("Unknown");
       await updateCampaign(donors);
+ 
+  let donationProps;
+  let transactionProps;
+
+  if(body.center_id){
+     donationProps =   [body.center_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id , "center"]
+     transactionProps =    [body.transaction_id,body.center_id, body.amount, payer_details[0].id , "center"]
+  }else{
+     donationProps =   [campaign[0].user_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id , "normal"]
+     transactionProps =   [body.transaction_id, campaign[0].user_id, body.amount, payer_details[0].id , "normal"]
+  }
 
       await db.query(
         "UPDATE users SET donations = ? WHERE id = ?",
         [payer_donations, payer_details[0].id]
       );
       await db.query(
-        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , user_id_from) VALUES (?, ?, ?, ? , ?)",
-        [campaign[0].center_id || campaign[0].user_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id]
+        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , user_id_from , _to) VALUES (?, ?, ?, ? , ? , ?)",
+         donationProps
       );
       await db.query(
-        "INSERT INTO transactions (refrence, owner_id, ammount, payer_id) VALUES (?, ?, ?, ?)",
-        [body.transaction_id, campaign[0].user_id, body.amount, payer_details[0].id]
+        "INSERT INTO transactions (refrence, owner_id, ammount, payer_id , paid_to) VALUES (?, ?, ?, ? , ?)",
+       transactionProps
       );
 
 
@@ -164,20 +248,33 @@ export async function POST(request: NextRequest) {
       }
 
       const payer_donations = Number(payer_details[0].donations) + Number(body.amount);
-      const donors = buildDonors(payer_details[0].full_name);
+
+        const donors = buildDonors(payer_details[0].full_name);
       await updateCampaign(donors);
+ 
+
+  let donationProps;
+  let transactionProps;
+
+  if(body.center_id){
+     donationProps =   [body.center_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id , "center"]
+     transactionProps =    [body.transaction_id,body.center_id, body.amount, payer_details[0].id , "center"]
+  }else{
+     donationProps =   [campaign[0].user_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id , "normal"]
+     transactionProps =   [body.transaction_id, campaign[0].user_id, body.amount, payer_details[0].id , "normal"]
+  }
 
       await db.query(
         "UPDATE users SET donations = ? WHERE id = ?",
         [payer_donations, payer_details[0].id]
       );
       await db.query(
-        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , user_id_from) VALUES (?, ?, ?, ? , ?)",
-        [campaign[0].center_id || campaign[0].user_id, body.amount, payer_details[0].full_name, body.transaction_id , payer_details[0].id]
+        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , user_id_from , _to) VALUES (?, ?, ?, ? , ?,?)",
+        donationProps
       );
       await db.query(
-        "INSERT INTO transactions (refrence, owner_id, ammount, payer_id) VALUES (?, ?, ?, ?)",
-        [body.transaction_id, campaign[0].user_id, body.amount, payer_details[0].id]
+        "INSERT INTO transactions (refrence, owner_id, ammount, payer_id , paid_to) VALUES (?, ?, ?, ? , ?)",
+       transactionProps
       );
 
       return NextResponse.json(
@@ -188,16 +285,28 @@ export async function POST(request: NextRequest) {
 
 
     if (!body.isAuthed && !body.isBlind) {
-      const donors = buildDonors(body.donor_name as string);
+  
+        const donors = buildDonors(body.donor_name as string);
       await updateCampaign(donors);
+ 
 
+  let donationProps;
+  let transactionProps;
+
+  if(body.center_id){
+     donationProps =      [body.center_id, body.amount, body.donor_name, body.transaction_id , "center"]
+     transactionProps =      [body.transaction_id, body.center_id, body.amount , "center"]
+  }else{
+     donationProps =     [campaign[0].user_id, body.amount, body.donor_name, body.transaction_id , "normal"]
+     transactionProps =    [body.transaction_id, campaign[0].user_id, body.amount , "normal"]
+  }
       await db.query(
-        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id) VALUES (?, ?, ?, ?)",
-        [campaign[0].user_id, body.amount, body.donor_name, body.transaction_id]
+        "INSERT INTO donations (to_user_or_centerId, ammount, name, transaction_id , _to) VALUES (?, ?, ?, ? , ?)",
+       donationProps
       );
       await db.query(
-        "INSERT INTO transactions (refrence, owner_id, ammount) VALUES (?, ?, ?)",
-        [body.transaction_id, campaign[0].user_id, body.amount]
+        "INSERT INTO transactions (refrence, owner_id, ammount  , paid_to) VALUES (?, ?, ? , ?)",
+  transactionProps  
       );
 
       return NextResponse.json(

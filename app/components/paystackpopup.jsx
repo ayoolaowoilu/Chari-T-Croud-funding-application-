@@ -15,7 +15,7 @@ export default function PaystackPopup({
   onCancel,
   metadata,
   homeUrl = '/',
-  causesUrl = '/causes/get',id,isAuthed,name,isBlind,owner_id,donor_name,message
+  causesUrl = '/causes/get',id,isAuthed,name,isBlind,owner_id,donor_name,message,center_id
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -66,7 +66,7 @@ export default function PaystackPopup({
                         amount:amount,
                         transaction_id:trx.reference,
                         donor_name:donor_name,
-                        message:message
+                        message:message,center_id:center_id
               }
                 const resp = await updateDonate(payload)
                 if(resp.error){

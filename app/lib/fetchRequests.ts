@@ -236,9 +236,9 @@ const DeleteCause = async(id:number) =>{
                           }
                      }
 
-                      const GetUserDetailsDyId = async (id:number) => {
+                      const GetUserDetailsDyId = async (id:number , isCenter:boolean) => {
   try{
-       const resp = await fetch(`${API_URL}/api/getuserdetailsbyid?id=${id}`)
+       const resp = await fetch(`${API_URL}/api/getuserdetailsbyid?id=${id}&is_center=${isCenter}`)
     
     const data = await resp.json()
 
@@ -261,7 +261,7 @@ const DeleteCause = async(id:number) =>{
         transaction_id:string,
         donor_name?:string,
         message?:string
-
+       center_id?:any
                            
   }
   const updateDonate = async(data:uDonate) => {

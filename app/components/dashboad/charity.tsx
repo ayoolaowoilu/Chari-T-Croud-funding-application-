@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Button from "../ui/button"
 import { redirect } from "next/navigation"
+import { formatAmount } from "@/app/(dashboard)/causes/cause/page"
 
 
 interface Center {
@@ -279,12 +280,12 @@ export default function CharityProp() {
                                 Total Received
                             </span>
                             <span className="text-lg font-bold text-gray-900">
-                               ₦{center.recived}
+                               ₦{formatAmount(Number(center.recived))}
                             </span>
                         </div>
                     </div>
 
-                    <div className="mt-4 flex items-center gap-2">
+                    <div className="mt-4 flex items-center gap-4">
                         <Button
                             variant={isVerified ? "primary" : "secondary"}
                             size="sm"
@@ -293,7 +294,7 @@ export default function CharityProp() {
                             onClick={() => isVerified && redirect(`/dashboard/centers/campaign?id=${center.id}`)}
                         />
                         <Button
-                            variant="secondary"
+                            variant="outline"
                             size="sm"
                             details="Public Profile"
                             onClick={() => redirect(`/dashboard/centers/profile?id=${center.id}`)}

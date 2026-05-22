@@ -13,6 +13,9 @@ import Footer from '@/app/components/layout/footer'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import Button from '@/app/components/ui/button'
 import { redirect } from 'next/navigation'
+import { formatAmount } from '@/app/(dashboard)/causes/cause/page'
+import { number } from 'framer-motion'
+import { formatNumber } from '@/app/components/layout/card'
 
 interface FormData {
   name: string
@@ -604,7 +607,7 @@ export default function CenterRegistration() {
                           <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Donors</div>
                         </div>
                         <div className="bg-slate-50 rounded-lg p-2.5 text-center">
-                          <div className="text-lg font-bold text-slate-900">₦{item.recived || '0'}</div>
+                          <div className="text-lg font-bold text-slate-900">₦{formatAmount(Number(item.recived))}</div>
                           <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Received</div>
                         </div>
                       </div>
@@ -758,7 +761,7 @@ export default function CenterRegistration() {
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mt-0.5">Total Donors</div>
               </div>
               <div className="p-4 text-center">
-                <div className="text-2xl font-bold text-slate-900">₦{item.recived || '0'}</div>
+                <div className="text-2xl font-bold text-slate-900">₦{formatAmount(Number(item.recived))}</div>
                 <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mt-0.5">Total Received</div>
               </div>
             </div>
@@ -934,7 +937,7 @@ export default function CenterRegistration() {
 
               <div className="px-8 py-6 border-b border-gray-100">
                 <h1 className="text-2xl font-semibold text-gray-900">{isEdit ? "Manage" : "Register"} Charity Center</h1>
-                <p className="mt-1 text-sm text-gray-500">Complete the form below to register your organization</p>
+                <p className="mt-1 text-sm text-gray-500">Complete the form below to {isEdit ? "edit" : "register"} your organization</p>
               </div>
 
               <form onSubmit={handleSubmit} className="px-8 py-6 space-y-8">
@@ -1368,7 +1371,7 @@ export default function CenterRegistration() {
     )
   }
 
-  // STAGE 4: Success
+  
   else {
     return <>
       <NavBar />

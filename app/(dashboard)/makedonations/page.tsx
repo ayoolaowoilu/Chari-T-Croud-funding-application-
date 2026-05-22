@@ -6,11 +6,12 @@ import NavBar from '@/app/components/layout/NavBar';
 import { useSearchParams } from 'next/navigation';
 
 import { useSession } from 'next-auth/react';
-import { fetchOneCauseById } from '@/app/lib/fetchRequests';
+import { fetchOneCauseById, GetUserDetailsDyId } from '@/app/lib/fetchRequests';
 import { DualRingSpinner } from '@/app/components/ui/loading';
 import { Campaign } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import PaystackPopup from '@/app/components/paystackpopup';
+import Explain from '@/app/components/layout/explain';
 
 
 
@@ -18,6 +19,7 @@ export default function Page(){
     const searchParams = useSearchParams()
 
     const [campaign,setCampaign] = useState<Campaign | null>(); 
+      const [centerCache, setCenterCache] = useState<Record<number, { full_name: string; image: string }>>({});
 
     const donationId = searchParams.get("id") as string
      const name = campaign?.name
@@ -46,7 +48,29 @@ export default function Page(){
     useEffect(()=>{
        fetchData()
     },[])
+
+      useEffect(() => {
+    if (campaign?.center_id && !centerCache[Number(campaign.center_id)]) {
+      const getCenter = async () => {
+        try {
+          const resp = await GetUserDetailsDyId(Number(campaign.center_id) , true);
+         
+          if (resp.error) {
+            console.error("Failed to fetch center:", resp.error);
+            return;
+          }
+          setCenterCache(prev => ({ ...prev, [campaign.center_id!]: resp }));
+        } catch (err) {
+          console.error("Error fetching center:", err);
+        }
+      };
+      getCenter();
+    }
+  }, [campaign?.center_id, centerCache]);
   
+  const centerData = centerCache[Number(campaign?.center_id)]
+  console.log(centerData , centerCache)
+
   const presetAmounts = useMemo(()=>{
      if(currency === "NG"){
     return  ['1000', '5000', '10000', '250000', '500000']  }else {
@@ -71,8 +95,10 @@ export default function Page(){
     },[amount , customAmount])
   
       if((Number(amount) > remaining) || (Number(customAmount) > remaining) ){
-           setAmount(String(remaining))
-           setCustomAmount(String(remaining))     
+         if(!campaign?.center_id){
+              setAmount(String(remaining))
+           setCustomAmount(String(remaining)) 
+         }    
     }
 
   const handleAmountSelect = (val: string) => {
@@ -124,7 +150,7 @@ export default function Page(){
   }else{
         return (
   <>
-      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4 md:p-8 mt-14">
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4 md:p-8 mt-13">
       <NavBar />
   
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -168,15 +194,41 @@ export default function Page(){
           <div className="mb-8">
 
 
-           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mb-4">
+           {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mb-4">
               <Heart className="w-3 h-3 fill-current" />
               <span>{campaign.category}</span>
-            </div>  
+            </div>   */}
 
 
             <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-3 text-gray-900">
               {name} <span className="text-blue-600 font-normal">Mission</span>
             </h1>
+          {campaign.center_id &&   <div className="font-semibold text-gray-900 text-sm inline-flex items-center">
+
+                 <div className="rounded-full border border-gray-200 w-6 h-6 overflow-hidden mr-2 inline-flex items-center justify-center shrink-0">
+                        <img src={centerData?.image} alt={centerData?.full_name} className="w-6 h-6 rounded-full object-cover" />
+                      </div>
+
+                  <Explain
+                        topic={centerData?.full_name}
+                        details="This is a charity center profile"
+                        link={`/dashboard/centers/profile?id=${campaign?.center_id}`}
+                        link_details={"View profile"}
+                      />
+
+                       <span 
+                        className=" ml-2 inline-flex items-center transition-transform duration-300 hover:scale-110" 
+                        title="Verified Charity"
+                    >
+                        <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                        </svg>
+                    </span>
+
+            </div>}
+
+
+
             <p className="text-gray-600 text-sm leading-relaxed">
               Join thousands of supporters making a difference. Every contribution brings us closer to our goal.
             </p>
@@ -316,8 +368,8 @@ export default function Page(){
       email={session?.user.email || formData.email}
       publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
       subaccount={campaign.bank_details.subAccountCode}
-      onSuccess={()=>{console.log("succecc popup opned")}}
-      onCancel={()=>{console.log("popup cancled")}}
+      onSuccess={()=>{console.log("success popup opened")}}
+      onCancel={()=>{console.log("popup canceled")}}
       amount={amount == "custom" ? Number(customAmount) : Number(amount) }
       metadata={{
     custom_fields: [{
@@ -335,6 +387,7 @@ export default function Page(){
   owner_id={campaign.user_id}
   donor_name={formData.name}
   message={formData.message}
+  center_id={campaign.center_id ? campaign.center_id : null}
   
       />
 

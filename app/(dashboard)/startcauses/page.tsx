@@ -542,9 +542,9 @@ export default function StartCausePage() {
       const resp = await uploadCause(uploadPayload)
 
          const causeId = JSON.parse(resp).id
-         console.log(causeId , resp)
+       
   setLink(`${window.location.origin}/causes/cause?id=${causeId}`)
-  console.log(causeId , resp)
+
 
       if (draftId) {
         await remove(draftId)
