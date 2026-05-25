@@ -25,7 +25,7 @@ npm install
 ### Enviroment variables
 
 ### .env(ill drop the testKeys if ur intrested)
-```
+```bash
 
 GOOGLE_CLIENT_ID = ""
 GOOGLE_CLIENT_SECRET = ""
