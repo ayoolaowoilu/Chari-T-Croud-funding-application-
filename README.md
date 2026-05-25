@@ -44,7 +44,7 @@ PAYSTACK_APP_URL ="https://api.paystack.co"
 
 ```
 ### .env.local
-```
+```bash
 NEXTAUTH_URL = http://localhost:3000
 NEXTAUTH_SECRET = "jijsijijejijje jijjfjjjefeeff"
  ```
@@ -52,7 +52,7 @@ NEXTAUTH_SECRET = "jijsijijejijje jijjfjjjefeeff"
 
 ### Database Setup
 Run the following SQL to create the required tables(MySql):
-```
+```bash
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(150),
@@ -164,5 +164,7 @@ CREATE TABLE reports (
 );
 ```
 ### Running 
- ``` npm run dev ```
+ ```bash
+ npm run dev
+```
 
