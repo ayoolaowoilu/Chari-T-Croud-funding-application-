@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { redirect, useSearchParams } from "next/navigation"
 import { GetCenter } from "@/app/lib/fetchRequests"
 import NavBar from "@/app/components/layout/NavBar"
 import Footer from "@/app/components/layout/footer"
@@ -15,7 +15,8 @@ interface Campaign {
     main_img: string | null
     center_name: string
     center_logo: string | null
-    category:string
+    category: string
+    raised: number
 }
 
 interface CenterProfile {
@@ -33,7 +34,7 @@ interface CenterProfile {
     total_donators: number
     total_campaigns: number
     campaigns?: Campaign[]
-    bank_details:any
+    bank_details: any
 }
 
 export default function CenterProfilePage() {
@@ -48,7 +49,6 @@ export default function CenterProfilePage() {
     // Welcome popup state
     const [showWelcome, setShowWelcome] = useState(false)
     const [latestCampaign, setLatestCampaign] = useState<Campaign | null>(null)
-    
 
     // Donation popup state
     const [showDonateModal, setShowDonateModal] = useState(false)
@@ -60,41 +60,34 @@ export default function CenterProfilePage() {
     const [aboutExpanded, setAboutExpanded] = useState(false)
     const ABOUT_INITIAL_HEIGHT = 120
 
-
     const campaigns = center?.campaigns || []
     const hasMoreAbout = center?.about && center.about.length > 200
 
     const [donorEmail, setDonorEmail] = useState("")
-const [donorName, setDonorName] = useState("")
-const [isBlind, setIsBlind] = useState(false)
+    const [donorName, setDonorName] = useState("")
+    const [isBlind, setIsBlind] = useState(false)
 
-const {data:session , status} = useSession();
+    const { data: session, status } = useSession()
 
+    const scroll = (direction: any) => {
+        if (!scrollContainerRef.current) return
+        const scrollAmount = direction === 'left' ? -320 : 320
+        scrollContainerRef.current.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth',
+        })
+    }
 
-
-
-  const scroll = (direction:any) => {
-    if (!scrollContainerRef.current) return;
-    const scrollAmount = direction === 'left' ? -300 : 300;
-    scrollContainerRef.current.scrollBy({
-      left: scrollAmount,
-      behavior: 'smooth',
-    });
-  };
     const scrollContainerRef = useRef<HTMLDivElement>(null)
-const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
-
+    const [showLeftArrow, setShowLeftArrow] = useState(false)
+    const [showRightArrow, setShowRightArrow] = useState(false)
 
     const updateArrowsVisibility = () => {
-    if (!scrollContainerRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-    setShowLeftArrow(scrollLeft > 10);
-    setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10);
-  };
-
-
- 
+        if (!scrollContainerRef.current) return
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+        setShowLeftArrow(scrollLeft > 10)
+        setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10)
+    }
 
     const fetchCenter = async () => {
         if (!centerId) return
@@ -131,30 +124,23 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
         fetchCenter()
     }, [centerId])
 
+    useEffect(() => {
+        const container = scrollContainerRef.current
+        if (!container) return
 
-     useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+        updateArrowsVisibility()
+        container.addEventListener('scroll', updateArrowsVisibility)
+        window.addEventListener('resize', updateArrowsVisibility)
 
-    // Initial check
-    updateArrowsVisibility();
+        const resizeObserver = new ResizeObserver(() => updateArrowsVisibility())
+        resizeObserver.observe(container)
 
-    // Listen to scroll events
-    container.addEventListener('scroll', updateArrowsVisibility);
-    window.addEventListener('resize', updateArrowsVisibility);
-
-    // Re-check when campaigns change (images load, etc.)
-    const resizeObserver = new ResizeObserver(() => updateArrowsVisibility());
-    resizeObserver.observe(container);
-
-    return () => {
-      container.removeEventListener('scroll', updateArrowsVisibility);
-      window.removeEventListener('resize', updateArrowsVisibility);
-      resizeObserver.disconnect();
-    };
-  }, [campaigns])
-
-
+        return () => {
+            container.removeEventListener('scroll', updateArrowsVisibility)
+            window.removeEventListener('resize', updateArrowsVisibility)
+            resizeObserver.disconnect()
+        }
+    }, [campaigns])
 
     const handleDonateClick = (campaign?: Campaign) => {
         setSelectedCampaign(campaign || null)
@@ -187,8 +173,6 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                 </span>
             )
         }
-
-         
 
         if (status?.toLowerCase() === "pending") {
             return (
@@ -226,6 +210,16 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
     const randomBanner = center
         ? `https://picsum.photos/seed/${center.name}-banner/1584/396`
         : ""
+
+    // Format currency
+    const formatNaira = (amount: number) => {
+        return new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(amount).replace('NGN', '₦')
+    }
 
     if (loading) {
         return (
@@ -290,8 +284,6 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
         )
     }
 
-
-
     return (
         <div className="min-h-screen bg-[#f3f2ef] relative">
             <NavBar />
@@ -300,11 +292,10 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
             {showWelcome && latestCampaign && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm">
                     <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 sm:max-w-md">
-                        {/* Campaign Image */}
                         <div className="relative h-40 bg-gray-100 sm:h-48">
                             {getImageUrl(latestCampaign.main_img) ? (
-                                <img 
-                                    src={getImageUrl(latestCampaign.main_img)!} 
+                                <img
+                                    src={getImageUrl(latestCampaign.main_img)!}
                                     alt={latestCampaign.name}
                                     className="h-full w-full object-cover"
                                 />
@@ -315,7 +306,7 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                                     </svg>
                                 </div>
                             )}
-                            <button 
+                            <button
                                 onClick={() => setShowWelcome(false)}
                                 className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors sm:top-3 sm:right-3 sm:h-8 sm:w-8"
                             >
@@ -325,9 +316,7 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                             </button>
                         </div>
 
-                        {/* Content */}
                         <div className="p-4 sm:p-6">
-                            {/* Center Profile Mini */}
                             <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100 sm:mb-4 sm:pb-4">
                                 <div className="h-9 w-9 rounded-full overflow-hidden bg-gray-100 ring-2 ring-white shadow-sm sm:h-10 sm:w-10">
                                     {center.logourl ? (
@@ -355,7 +344,7 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                                 <button
                                     onClick={() => {
                                         setShowWelcome(false)
-                                        handleDonateClick(latestCampaign)
+                                        redirect(`/causes/cause?id=${latestCampaign.id}`)
                                     }}
                                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0a66c2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#004182] hover:shadow-md active:scale-95 sm:px-5 sm:gap-2"
                                 >
@@ -377,156 +366,152 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
             )}
 
             {/* Donation Modal */}
-         {showDonateModal && (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-sm bg-white rounded-t-2xl shadow-2xl p-5 animate-in slide-in-from-bottom duration-200 sm:rounded-2xl sm:p-6">
-            <button 
-                onClick={() => {
-                    setShowDonateModal(false)
-                    setDonationAmount("")
-                    setDonorEmail("")
-                    setDonorName("")
-                    setIsBlind(false)
-                }}
-                className="absolute top-3 right-3 h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors sm:top-4 sm:right-4"
-            >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-
-            <div className="text-center mb-5 sm:mb-6">
-                <div className="mx-auto h-11 w-11 rounded-full bg-[#0a66c2]/10 flex items-center justify-center mb-3 sm:h-12 sm:w-12">
-                    <svg className="h-5 w-5 text-[#0a66c2] sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                </div>
-                <h3 className="text-base font-bold text-gray-900 sm:text-lg">
-                    {selectedCampaign ? `Donate to ${selectedCampaign.name}` : `Donate to ${center.name}`}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1 sm:text-sm">Your contribution makes a difference</p>
-            </div>
-
-            <div className="space-y-4">
-                {/* Amount */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Amount (₦)</label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-base sm:text-lg">₦</span>
-                        <input
-                            type="number"
-                            value={donationAmount}
-                            onChange={(e) => setDonationAmount(e.target.value)}
-                            placeholder="0.00"
-                            className="w-full rounded-xl border border-gray-300 pl-8 pr-4 py-3 text-lg font-semibold text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all sm:pl-9 sm:text-xl"
-                            min="100"
-                            step="100"
-                        />
-                    </div>
-                </div>
-
-                {/* Quick amounts */}
-                <div className="grid grid-cols-3 gap-2">
-                    {["1000", "5000", "10000", "20000", "50000", "100000"].map((amount) => (
+            {showDonateModal && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="relative w-full max-w-sm bg-white rounded-t-2xl shadow-2xl p-5 animate-in slide-in-from-bottom duration-200 sm:rounded-2xl sm:p-6">
                         <button
-                            key={amount}
-                            onClick={() => setDonationAmount(amount)}
-                            className={`rounded-lg py-2.5 text-xs font-medium transition-all duration-200 sm:text-sm ${
-                                donationAmount === amount 
-                                    ? "bg-[#0a66c2] text-white shadow-md" 
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
+                            onClick={() => {
+                                setShowDonateModal(false)
+                                setDonationAmount("")
+                                setDonorEmail("")
+                                setDonorName("")
+                                setIsBlind(false)
+                            }}
+                            className="absolute top-3 right-3 h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors sm:top-4 sm:right-4"
                         >
-                            ₦{Number(amount).toLocaleString()}
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
-                    ))}
-                </div>
-                
-   {status == "unauthenticated" &&
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        value={donorEmail}
-                        onChange={(e) => setDonorEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all"
-                        required
-                    />
-                </div>}
 
-                {/* Blind donation toggle */}
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                    <div className="flex items-center gap-2">
-                        <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                        </svg>
-                        <span className="text-sm font-medium text-gray-700">Blind donation</span>
+                        <div className="text-center mb-5 sm:mb-6">
+                            <div className="mx-auto h-11 w-11 rounded-full bg-[#0a66c2]/10 flex items-center justify-center mb-3 sm:h-12 sm:w-12">
+                                <svg className="h-5 w-5 text-[#0a66c2] sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-base font-bold text-gray-900 sm:text-lg">
+                                {selectedCampaign ? `Donate to ${selectedCampaign.name}` : `Donate to ${center.name}`}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1 sm:text-sm">Your contribution makes a difference</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Amount (₦)</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-base sm:text-lg">₦</span>
+                                    <input
+                                        type="number"
+                                        value={donationAmount}
+                                        onChange={(e) => setDonationAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full rounded-xl border border-gray-300 pl-8 pr-4 py-3 text-lg font-semibold text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all sm:pl-9 sm:text-xl"
+                                        min="100"
+                                        step="100"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2">
+                                {["1000", "5000", "10000", "20000", "50000", "100000"].map((amount) => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => setDonationAmount(amount)}
+                                        className={`rounded-lg py-2.5 text-xs font-medium transition-all duration-200 sm:text-sm ${
+                                            donationAmount === amount
+                                                ? "bg-[#0a66c2] text-white shadow-md"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        }`}
+                                    >
+                                        ₦{Number(amount).toLocaleString()}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {status == "unauthenticated" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        Email <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={donorEmail}
+                                        onChange={(e) => setDonorEmail(e.target.value)}
+                                        placeholder="your@email.com"
+                                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                                <div className="flex items-center gap-2">
+                                    <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700">Blind donation</span>
+                                </div>
+                                <button
+                                    onClick={() => setIsBlind(!isBlind)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                                        isBlind ? "bg-[#0a66c2]" : "bg-gray-300"
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                                            isBlind ? "translate-x-6" : "translate-x-1"
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
+                            {!isBlind && status == "unauthenticated" && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        Your Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={donorName}
+                                        onChange={(e) => setDonorName(e.target.value)}
+                                        placeholder="John Doe"
+                                        className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all"
+                                        required={!isBlind}
+                                    />
+                                    <p className="mt-1 text-xs text-gray-400">This will be shown publicly on the donation list</p>
+                                </div>
+                            )}
+
+                            <PaystackPopup
+                                email={session?.user.email || donorEmail}
+                                publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
+                                subaccount={center.bank_details.subAccountCode}
+                                onSuccess={() => { console.log("success popup opened") }}
+                                onCancel={() => { console.log("popup cancelled") }}
+                                amount={donationAmount}
+                                metadata={{
+                                    custom_fields: [{
+                                        display_name: 'Order ID',
+                                        variable_name: 'order_id',
+                                        value: '12345'
+                                    }]
+                                }}
+                                name={isBlind ? null : status == "authenticated" ? session.user.name : donorName}
+                                isBlind={isBlind}
+                                isAuthed={status == "authenticated"}
+                                homeUrl='/causes/get'
+                                causesUrl='/causes/get'
+                                center_id={centerId}
+                                donor_name={isBlind ? null : status == "authenticated" ? session.user.name : donorName}
+                                id={null}
+                                owner_id={null}
+                                message={null}
+                            />
+                        </div>
                     </div>
-                    <button
-                        onClick={() => setIsBlind(!isBlind)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-                            isBlind ? "bg-[#0a66c2]" : "bg-gray-300"
-                        }`}
-                    >
-                        <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                                isBlind ? "translate-x-6" : "translate-x-1"
-                            }`}
-                        />
-                    </button>
                 </div>
-
-             
-                {!isBlind && status == "unauthenticated" && (
-                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Your Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={donorName}
-                            onChange={(e) => setDonorName(e.target.value)}
-                            placeholder="John Doe"
-                            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 outline-none transition-all"
-                            required={!isBlind}
-                        />
-                        <p className="mt-1 text-xs text-gray-400">This will be shown publicly on the donation list</p>
-                    </div>
-                )}
-
-           <PaystackPopup 
-               email={session?.user.email || donorEmail}
-               publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
-               subaccount={center.bank_details.subAccountCode}
-               onSuccess={()=>{console.log("succecc popup opned")}}
-               onCancel={()=>{console.log("popup cancled")}}
-               amount={ donationAmount}
-               metadata={{
-             custom_fields: [{
-               display_name: 'Order ID',
-               variable_name: 'order_id',
-               value: '12345'
-             }]
-           }}
-           name={isBlind ? null : status == "authenticated" ? session.user.name : donorName}
-           isBlind={isBlind}
-           isAuthed={status == "authenticated"}
-           homeUrl='/causes/get'
-           causesUrl='/causes/get'
-        
-        center_id={centerId}
-           donor_name={isBlind ? null : status == "authenticated" ? session.user.name : donorName}
-           id={null}
-           owner_id={null}
-           message={null}       
-               />
-            </div>
-        </div>
-    </div>
-)}
+            )}
 
             <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6">
                 {/* Main Card */}
@@ -548,7 +533,6 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                     <div className="relative px-3 pb-5 sm:px-6 sm:pb-6">
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
                             <div className="flex flex-col sm:flex-row sm:items-end sm:gap-5">
-                                {/* Avatar */}
                                 <div className="-mt-10 sm:-mt-16">
                                     <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-white bg-white shadow-sm transition-transform duration-300 hover:scale-105 sm:h-24 sm:w-24 md:h-32 md:w-32">
                                         {center.logourl ? (
@@ -578,7 +562,6 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                                 </div>
                             </div>
 
-                            {/* Action Buttons */}
                             <div className="mt-3 flex gap-2 sm:mt-0 sm:gap-3">
                                 <button
                                     onClick={() => handleDonateClick()}
@@ -611,7 +594,7 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                         <div className="bg-white p-3 shadow-sm rounded-xl sm:rounded-xl sm:p-4 transition-all duration-300 hover:shadow-md">
                             <h2 className="text-base font-semibold text-gray-900 sm:text-lg">About</h2>
                             <div className="relative">
-                                <div 
+                                <div
                                     className="mt-2 text-sm leading-6 text-gray-600 whitespace-pre-wrap overflow-hidden transition-all duration-500 sm:mt-3"
                                     style={{ maxHeight: aboutExpanded ? "none" : ABOUT_INITIAL_HEIGHT }}
                                 >
@@ -645,103 +628,120 @@ const [showLeftArrow, setShowLeftArrow] = useState(false);
                             )}
                         </div>
 
-                        {/* Campaigns Horizontal Scroll */}
-                     <div className="bg-white md:w-full w-100 mx-auto p-3 shadow-sm rounded-xl sm:rounded-xl sm:p-4 transition-all duration-300 hover:shadow-md">
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Campaigns</h2>
-        <span className="text-xs text-gray-500">{campaigns.length} active</span>
-      </div>
+                        {/* Campaigns Horizontal Scroll - SMOOTH DESIGN */}
+                        <div className="bg-white md:w-full w-100 mx-auto p-3 shadow-sm rounded-xl sm:rounded-xl sm:p-4 transition-all duration-300 hover:shadow-md">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4">
+                                <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Campaigns</h2>
+                                <span className="text-xs text-gray-500">{campaigns.length} active</span>
+                            </div>
 
-      {campaigns.length > 0 ? (
-        <div className="relative group w-90 md:w-full">
-          {/* Horizontal scroll container */}
-          <div
-            ref={scrollContainerRef}
-            className="flex  gap-3 overflow-x-auto pb-3 -mx-3 px-3 sm:-mx-4 sm:px-4 sm:gap-4 snap-x snap-mandatory scrollbar-hide"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="flex-none w-65 snap-start bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 sm:w-72"
-              >
-                {/* Fixed height image container */}
-                <div className="relative h-36 bg-gray-100 overflow-hidden sm:h-40">
-                  {getImageUrl(campaign.main_img) ? (
-                    <img
-                      src={getImageUrl(campaign.main_img)}
-                      alt={campaign.name}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-110"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-200">
-                      <svg className="h-8 w-8 text-gray-400 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12a2.25 2.25 0 002.25 2.25zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium sm:text-xs ${
-                       'bg-gray-100 text-gray-700'
-                    }`}>
-                      {campaign.category}
-                    </span>
-                  </div>
-                </div>
+                            {campaigns.length > 0 ? (
+                                <div className="relative group w-90 md:w-full">
+                                    <div
+                                        ref={scrollContainerRef}
+                                        className="flex gap-3 overflow-x-auto pb-3 -mx-3 px-3 sm:-mx-4 sm:px-4 sm:gap-4 snap-x snap-mandatory scrollbar-hide"
+                                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                                    >
+                                        {campaigns.map((campaign) => (
+                                            <div
+                                                key={campaign.id}
+                                                className="flex-none w-[280px] snap-start bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 ease-out sm:w-[300px]"
+                                            >
+                                                {/* Image with overlay gradient */}
+                                                <div className="relative h-40 bg-gray-100 overflow-hidden sm:h-44">
+                                                    {getImageUrl(campaign.main_img) ? (
+                                                        <img
+                                                            src={getImageUrl(campaign.main_img)}
+                                                            alt={campaign.name}
+                                                            className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                                                            <svg className="h-8 w-8 text-gray-300 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12a2.25 2.25 0 002.25 2.25zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                    {/* Subtle bottom gradient */}
+                                                    <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-black/20 to-transparent" />
 
-                {/* Fixed height content area */}
-                <div className="p-3 flex flex-col h-45 sm:p-4 sm:h-47.5">
-                  <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">{campaign.name}</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-3 leading-relaxed flex-1 sm:line-clamp-2">
-                    {campaign.details}
-                  </p>
+                                                    {/* Category badge - floating */}
+                                                    <div className="absolute top-3 left-3">
+                                                        <span className="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-semibold bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm sm:text-xs">
+                                                            {campaign.category}
+                                                        </span>
+                                                    </div>
+                                                </div>
 
-                  <button
-                    onClick={() => handleDonateClick(campaign)}
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0a66c2] px-4 py-2 text-xs font-semibold text-white transition-all duration-200 hover:bg-[#004182] active:scale-95 sm:gap-2 sm:text-sm"
-                  >
-                    <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                    Donate Now
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                                                {/* Content */}
+                                                <div className="p-4 sm:p-5">
+                                                    <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-1 leading-tight">{campaign.name}</h3>
+                                                    <p className="text-xs text-gray-500 mb-4 line-clamp-2 leading-relaxed">
+                                                        {campaign.details}
+                                                    </p>
 
-          {/* Left scroll button - only shows when scrollable left */}
-          {showLeftArrow && (
-            <button
-              onClick={() => scroll('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#0a66c2] z-10"
-              aria-label="Scroll left"
-            >
-              <svg className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-          )}
+                                                    {/* Raised amount - prominent */}
+                                                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-50">
+                                                        <div>
+                                                            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Raised</p>
+                                                            <p className="text-base font-bold text-[#0a66c2] sm:text-lg">
+                                                                {formatNaira(campaign.raised || 0)}
+                                                            </p>
+                                                        </div>
+                                                        <div className="h-8 w-8 rounded-full bg-[#0a66c2]/10 flex items-center justify-center">
+                                                            <svg className="h-4 w-4 text-[#0a66c2]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
 
-          {/* Right scroll button - only shows when scrollable right */}
-          {showRightArrow && (
-            <button
-              onClick={() => scroll('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#0a66c2] z-10"
-              aria-label="Scroll right"
-            >
-              <svg className="h-4 w-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="text-center py-6 text-gray-500 text-sm sm:py-8">
-          No active campaigns at the moment.
-        </div>
-      )}
-    </div>
+                                                    {/* Donate button - full width, smooth */}
+                                                    <button
+                                                        onClick={() => redirect(`/causes/cause?id=${campaign.id}`)}
+                                                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#0a66c2] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#004182] hover:shadow-lg hover:shadow-[#0a66c2]/20 active:scale-[0.98] sm:text-sm"
+                                                    >
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                                        </svg>
+                                                        Donate Now
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Left scroll button */}
+                                    {showLeftArrow && (
+                                        <button
+                                            onClick={() => scroll('left')}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-100 flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 hover:shadow-xl focus:outline-none z-10"
+                                            aria-label="Scroll left"
+                                        >
+                                            <svg className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                    )}
+
+                                    {/* Right scroll button */}
+                                    {showRightArrow && (
+                                        <button
+                                            onClick={() => scroll('right')}
+                                            className="absolute right-0 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-100 flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 hover:shadow-xl focus:outline-none z-10"
+                                            aria-label="Scroll right"
+                                        >
+                                            <svg className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-6 text-gray-500 text-sm sm:py-8">
+                                    No active campaigns at the moment.
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Right Sidebar */}

@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get("email");
   const pageParam = request.nextUrl.searchParams.get("page");
   const type = request.nextUrl.searchParams.get("type");
+  const limit = Number(request.nextUrl.searchParams.get("limit")) || 10;
 
   // Validation
   if (!email) {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Type must be 'gotten' or 'given'" }, { status: 400 });
   }
 
-  const limit = 10; 
+  
   const offset = (page - 1) * limit;
 
   try {
