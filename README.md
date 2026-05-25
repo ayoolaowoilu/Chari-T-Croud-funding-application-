@@ -4,7 +4,7 @@ Chari-T is a purpose-built digital platform designed to bridge the gap between c
 
 ## Tech Stack
 
-- **Frontend:** Next.js, React
+- **Frontend:** Next.js, React , cloudinary
 - **Database:** MySQL , redis ,Serverless 
 
 ## Getting Started
@@ -22,9 +22,11 @@ cd Chari-T-Croud-funding-application-
 npm install
 ```
 
-###Enviroment variables
+### Enviroment variables
+
+### .env(ill drop the testKeys if ur intrested)
 ```
-###.env(ill drop the testKeys if ur intrested)
+
 GOOGLE_CLIENT_ID = ""
 GOOGLE_CLIENT_SECRET = ""
 DB_HOST = localhost
@@ -40,15 +42,16 @@ NEXT_PUBLIC_PAYSTACK_SECRET_KEY = "sk_test_df293748288b83367301d9b9f68a3fd7582a0
 NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY = "pk_test_a3556b84fe1c7b8fab91df5491aff03c0c9ac2e0"
 PAYSTACK_APP_URL ="https://api.paystack.co"
 
-###.env.local
+```
+### .env.local
+```
 NEXTAUTH_URL = http://localhost:3000
 NEXTAUTH_SECRET = "jijsijijejijje jijjfjjjefeeff"
+ ```
 
-```
 
-
-###Database Setup
-Run the following SQL to create the required tables:
+### Database Setup
+Run the following SQL to create the required tables(MySql):
 ```
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -160,6 +163,6 @@ CREATE TABLE reports (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
-###Running 
-bash ``` npm run dev ```
+### Running 
+ ``` npm run dev ```
 
