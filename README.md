@@ -5,7 +5,7 @@ Chari-T is a purpose-built digital platform designed to bridge the gap between c
 ## Tech Stack
 
 - **Frontend:** Next.js, React , cloudinary
-- **Database:** MySQL , redis ,Serverless 
+- **Database:** MySQL , redis ,Serverless , typescript 
 
 ## Getting Started
 
