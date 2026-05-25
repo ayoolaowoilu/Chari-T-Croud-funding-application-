@@ -2,6 +2,17 @@
 
 Chari-T is a purpose-built digital platform designed to bridge the gap between compassionate individuals and verified charity organizations. At its core, the app serves as a centralized hub where users can discover, engage with, and contribute to meaningful social impact initiatives — all from a single, intuitive interface.
 
+## Features
+
+- User authentication & role management (donor/admin)
+- KYC verification system
+- Campaign creation & management
+- Donation processing
+- Center/organization verification
+- Reporting system
+- Safety ratings for campaigns
+
+
 ## Tech Stack
 
 - **Frontend:** Next.js, React , cloudinary
