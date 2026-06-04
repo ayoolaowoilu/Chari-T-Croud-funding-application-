@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Footer from "@/app/components/layout/footer";
 import NavBar from "@/app/components/layout/NavBar";
 
-// ─── Types ──────────────────────────────────────────────────────────
+
 
 type StyleInfo = {
   name: string;
   desc: string;
 };
 
-// ─── Constants ──────────────────────────────────────────────────────
 
 const STYLE_LABELS: Record<number, StyleInfo> = {
   1: { name: "Magazine Cover", desc: "Bold hero image with editorial layout and story-driven stats" },
@@ -24,7 +23,7 @@ const STYLE_LABELS: Record<number, StyleInfo> = {
 
 const STYLES = [1, 2, 3, 4, 5] as const;
 
-// ─── Helpers ──────────────────────────────────────────────────────────
+
 
 function formatCurrency(amount: string): string {
   const num = parseFloat(amount);
@@ -97,7 +96,7 @@ function FlierCard({
   return (
     <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       {/* Image container */}
-      <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden">
+      <div className="relative aspect-3/4 bg-gray-50 overflow-hidden">
         {!loaded && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
             <div className="flex flex-col items-center gap-3">
@@ -162,10 +161,12 @@ function FlierCard({
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────────────────
 
 export default function Flier() {
   const searchParams = useSearchParams();
+  useEffect(() => {
+      document.title = `Flier Preview - ${searchParams.get("campaign_name") || "Support Our Cause"}`;
+  }, []);
 
   const baseData = useMemo(
     () => ({
@@ -229,9 +230,7 @@ export default function Flier() {
             <span className="px-3 py-1 rounded-full bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Campaign #{baseData.campaign_id}
             </span>
-            <span className="px-3 py-1 rounded-full bg-gray-900 text-xs font-semibold text-white uppercase tracking-wider">
-              Powered by Paystack
-            </span>
+          
             {baseData._type === "center" && baseData.center_name && (
               <span className="px-3 py-1 rounded-full bg-blue-50 text-xs font-semibold text-blue-700 uppercase tracking-wider">
                 {baseData.center_name} ✓

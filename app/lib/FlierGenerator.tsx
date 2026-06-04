@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-// ─── Types ──────────────────────────────────────────────────────────
+
 
 type Flier = {
   _type: "center" | "normal";
@@ -18,15 +18,11 @@ type Flier = {
   center_handle?: string;
 };
 
-// ─── Helpers ────────────────────────────────────────────────────────
+
 
 const formatAmount = (amount: string) => {
-  const num = parseFloat(amount);
-  return new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    maximumFractionDigits: 0,
-  }).format(num);
+
+ return "N" + new Intl.NumberFormat('en-US').format(Number(amount));
 };
 
 const getProgress = (raised: string, goal?: string) => {
@@ -37,7 +33,6 @@ const getProgress = (raised: string, goal?: string) => {
   return Math.min(Math.round((r / g) * 100), 100);
 };
 
-// ─── SHARED COMPONENTS ──────────────────────────────────────────────
 
 const ChariTLogo = ({ size = 40 }: { size?: number }) => (
   <div style={{
@@ -721,7 +716,7 @@ const Style3 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── STYLE 4: STORY STYLE ──────────────────────────────────────────
+
 const Style4 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -868,7 +863,7 @@ const Style4 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── STYLE 5: MINIMAL IMPACT ───────────────────────────────────────
+
 const Style5 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
