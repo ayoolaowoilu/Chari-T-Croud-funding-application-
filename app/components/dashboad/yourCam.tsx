@@ -246,8 +246,8 @@ export default function YourCam() {
   };
 
   const handleGenerateFlier = (item: Don) => {
-    // Placeholder for flier generation - user will add logic later
-    console.log("Generate flier for:", item.name, item.id);
+    const flierUrl = `/causes/flier?_type=center&center_name=${encodeURIComponent(item.center_name || '')}&campaign_name=${encodeURIComponent(item.name)}&raised=${item.raised}&goal=${item.goal}&campaign_id=${item.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(item.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${item.id}`)}&tagline=${encodeURIComponent(item.name || '')}&details=${encodeURIComponent(item.details || '')}`;
+    window.open(flierUrl, '_blank');
   };
 
   const stats = {
