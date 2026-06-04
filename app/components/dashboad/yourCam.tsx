@@ -464,7 +464,7 @@ export default function YourCam() {
                     ) : null}
 
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
-                      <div className="relative w-full sm:w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="relative w-full sm:w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                         {item.main_img ? (
                           <img src={JSON.parse(item.main_img).url} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
@@ -489,7 +489,7 @@ export default function YourCam() {
                           <span className={`px-2 py-0.5 rounded-md font-medium border ${isCenter ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
                             {item.category}
                           </span>
-                          <span className="text-gray-500">{item.currency} {item.raised?.toLocaleString()} / {item.goal?.toLocaleString()}</span>
+                          <span className="text-gray-500">{item.currency} {item.raised?.toLocaleString()} {isCenter ? "" : `/ ${item.goal?.toLocaleString()} `}</span>
                           <span className={`font-medium ${matured ? "text-red-600" : "text-gray-400"}`}>Due: {formatDate(Number(item.date_to_completion))}</span>
                         </div>
                         <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
