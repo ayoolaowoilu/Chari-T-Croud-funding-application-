@@ -140,10 +140,10 @@ const FetchUserCauses = async(email:string) => {
          }
 }
 
-const fetchRandom5Causes = async (query:string,category:string):Promise<any>=>{
+const fetchRandom5Causes = async (query:string,category:string , page:number):Promise<any>=>{
        console.log(query,category)
         try {
-               const resp = await fetch(`${API_URL}/api/causes/random5?query=${query}&category=${category}`)
+               const resp = await fetch(`${API_URL}/api/causes/random5?query=${query}&category=${category}&page=${page}`)
                      return await resp.json()
         } catch (error) {
               console.log(error)

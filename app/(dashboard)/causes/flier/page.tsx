@@ -191,7 +191,7 @@ export default function Flier() {
   );
 
   const getFlierUrl = useCallback(
-    (style: number) => {
+    (style: number):string => {
       const sp = new URLSearchParams();
       sp.set("style", String(style));
       sp.set("campaign_name", baseData.campaign_name);
