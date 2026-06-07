@@ -795,7 +795,6 @@ export default function StartCausePage() {
         {/* Location */}
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-            <MapPin className="w-4 h-4 text-slate-500" />
            
           </label>
           <LocationAutocomplete onChange={setLocation} value={location} />
@@ -846,7 +845,7 @@ export default function StartCausePage() {
         </div>
 
         {/* Goal & Duration */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <Wallet className="w-4 h-4 text-slate-500" />
