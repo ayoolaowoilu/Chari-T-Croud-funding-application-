@@ -1310,7 +1310,31 @@ export default function StartCausePage() {
     </div>
   )
 
-  const renderStage5 = () => (
+    const getFlierUrl = useCallback(
+    (style: number , id:number):string => {
+      const sp = new URLSearchParams();
+      sp.set("style", String(style));
+      sp.set("campaign_name", causeName);
+      sp.set("raised", "0");
+      if (goal) sp.set("goal", String(goal));
+      sp.set("campaign_id", String(id));
+      sp.set("campaign_logo_url", String(mainImage?.url));
+      sp.set("qr_code_url", `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.origin}/causes/cause?id=${id}`);
+        sp.set("tagline", details);
+      if (story) sp.set("details", story);
+      sp.set("_type", "normal");
+      return `${window.origin}/api/flier?${sp.toString()}`;
+    },
+    [stage]
+  );
+
+
+const renderStage5 = () => {
+  const id = new URL(link).searchParams.get("id") 
+  const flierUrls = [1, 2, 3, 4, 5].map((style) => getFlierUrl(style , Number(id)));
+
+
+  return (
     <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-white rounded-2xl border border-emerald-200 shadow-sm p-10 text-center">
         {/* Success Animation */}
@@ -1327,46 +1351,73 @@ export default function StartCausePage() {
         <p className="text-slate-500 mb-10 max-w-sm mx-auto">
           <span className="font-semibold text-slate-900">"{causeName}"</span> is now live and ready to receive donations.
         </p>
-         
-         
-                       
 
-                        {/* Campaign Link */}
-                        <div className="max-w-lg mx-auto">
-                            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200 flex items-center gap-2">
-                                <div className="flex-1 min-w-0 px-3 py-2">
-                                    <p className="text-sm text-slate-600 truncate font-mono">
-                                        {String(link) || "Generating link..."}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={copyToClipboard}
-                                      disabled={!link}
-                                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${
-                                        copied 
-                                            ? "bg-emerald-600 text-white" 
-                                            : "bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300"
-                                    }`}
-                                >
-                                    {copied ? (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            Copied!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
-                                            Copy Link
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <p className="text-xs text-slate-400 mt-3">Share this link with supporters to start receiving donations immediately</p>
-                        </div>
+        {/* Flier Previews - Visible at start */}
+        <div className="mb-10">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Pick a Flier</h3>
+          <div className="grid grid-cols-5 gap-3">
+            {flierUrls.map((url, idx) => (
+              <a
+                key={idx}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-3/4 bg-slate-100 rounded-lg border-2 border-slate-200 hover:border-emerald-500 transition-all overflow-hidden block"
+              >
+                <img
+                  src={url}
+                  alt={`Flier style ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-xs font-semibold px-2 py-1 rounded-md transition-opacity">
+                    Style {idx + 1}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400 mt-3">Click any flier to open in full size</p>
+        </div>
+
+        {/* Campaign Link */}
+        <div className="max-w-lg mx-auto mb-8">
+          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200 flex items-center gap-2">
+            <div className="flex-1 min-w-0 px-3 py-2">
+              <p className="text-sm text-slate-600 truncate font-mono">
+                {String(link) || "Generating link..."}
+              </p>
+            </div>
+            <button
+              onClick={copyToClipboard}
+              disabled={!link}
+              className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 shrink-0 ${
+                copied 
+                  ? "bg-emerald-600 text-white" 
+                  : "bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-300"
+              }`}
+            >
+              {copied ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy Link
+                </>
+              )}
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-3">Share this link with supporters to start receiving donations immediately</p>
+        </div>
+
         {/* Stats Summary */}
         <div className="bg-slate-50 rounded-xl p-5 mb-8 text-left space-y-3 border border-slate-100">
           <div className="flex justify-between text-sm">
@@ -1405,7 +1456,8 @@ export default function StartCausePage() {
         </div>
       </div>
     </div>
-  )
+  );
+};
 
 
   const renderStage6 = () => (
