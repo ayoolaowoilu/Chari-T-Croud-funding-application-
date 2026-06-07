@@ -1,8 +1,8 @@
 import Button from "../ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
 import { redirect } from "next/navigation";
-import { Clock, Users, MapPin, MoreVertical, Copy, Link2, Image, ExternalLink } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Clock, Users, MapPin, MoreVertical, Copy,  ExternalLink } from "lucide-react";
+import {  useState } from "react";
 
 interface Don {
     img: string;
@@ -50,10 +50,6 @@ const CardMenu = ({ id, title, onCopyLink, onGetFlier }: {
         setOpen(false);
     };
 
-    const handleFlier = () => {
-        onGetFlier();
-        setOpen(false);
-    };
 
     const handleViewMore = () => {
         redirect(`/causes/cause?id=${id}`);
@@ -94,13 +90,13 @@ const CardMenu = ({ id, title, onCopyLink, onGetFlier }: {
                                 <Copy className="w-4 h-4 text-blue-500" />
                                 Copy link
                             </button>
-                            <button
+                            {/* <button
                                 onClick={handleFlier}
                                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
                             >
                                 <Image className="w-4 h-4 text-blue-500" />
-                                Get flier
-                            </button>
+                                View
+                            </button> */}
                             <div className="border-t border-blue-100" />
                             <button
                                 onClick={handleViewMore}
