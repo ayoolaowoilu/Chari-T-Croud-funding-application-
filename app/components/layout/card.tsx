@@ -1,7 +1,8 @@
 import Button from "../ui/button";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { redirect } from "next/navigation";
-import { Clock, Users, MapPin, TrendingUp, BadgeCheck } from "lucide-react";
+import { Clock, Users, MapPin, MoreVertical, Copy, Link2, Image, ExternalLink } from "lucide-react";
+import { useCallback, useState } from "react";
 
 interface Don {
     img: string;
@@ -36,6 +37,86 @@ export const formatNumber = (num: number): string => {
     return num?.toString();
 };
 
+const CardMenu = ({ id, title, onCopyLink, onGetFlier }: {
+    id: number;
+    title: string;
+    onCopyLink: () => void;
+    onGetFlier: () => void;
+}) => {
+    const [open, setOpen] = useState(false);
+
+    const handleCopy = () => {
+        onCopyLink();
+        setOpen(false);
+    };
+
+    const handleFlier = () => {
+        onGetFlier();
+        setOpen(false);
+    };
+
+    const handleViewMore = () => {
+        redirect(`/causes/cause?id=${id}`);
+        setOpen(false);
+    };
+
+    return (
+        <div className="relative">
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen(!open);
+                }}
+                className="p-2.5 rounded-xl border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                aria-label="More options"
+            >
+                <MoreVertical className="w-4 h-4 text-blue-600" />
+            </button>
+
+            <AnimatePresence>
+                {open && (
+                    <>
+                        <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute right-0 bottom-full mb-2 z-50 w-44 bg-white rounded-xl border-2 border-blue-200 shadow-lg shadow-blue-100/50 overflow-hidden"
+                        >
+                            <button
+                                onClick={handleCopy}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
+                            >
+                                <Copy className="w-4 h-4 text-blue-500" />
+                                Copy link
+                            </button>
+                            <button
+                                onClick={handleFlier}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
+                            >
+                                <Image className="w-4 h-4 text-blue-500" />
+                                Get flier
+                            </button>
+                            <div className="border-t border-blue-100" />
+                            <button
+                                onClick={handleViewMore}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
+                            >
+                                <ExternalLink className="w-4 h-4 text-blue-500" />
+                                View more
+                            </button>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 const CampaignCard: React.FC<Don> = ({
     img,
     title,
@@ -57,6 +138,15 @@ const CampaignCard: React.FC<Don> = ({
     const isFullyFunded = progressPct >= 100;
     const daysleftt = Math.floor((Number(daysLeft) - Date.now()) / (1000 * 60 * 60 * 24));
     const isNearDeadline = daysLeft !== undefined && daysleftt <= 7 && daysleftt > 0;
+
+    const handleCopyLink = () => {
+        const url = `${window.location.origin}/causes/cause?id=${id}`;
+        navigator.clipboard.writeText(url);
+    };
+
+    const handleGetFlier = () => {
+        window.open(`/api/flier?campaign=${id}`, '_blank');
+    };
 
     return (
         <motion.div
@@ -165,13 +255,22 @@ const CampaignCard: React.FC<Don> = ({
                         <span>Goal {symbol}{formatNumber(goal)}</span>
                     </div>
 
-                    <Button
-                        details="View Details"
-                        variant="outline"
-                        size="md"
-                        className="w-full"
-                        onClick={() => redirect(`/causes/cause?id=${id}`)}
-                    />
+                    {/* Button + 3-dots row */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            details="View Details"
+                            variant="outline"
+                            size="md"
+                            className="flex-1"
+                            onClick={() => redirect(`/causes/cause?id=${id}`)}
+                        />
+                        <CardMenu
+                            id={id}
+                            title={title}
+                            onCopyLink={handleCopyLink}
+                            onGetFlier={handleGetFlier}
+                        />
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -192,6 +291,15 @@ const CenterCard: React.FC<Don> = ({
 }) => {
     const daysleftt = Math.floor((Number(daysLeft) - Date.now()) / (1000 * 60 * 60 * 24));
     const isNearDeadline = daysLeft !== undefined && daysleftt <= 7 && daysleftt > 0;
+    
+    
+
+    const handleCopyLink = () => {
+        const url = `${window.location.origin}/causes/cause?id=${id}`;
+        navigator.clipboard.writeText(url);
+    };
+
+
 
     return (
         <motion.div
@@ -202,7 +310,7 @@ const CenterCard: React.FC<Don> = ({
             transition={{ duration: 0.4 }}
             whileHover={{ y: -2 }}
         >
-            {/* ── Image Section ─────────────────────────────── */}
+          
             <div className="relative h-48 shrink-0 overflow-hidden">
                 <img
                     src={img}
@@ -273,7 +381,7 @@ const CenterCard: React.FC<Don> = ({
                     {desc}
                 </p>
 
-               
+
                 <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center gap-1">
                         <span className="text-sm font-semibold text-gray-900">
@@ -293,14 +401,20 @@ const CenterCard: React.FC<Don> = ({
                     )}
                 </div>
 
-                {/* CTA Button */}
-                <div className="mt-auto">
+              
+                <div className="mt-auto flex items-center gap-2">
                     <Button
                         details="View Details"
                         variant="outline"
                         size="md"
-                        className="w-full"
+                        className="flex-1"
                         onClick={() => redirect(`/causes/cause?id=${id}`)}
+                    />
+                    <CardMenu
+                        id={id}
+                        title={title}
+                        onCopyLink={handleCopyLink}
+                        onGetFlier={()=>null}
                     />
                 </div>
             </div>

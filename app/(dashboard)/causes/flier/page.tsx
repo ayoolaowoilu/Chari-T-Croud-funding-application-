@@ -206,7 +206,7 @@ export default function Flier() {
       if (baseData.center_handle) sp.set("center_handle", baseData.center_handle);
       if (baseData.center_logo_url) sp.set("center_logo_url", baseData.center_logo_url);
       sp.set("_type", baseData._type);
-      return `/api/flier?${sp.toString()}`;
+      return `${window.origin}/api/flier?${sp.toString()}`;
     },
     [baseData]
   );

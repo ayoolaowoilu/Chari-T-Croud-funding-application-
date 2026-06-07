@@ -1,6 +1,5 @@
+
 import { ImageResponse } from 'next/og';
-
-
 
 type Flier = {
   _type: "center" | "normal";
@@ -18,11 +17,8 @@ type Flier = {
   center_handle?: string;
 };
 
-
-
 const formatAmount = (amount: string) => {
-
- return "N" + new Intl.NumberFormat('en-US').format(Number(amount));
+  return "N" + new Intl.NumberFormat('en-US').format(Number(amount));
 };
 
 const getProgress = (raised: string, goal?: string) => {
@@ -32,7 +28,6 @@ const getProgress = (raised: string, goal?: string) => {
   if (isNaN(r) || isNaN(g) || g === 0) return null;
   return Math.min(Math.round((r / g) * 100), 100);
 };
-
 
 const ChariTLogo = ({ size = 40 }: { size?: number }) => (
   <div style={{
@@ -132,6 +127,43 @@ const QRCode = ({ url, label }: { url: string; label?: string }) => (
     )}
   </div>
 );
+
+const DonationLink = ({ url }: { url: string }) => {
+    const Url = new URL(url)
+    const donate_url = Url.searchParams.get("data")
+
+    return (
+        <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 8,
+    padding: '16px 24px',
+    background: '#111111',
+    borderRadius: 16,
+    width: '100%',
+  }}>
+    <span style={{
+      fontSize: 12,
+      fontWeight: 700,
+      color: '#888888',
+      textTransform: 'uppercase',
+      letterSpacing: 2,
+      fontFamily: 'system-ui',
+    }}>Go to this link</span>
+    <span style={{
+      fontSize: 18,
+      fontWeight: 800,
+      color: '#ffffff',
+      fontFamily: 'system-ui',
+      letterSpacing: 0.5,
+      wordBreak: 'break-all',
+      textAlign: 'center',
+    }}>{donate_url}</span>
+  </div>
+    )
+
+  };
 
 const ProgressBar = ({ raised, goal, large = false }: { raised: string; goal?: string; large?: boolean }) => {
   const progress = getProgress(raised, goal);
@@ -252,7 +284,7 @@ const CenterBadge = ({ name, handle }: { name: string; handle?: string }) => (
   </div>
 );
 
-// ─── STYLE 1: MAGAZINE COVER ──────────────────────────────────────
+
 const Style1 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -265,7 +297,7 @@ const Style1 = ({ data }: { data: Flier }) => (
   }}>
     {/* Hero Image */}
     <div style={{
-      height: '50%',
+      height: '45%',
       position: 'relative',
       display: 'flex',
     }}>
@@ -277,7 +309,7 @@ const Style1 = ({ data }: { data: Flier }) => (
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6))',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))',
         display: 'flex',
       }} />
 
@@ -315,7 +347,7 @@ const Style1 = ({ data }: { data: Flier }) => (
           letterSpacing: 2,
         }}>Campaign #{data.campaign_id}</span>
         <h1 style={{
-          fontSize: 56,
+          fontSize: 52,
           fontWeight: 900,
           color: '#ffffff',
           lineHeight: 1.1,
@@ -333,14 +365,12 @@ const Style1 = ({ data }: { data: Flier }) => (
       display: 'flex',
       flexDirection: 'column',
       padding: '36px 40px',
-      gap: 28,
+      gap: 24,
     }}>
-      {/* Center badge for center type */}
       {data._type === 'center' && data.center_name && (
         <CenterBadge name={data.center_name} handle={data.center_handle} />
       )}
 
-      {/* Big Stats */}
       <div style={{
         display: 'flex',
         gap: 40,
@@ -353,122 +383,14 @@ const Style1 = ({ data }: { data: Flier }) => (
 
       <ProgressBar raised={data.raised} goal={data.goal} large />
 
-      {/* Tagline */}
       <p style={{
-        fontSize: 18,
+        fontSize: 17,
         color: '#444444',
         lineHeight: 1.5,
         margin: 0,
         fontWeight: 500,
       }}>
         {data.tagline || "Every contribution brings us closer to making a real difference. Join thousands of donors who believe in this cause."}
-      </p>
-
-      {/* Details */}
-      {data.details && (
-        <p style={{
-          fontSize: 15,
-          color: '#666666',
-          lineHeight: 1.6,
-          margin: 0,
-        }}>
-          {data.details}
-        </p>
-      )}
-
-      {/* Bottom: QR + CTA */}
-      <div style={{
-        marginTop: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: 24,
-        borderTop: '1px solid #f0f0f0',
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: '#111111' }}>Scan to Donate</span>
-          <span style={{ fontSize: 14, color: '#888888', maxWidth: 280 }}>
-            Quick, secure payments powered by Paystack. Every naira counts.
-          </span>
-        </div>
-        <QRCode url={data.qr_code_url} label="Scan Me" />
-      </div>
-    </div>
-  </div>
-);
-
-// ─── STYLE 2: POSTER STYLE ──────────────────────────────────────────
-const Style2 = ({ data }: { data: Flier }) => (
-  <div style={{
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    background: '#0a0a0a',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-  }}>
-    {/* Left: Image */}
-    <div style={{
-      width: '42%',
-      height: '100%',
-      position: 'relative',
-      display: 'flex',
-    }}>
-      <img
-        src={data.campaign_logo_url}
-        alt="Campaign"
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(to right, transparent, #0a0a0a)',
-        display: 'flex',
-      }} />
-    </div>
-
-    {/* Right: Content */}
-    <div style={{
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '44px',
-      justifyContent: 'center',
-      gap: 28,
-    }}>
-      <ChariTLogo size={32} />
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#555555',
-          textTransform: 'uppercase',
-          letterSpacing: 2,
-        }}>Campaign #{data.campaign_id}</span>
-        <h1 style={{
-          fontSize: 42,
-          fontWeight: 900,
-          color: '#ffffff',
-          lineHeight: 1.1,
-          margin: 0,
-          letterSpacing: -1,
-        }}>
-          {data.campaign_name || 'Support Our Cause'}
-        </h1>
-      </div>
-
-      {/* Center badge for center type */}
-      {data._type === 'center' && data.center_name && (
-        <CenterBadge name={data.center_name} handle={data.center_handle} />
-      )}
-
-      <p style={{
-        fontSize: 16,
-        color: '#888888',
-        lineHeight: 1.6,
-        margin: 0,
-      }}>
-        {data.tagline || "Your generosity creates ripples of change. Together, we can transform lives and build a brighter future for those who need it most."}
       </p>
 
       {data.details && (
@@ -482,11 +404,118 @@ const Style2 = ({ data }: { data: Flier }) => (
         </p>
       )}
 
-      {/* Big Stats */}
+      {/* Bold Donation Link */}
+      <DonationLink url={data.qr_code_url} />
+
+      {/* Bottom: QR + CTA */}
+      <div style={{
+        marginTop: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: 20,
+        borderTop: '1px solid #f0f0f0',
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span style={{ fontSize: 20, fontWeight: 800, color: '#111111' }}>Scan to Donate</span>
+          <span style={{ fontSize: 13, color: '#888888', maxWidth: 280 }}>
+            Quick, secure payments powered by Paystack. Every naira counts.
+          </span>
+        </div>
+        <QRCode url={data.qr_code_url} label="Scan Me" />
+      </div>
+    </div>
+  </div>
+);
+
+
+const Style2 = ({ data }: { data: Flier }) => (
+  <div style={{
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    background: '#0a0a0a',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+  }}>
+    {/* Left: Image */}
+    <div style={{
+      width: '40%',
+      height: '100%',
+      position: 'relative',
+      display: 'flex',
+    }}>
+      <img
+        src={data.campaign_logo_url}
+        alt="Campaign"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(to right, transparent 30%, #0a0a0a)',
+        display: 'flex',
+      }} />
+    </div>
+
+    {/* Right: Content */}
+    <div style={{
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '40px',
+      justifyContent: 'center',
+      gap: 22,
+    }}>
+      <ChariTLogo size={32} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: '#555555',
+          textTransform: 'uppercase',
+          letterSpacing: 2,
+        }}>Campaign #{data.campaign_id}</span>
+        <h1 style={{
+          fontSize: 38,
+          fontWeight: 900,
+          color: '#ffffff',
+          lineHeight: 1.1,
+          margin: 0,
+          letterSpacing: -1,
+        }}>
+          {data.campaign_name || 'Support Our Cause'}
+        </h1>
+      </div>
+
+      {data._type === 'center' && data.center_name && (
+        <CenterBadge name={data.center_name} handle={data.center_handle} />
+      )}
+
+      <p style={{
+        fontSize: 15,
+        color: '#888888',
+        lineHeight: 1.6,
+        margin: 0,
+      }}>
+        {data.tagline || "Your generosity creates ripples of change. Together, we can transform lives and build a brighter future for those who need it most."}
+      </p>
+
+      {data.details && (
+        <p style={{
+          fontSize: 13,
+          color: '#666666',
+          lineHeight: 1.6,
+          margin: 0,
+        }}>
+          {data.details}
+        </p>
+      )}
+
       <div style={{
         display: 'flex',
         gap: 32,
-        padding: '28px',
+        padding: '24px',
         background: '#1a1a1a',
         borderRadius: 16,
       }}>
@@ -514,11 +543,37 @@ const Style2 = ({ data }: { data: Flier }) => (
               display: 'flex',
             }} />
           </div>
-          <span style={{ fontSize: 14, color: '#555555', fontWeight: 700 }}>
+          <span style={{ fontSize: 13, color: '#555555', fontWeight: 700 }}>
             {getProgress(data.raised, data.goal)}% of goal reached
           </span>
         </div>
       )}
+
+      {/* Bold Donation Link */}
+      <div style={{
+        padding: '14px 20px',
+        background: '#ffffff',
+        borderRadius: 14,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+      }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: '#888888',
+          textTransform: 'uppercase',
+          letterSpacing: 2,
+          fontFamily: 'system-ui',
+        }}>Go to this link</span>
+        <span style={{
+          fontSize: 16,
+          fontWeight: 800,
+          color: '#111111',
+          fontFamily: 'system-ui',
+          wordBreak: 'break-all',
+        }}>{new URL(data.qr_code_url).searchParams.get("data")}</span>
+      </div>
 
       {/* QR + Footer */}
       <div style={{
@@ -526,11 +581,11 @@ const Style2 = ({ data }: { data: Flier }) => (
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 24,
+        paddingTop: 20,
         borderTop: '1px solid #222222',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={{ fontSize: 18, fontWeight: 800, color: '#ffffff' }}>Scan to Give</span>
+          <span style={{ fontSize: 16, fontWeight: 800, color: '#ffffff' }}>Scan to Give</span>
           <PaystackBadge />
         </div>
         <QRCode url={data.qr_code_url} />
@@ -548,8 +603,8 @@ const Style3 = ({ data }: { data: Flier }) => (
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#f0f0f0',
-    padding: 36,
+    background: '#e8e8e8',
+    padding: 32,
     fontFamily: 'system-ui, -apple-system, sans-serif',
   }}>
     <div style={{
@@ -564,7 +619,7 @@ const Style3 = ({ data }: { data: Flier }) => (
     }}>
       {/* Ticket header */}
       <div style={{
-        padding: '28px 36px',
+        padding: '24px 32px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -582,15 +637,14 @@ const Style3 = ({ data }: { data: Flier }) => (
 
       {/* Ticket body */}
       <div style={{
-        padding: 36,
+        padding: 32,
         display: 'flex',
         flexDirection: 'column',
-        gap: 28,
+        gap: 22,
       }}>
-        {/* Image */}
         <div style={{
           width: '100%',
-          height: 280,
+          height: 240,
           borderRadius: 16,
           overflow: 'hidden',
           display: 'flex',
@@ -604,7 +658,7 @@ const Style3 = ({ data }: { data: Flier }) => (
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <h1 style={{
-            fontSize: 36,
+            fontSize: 32,
             fontWeight: 900,
             color: '#111111',
             margin: 0,
@@ -613,7 +667,7 @@ const Style3 = ({ data }: { data: Flier }) => (
             {data.campaign_name || 'Support Our Cause'}
           </h1>
           <p style={{
-            fontSize: 16,
+            fontSize: 15,
             color: '#666666',
             lineHeight: 1.5,
             margin: 0,
@@ -622,19 +676,17 @@ const Style3 = ({ data }: { data: Flier }) => (
           </p>
         </div>
 
-        {/* Center badge for center type */}
         {data._type === 'center' && data.center_name && (
           <CenterBadge name={data.center_name} handle={data.center_handle} />
         )}
 
-        {/* Big Stats row */}
         <div style={{
           display: 'flex',
-          gap: 20,
+          gap: 16,
         }}>
           <div style={{
             flex: 1,
-            padding: 24,
+            padding: 20,
             background: '#fafafa',
             borderRadius: 16,
             display: 'flex',
@@ -643,13 +695,13 @@ const Style3 = ({ data }: { data: Flier }) => (
             alignItems: 'center',
             textAlign: 'center',
           }}>
-            <span style={{ fontSize: 12, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Raised</span>
-            <span style={{ fontSize: 36, fontWeight: 900, color: '#111111' }}>{formatAmount(data.raised)}</span>
+            <span style={{ fontSize: 11, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Raised</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#111111' }}>{formatAmount(data.raised)}</span>
           </div>
           {data.goal && (
             <div style={{
               flex: 1,
-              padding: 24,
+              padding: 20,
               background: '#fafafa',
               borderRadius: 16,
               display: 'flex',
@@ -658,13 +710,13 @@ const Style3 = ({ data }: { data: Flier }) => (
               alignItems: 'center',
               textAlign: 'center',
             }}>
-              <span style={{ fontSize: 12, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Goal</span>
-              <span style={{ fontSize: 36, fontWeight: 900, color: '#111111' }}>{formatAmount(data.goal)}</span>
+              <span style={{ fontSize: 11, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Goal</span>
+              <span style={{ fontSize: 32, fontWeight: 900, color: '#111111' }}>{formatAmount(data.goal)}</span>
             </div>
           )}
           <div style={{
             flex: 1,
-            padding: 24,
+            padding: 20,
             background: '#fafafa',
             borderRadius: 16,
             display: 'flex',
@@ -673,8 +725,8 @@ const Style3 = ({ data }: { data: Flier }) => (
             alignItems: 'center',
             textAlign: 'center',
           }}>
-            <span style={{ fontSize: 12, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Status</span>
-            <span style={{ fontSize: 36, fontWeight: 900, color: '#111111' }}>
+            <span style={{ fontSize: 11, color: '#888888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Status</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#111111' }}>
               {getProgress(data.raised, data.goal) || 0}%
             </span>
           </div>
@@ -684,22 +736,25 @@ const Style3 = ({ data }: { data: Flier }) => (
 
         {data.details && (
           <p style={{
-            fontSize: 14,
+            fontSize: 13,
             color: '#666666',
             lineHeight: 1.6,
             margin: 0,
-            padding: '16px',
+            padding: '14px',
             background: '#fafafa',
             borderRadius: 12,
           }}>
             {data.details}
           </p>
         )}
+
+        {/* Bold Donation Link */}
+        <DonationLink url={data.qr_code_url} />
       </div>
 
       {/* Ticket footer */}
       <div style={{
-        padding: '28px 36px',
+        padding: '24px 32px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -707,7 +762,7 @@ const Style3 = ({ data }: { data: Flier }) => (
         background: '#fafafa',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#111111' }}>Scan to Donate Instantly</span>
+          <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>Scan to Donate Instantly</span>
           <PaystackBadge />
         </div>
         <QRCode url={data.qr_code_url} label="Scan Me" />
@@ -716,7 +771,7 @@ const Style3 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-
+// ─── STYLE 4: FULL BLEED STORY ────────────────────────────────────
 const Style4 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -728,7 +783,7 @@ const Style4 = ({ data }: { data: Flier }) => (
   }}>
     {/* Full bleed image */}
     <div style={{
-      height: '48%',
+      height: '42%',
       position: 'relative',
       display: 'flex',
     }}>
@@ -747,9 +802,9 @@ const Style4 = ({ data }: { data: Flier }) => (
       {/* Floating header */}
       <div style={{
         position: 'absolute',
-        top: 28,
-        left: 36,
-        right: 36,
+        top: 24,
+        left: 32,
+        right: 32,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -764,7 +819,7 @@ const Style4 = ({ data }: { data: Flier }) => (
         bottom: 0,
         left: 0,
         right: 0,
-        padding: '0 36px 28px',
+        padding: '0 32px 24px',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
@@ -777,7 +832,7 @@ const Style4 = ({ data }: { data: Flier }) => (
           letterSpacing: 2,
         }}>Campaign #{data.campaign_id}</span>
         <h1 style={{
-          fontSize: 48,
+          fontSize: 44,
           fontWeight: 900,
           color: '#ffffff',
           lineHeight: 1.1,
@@ -793,16 +848,15 @@ const Style4 = ({ data }: { data: Flier }) => (
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      padding: '36px',
-      gap: 24,
+      padding: '32px',
+      gap: 20,
     }}>
-      {/* Center badge for center type */}
       {data._type === 'center' && data.center_name && (
         <CenterBadge name={data.center_name} handle={data.center_handle} />
       )}
 
       <p style={{
-        fontSize: 20,
+        fontSize: 18,
         color: '#333333',
         lineHeight: 1.6,
         margin: 0,
@@ -813,7 +867,7 @@ const Style4 = ({ data }: { data: Flier }) => (
 
       {data.details && (
         <p style={{
-          fontSize: 15,
+          fontSize: 14,
           color: '#555555',
           lineHeight: 1.6,
           margin: 0,
@@ -825,24 +879,27 @@ const Style4 = ({ data }: { data: Flier }) => (
       {/* Impact stats */}
       <div style={{
         display: 'flex',
-        gap: 24,
-        padding: '28px',
+        gap: 20,
+        padding: '24px',
         background: '#f8f8f8',
         borderRadius: 16,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-          <span style={{ fontSize: 40, fontWeight: 900, color: '#111111' }}>{formatAmount(data.raised)}</span>
-          <span style={{ fontSize: 12, color: '#888888', fontWeight: 700, textTransform: 'uppercase' }}>Raised so far</span>
+          <span style={{ fontSize: 36, fontWeight: 900, color: '#111111' }}>{formatAmount(data.raised)}</span>
+          <span style={{ fontSize: 11, color: '#888888', fontWeight: 700, textTransform: 'uppercase' }}>Raised so far</span>
         </div>
         {data.goal && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
-            <span style={{ fontSize: 40, fontWeight: 900, color: '#666666' }}>{formatAmount(data.goal)}</span>
-            <span style={{ fontSize: 12, color: '#888888', fontWeight: 700, textTransform: 'uppercase' }}>Our target</span>
+            <span style={{ fontSize: 36, fontWeight: 900, color: '#666666' }}>{formatAmount(data.goal)}</span>
+            <span style={{ fontSize: 11, color: '#888888', fontWeight: 700, textTransform: 'uppercase' }}>Our target</span>
           </div>
         )}
       </div>
 
       <ProgressBar raised={data.raised} goal={data.goal} large />
+
+      {/* Bold Donation Link */}
+      <DonationLink url={data.qr_code_url} />
 
       {/* CTA */}
       <div style={{
@@ -850,12 +907,12 @@ const Style4 = ({ data }: { data: Flier }) => (
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 24,
+        paddingTop: 20,
         borderTop: '1px solid #f0f0f0',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={{ fontSize: 20, fontWeight: 800, color: '#111111' }}>Ready to make an impact?</span>
-          <span style={{ fontSize: 14, color: '#888888' }}>Scan the code to donate securely via Paystack</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#111111' }}>Ready to make an impact?</span>
+          <span style={{ fontSize: 13, color: '#888888' }}>Scan the code to donate securely via Paystack</span>
         </div>
         <QRCode url={data.qr_code_url} label="Scan Me" />
       </div>
@@ -863,7 +920,7 @@ const Style4 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-
+// ─── STYLE 5: EDITORIAL GRID ──────────────────────────────────────
 const Style5 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -872,16 +929,16 @@ const Style5 = ({ data }: { data: Flier }) => (
     flexDirection: 'column',
     background: '#fafafa',
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    padding: 44,
+    padding: 40,
   }}>
     {/* Top */}
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: 28,
+      marginBottom: 24,
     }}>
-      <ChariTLogo size={38} />
+      <ChariTLogo size={36} />
       <span style={{
         fontSize: 12,
         fontWeight: 700,
@@ -895,19 +952,19 @@ const Style5 = ({ data }: { data: Flier }) => (
     <div style={{
       flex: 1,
       display: 'flex',
-      gap: 36,
+      gap: 32,
     }}>
       {/* Left: Content */}
       <div style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        gap: 24,
+        gap: 20,
         justifyContent: 'center',
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <h1 style={{
-            fontSize: 52,
+            fontSize: 48,
             fontWeight: 900,
             color: '#111111',
             lineHeight: 1.1,
@@ -917,7 +974,7 @@ const Style5 = ({ data }: { data: Flier }) => (
             {data.campaign_name || 'Support Our Cause'}
           </h1>
           <p style={{
-            fontSize: 17,
+            fontSize: 16,
             color: '#555555',
             lineHeight: 1.6,
             margin: 0,
@@ -926,7 +983,6 @@ const Style5 = ({ data }: { data: Flier }) => (
           </p>
         </div>
 
-        {/* Center badge for center type */}
         {data._type === 'center' && data.center_name && (
           <CenterBadge name={data.center_name} handle={data.center_handle} />
         )}
@@ -935,15 +991,15 @@ const Style5 = ({ data }: { data: Flier }) => (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 10,
-          padding: '32px',
+          gap: 8,
+          padding: '28px',
           background: '#111111',
           borderRadius: 20,
         }}>
-          <span style={{ fontSize: 13, color: '#666666', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Total Raised</span>
-          <span style={{ fontSize: 56, fontWeight: 900, color: '#ffffff', letterSpacing: -2 }}>{formatAmount(data.raised)}</span>
+          <span style={{ fontSize: 12, color: '#666666', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Total Raised</span>
+          <span style={{ fontSize: 52, fontWeight: 900, color: '#ffffff', letterSpacing: -2 }}>{formatAmount(data.raised)}</span>
           {data.goal && (
-            <span style={{ fontSize: 16, color: '#444444', fontWeight: 600 }}>
+            <span style={{ fontSize: 15, color: '#444444', fontWeight: 600 }}>
               of {formatAmount(data.goal)} goal ({getProgress(data.raised, data.goal)}%)
             </span>
           )}
@@ -970,11 +1026,11 @@ const Style5 = ({ data }: { data: Flier }) => (
 
         {data.details && (
           <p style={{
-            fontSize: 14,
+            fontSize: 13,
             color: '#666666',
             lineHeight: 1.6,
             margin: 0,
-            padding: '16px',
+            padding: '14px',
             background: '#ffffff',
             borderRadius: 12,
             border: '1px solid #e5e5e5',
@@ -982,14 +1038,17 @@ const Style5 = ({ data }: { data: Flier }) => (
             {data.details}
           </p>
         )}
+
+        {/* Bold Donation Link */}
+        <DonationLink url={data.qr_code_url} />
       </div>
 
       {/* Right: Image + QR */}
       <div style={{
-        width: 380,
+        width: 360,
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: 16,
       }}>
         <div style={{
           flex: 1,
@@ -1008,12 +1067,12 @@ const Style5 = ({ data }: { data: Flier }) => (
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '20px 24px',
+          padding: '18px 22px',
           background: '#ffffff',
           borderRadius: 16,
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: '#111111' }}>Scan to Donate</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#111111' }}>Scan to Donate</span>
             <PaystackBadge />
           </div>
           <QRCode url={data.qr_code_url} />

@@ -246,7 +246,7 @@ export default function YourCam() {
   };
 
   const handleGenerateFlier = (item: Don) => {
-    const flierUrl = `/causes/flier?_type=center&center_name=${encodeURIComponent(item.center_name || '')}&campaign_name=${encodeURIComponent(item.name)}&raised=${item.raised}&goal=${item.goal}&campaign_id=${item.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(item.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${item.id}`)}&tagline=${encodeURIComponent(item.name || '')}&details=${encodeURIComponent(item.details || '')}`;
+    const flierUrl = `/causes/flier?_type=${item._type}&center_name=${encodeURIComponent(item.center_name || '')}&campaign_name=${encodeURIComponent(item.name)}&raised=${item.raised}&goal=${item.goal}&campaign_id=${item.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(item.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${item.id}`)}&tagline=${encodeURIComponent(item.details || '')}&details=${encodeURIComponent(item.story.slice(0,1500) + "..." || '')}`;
     window.open(flierUrl, '_blank');
   };
 
@@ -727,7 +727,7 @@ export default function YourCam() {
                           <span className="text-sm font-medium text-gray-900">{donor.name}</span>
                         </div>
                         <div className="flex items-center gap-1 text-sm font-semibold text-gray-900">
-                          <DollarSign className="w-3.5 h-3.5 text-gray-500" />
+                      ₦
                           {donor.amount.toLocaleString()}
                         </div>
                       </motion.div>
