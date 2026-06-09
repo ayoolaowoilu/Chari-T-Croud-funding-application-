@@ -46,8 +46,10 @@ const SocialButtons = () => {
 
       {/* Twitter/X Button */}
       <button
+      disabled
+      title='Disabled for now , please use other auth methods'
         onClick={() => handleSignIn("twitter")}
-        className="group relative w-full flex items-center justify-center gap-3 px-4 py-3 bg-black rounded-xl shadow-sm hover:shadow-md hover:bg-gray-900 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        className="group opacity-50 relative w-full flex items-center justify-center gap-3 px-4 py-3 bg-black rounded-xl shadow-sm hover:shadow-md hover:bg-gray-900 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
       >
         <XIcon />
         <span className="text-sm font-medium text-white">Continue with X</span>
@@ -55,8 +57,10 @@ const SocialButtons = () => {
 
       {/* Facebook Button */}
       <button
+       disabled
+          title='Disabled for now , please use other auth methods'
         onClick={() => handleSignIn("facebook")}
-        className="group relative w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#699fe7] rounded-xl shadow-sm hover:shadow-md hover:bg-[#408cf1] transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877F2]"
+        className="group relative opacity-50 w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#699fe7] rounded-xl shadow-sm hover:shadow-md hover:bg-[#408cf1] transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877F2]"
       >
         <FaceBookSVG />
         <span className="text-sm font-medium text-white">Continue with Facebook</span>

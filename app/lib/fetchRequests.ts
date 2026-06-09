@@ -85,7 +85,7 @@ const getFeatured  = async() =>{
 
             return rr;
        }catch(error){
-           
+        
        }
 }
 
