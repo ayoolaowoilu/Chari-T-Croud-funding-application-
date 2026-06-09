@@ -82,7 +82,6 @@ const getFeatured  = async() =>{
            const resp =await fetch(`${API_URL}/api/causes/featured`)
 
            const rr = await resp.json()
-            console.log(rr)
 
             return rr;
        }catch(error){

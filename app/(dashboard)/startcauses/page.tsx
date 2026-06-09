@@ -1,7 +1,6 @@
 "use client"
 
 import NavBar from "@/app/components/layout/NavBar"
-import Button from "@/app/components/ui/button"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { redirect } from "next/navigation"
 import { uploadImage } from "@/app/lib/upload"

@@ -6,36 +6,6 @@ import LoadingCards from '../layout/loadingCards';
 import { useEffect, useState } from 'react';
 import { getFeatured } from '@/app/lib/fetchRequests';
 
-// const causes = [
-//     {
-//         img: "/slider1/medium-shot-boys-hugging.jpg",
-//         category: "Education",
-//         title: "Schools for Every Child",
-//         desc: "Build classrooms, provide supplies, and fund scholarships for children in underserved communities.",
-//         raised: 45000,
-//         goal: 60000,
-//         donors: 234
-//     },
-//     {
-//         img: "/slider1/close-up-smiley-kids-posing-together.jpg",
-//         category: "Food Security",
-//         title: "No Family Goes Hungry",
-//         desc: "Deliver nutritious meals and establish sustainable food programs for families facing hunger.",
-//         raised: 32000,
-//         goal: 50000,
-//         donors: 189
-//     },
-//     {
-//         img: "/slider1/happy-family-having-nice-thanksgiving-dinner-together.jpg",
-//         category: "Healthcare",
-//         title: "Medical Care for All",
-//         desc: "Provide essential medical treatment, vaccines, and health education to vulnerable populations.",
-//         raised: 28000,
-//         goal: 40000,
-//         donors: 156
-//     }
-// ];
-
 
 
 const containerVariants = {
@@ -164,6 +134,7 @@ export default function FeaturedCauses() {
                             transition: { type: "spring", stiffness: 400 }
                         }}
                         whileTap={{ scale: 0.95 }}
+                        onClick={()=>window.location.href = "/causes/get"}
                     >
                         View All Causes
                         <motion.svg 
