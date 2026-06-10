@@ -53,8 +53,9 @@ export default function Page() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
-  const [stage, setStage] = useState<1 | 2 | 3 | 4>(1)
+  const [stage, setStage] = useState<1 | 2>(1)
   const [stats, setStats] = useState<Stats | null>(null)
+  const [statData,setStatData] = useState();
 
   const fetchUserData = async () => {
     setLoading(true)
@@ -94,6 +95,16 @@ export default function Page() {
       setLoading(false)
     }
   }
+
+ const FetchStatData =async(page=0,table:string)=>{
+       
+     try {
+        const resp = await fetch(`/api/ad45667899/data?page=${page}&table=${table}`)
+         
+     } catch (error) {
+        console.log(error)
+     }
+ }
 
   useEffect(() => {
     fetchUserData()
@@ -136,16 +147,16 @@ export default function Page() {
       <main className="text-black max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {stage === 1 && stats && (
           <div className="space-y-8">
-            {/* Header */}
+            
             <div className="flex items-center gap-4">
-              <Logo />
+       
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">All Time Stats</h1>
                 <p className="text-sm text-gray-500">Platform overview and key metrics</p>
               </div>
             </div>
 
-            {/* Stats Grid */}
+    
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
                 label="Total Users"
@@ -187,6 +198,12 @@ export default function Page() {
               />
             </div>
           </div>
+        )}
+
+        {stage === 2 && stats && (
+             <div className="">
+                   <div className="font-bold text-black mx-2"></div>
+             </div>
         )}
       </main>
       <Footer />
