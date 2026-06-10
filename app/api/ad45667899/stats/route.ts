@@ -12,6 +12,7 @@ export async function GET(){
      const [row3]:any = await db.query("SELECT COUNT(*) as count FROM campaigns WHERE goal <> raised ")
      const [row4]:any = await db.query("SELECT COUNT(*) as count FROM campaigns WHERE date_to_completion > ? " ,[Date.now()])
      const [row5]:any = await db.query("SELECT COUNT(*) as count FROM transactions")
+     const [row6]:any = await db.query("SELECT COUNT(*) as count FROM campaigns WHERE report > 0")
 
      return NextResponse.json({
         totalUsers:row[0].count,
@@ -19,7 +20,8 @@ export async function GET(){
         all_time_campaigns:row2[0].count,
         funded_campaigns:row3[0].count,
         due_campaigns:row4[0].count,
-        all_time_transactions:row5[0].count
+        all_time_transactions:row5[0].count,
+        reported_campaigns:row6[0].count
      },{status:200})
     }catch(error){
         console.log(error)

@@ -350,8 +350,8 @@ const CenterCard: React.FC<Don> = ({
                 </h3>
 
                 {/* Center Name + Verification */}
-                <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-xs text-gray-600 leading-snug line-clamp-1">
+                <div title={centerName} className="flex items-center gap-1.5 mb-2">
+                    <span title={centerName} className="text-xs text-gray-600 leading-relaxed line-clamp-3">
                         {centerName}
                     </span>
                     <span 
@@ -364,7 +364,7 @@ const CenterCard: React.FC<Don> = ({
                     </span>
                 </div>
 
-                {/* Location */}
+               
                 {location && (
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-3 h-4">
                         <MapPin className="w-3 h-3 shrink-0" />
@@ -373,7 +373,7 @@ const CenterCard: React.FC<Don> = ({
                 )}
 
                 {/* Description */}
-                <p className="text-gray-600 text-sm leading-relaxed line-clamp-5 mb-4 grow">
+                <p className="text-gray-600 text-sm leading-relaxed line-clamp-4 mb-4 grow">
                     {desc}
                 </p>
 
