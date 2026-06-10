@@ -52,7 +52,7 @@ export default function KycForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error,setError] = useState(false)
   const [loading , setloading] = useState(true)
-    const {data:session} = useSession()
+    const {data:session , status} = useSession()
 
   const searchparams = useSearchParams()
   const redirect = searchparams.get("redir")
@@ -66,6 +66,7 @@ export default function KycForm() {
   const fetchData = async()=>{
        setloading(true)
        setError(false)
+       if(status == "loading") return null;
           try {
               const res = await FetchProfile(session?.user.email as string)
           if(!res.error){
@@ -85,7 +86,7 @@ export default function KycForm() {
 
   useEffect(()=>{
         fetchData()
-  },[session])
+  },[status])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;

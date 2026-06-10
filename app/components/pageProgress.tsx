@@ -26,12 +26,12 @@ export default function PageLoader() {
     setProgress(0)
     setTipIndex(Math.floor(Math.random() * TIPS.length))
 
-    // Progress animation
+
     const p1 = setTimeout(() => setProgress(40), 50)
     const p2 = setTimeout(() => setProgress(75), 150)
     const p3 = setTimeout(() => setProgress(95), 300)
 
-    // Finish loading
+
     const done = setTimeout(() => {
       setProgress(100)
       setTimeout(() => setIsLoading(false), 400)
@@ -45,7 +45,7 @@ export default function PageLoader() {
     }
   }, [pathname, searchParams])
 
-  // Rotate tips while loading
+
   useEffect(() => {
     if (!isLoading) return
     const interval = setInterval(() => {
@@ -73,7 +73,6 @@ export default function PageLoader() {
            <Logo />
           </motion.div>
 
-          {/* Progress bar container */}
           <div className="w-64 h-0.75 bg-gray-100 rounded-full overflow-hidden mb-8">
             <motion.div
               className="h-full bg-gray-800 rounded-full origin-left"
