@@ -17,6 +17,10 @@ export async function GET(request:NextRequest){
         , {status:200})
          
       } catch (error) {
+         console.log(error)
+          return NextResponse.json({
+            error:"There was an error failed to fetch",
         
+          },{status:500})
       }
 }
