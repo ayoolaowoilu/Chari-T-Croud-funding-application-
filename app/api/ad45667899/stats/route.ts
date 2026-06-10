@@ -6,6 +6,7 @@ import {  NextResponse } from "next/server";
 export async function GET(){
      
     try{
+     
      const [row]:any = await db.query("SELECT COUNT(*) as count FROM users ")
      const [row1]:any = await db.query("SELECT COUNT(*) as count FROM centers")
      const [row2]:any = await db.query("SELECT COUNT(*) as count FROM campaigns ")

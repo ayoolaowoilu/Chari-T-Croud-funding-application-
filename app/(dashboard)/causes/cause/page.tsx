@@ -786,7 +786,7 @@ export default function Page() {
                   </button>
                 </div>
             <Button onClick={()=>{
-               const flierUrl = `/causes/flier?_type=${campaign._type}&center_name=${encodeURIComponent(campaign.center_name || '')}&campaign_name=${encodeURIComponent(campaign.name)}&raised=${campaign.raised}&goal=${campaign.goal}&campaign_id=${campaign.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(campaign.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${campaign.id}`)}&tagline=${encodeURIComponent(campaign.details || '')}&details=${encodeURIComponent(campaign?.story.slice(0,1500) + "..." || '')}`;
+               const flierUrl = `/causes/flier?_type=${campaign._type}&center_name=${encodeURIComponent(campaign.center_name || '')}&campaign_name=${encodeURIComponent(campaign.name)}&raised=${campaign.raised}&goal=${campaign.goal}&campaign_id=${campaign.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(campaign.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${campaign.id}`)}&tagline=${encodeURIComponent(campaign.details || '')}&details=${encodeURIComponent(campaign?.story?.slice(0,1500) + "..." || '')}`;
     window.open(flierUrl, '_blank');
             }} variant="outline" className='w-full my-2' size="md" details={<span className='flex gap-2 justify-center '><Image size={20}  /> Get Flier</span>}  />
           </div>
