@@ -107,7 +107,7 @@ interface Transaction {
 type TableType = "users" | "centers" | "campaigns" | "transactions"
 type CampaignFilter = "all" | "funded" | "due" | "reported"
 
-// ─── Modal Components ──────────────────────────────────────────────
+
 
 function KycModal({
   isOpen,
@@ -320,7 +320,7 @@ function CenterDocsModal({
             <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Location</h4>
             <div className="p-3 bg-gray-50 rounded-lg">
               <div className="flex items-start gap-2 text-sm text-gray-700">
-                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
                 <span>{center.address}</span>
               </div>
               {center.geo_location && (
@@ -372,7 +372,7 @@ function CenterDocsModal({
   )
 }
 
-// ─── Helper Icon ─────────────────────────────────────────────────────
+
 
 function MailIcon({ className }: { className?: string }) {
   return (
@@ -382,7 +382,7 @@ function MailIcon({ className }: { className?: string }) {
   )
 }
 
-// ─── Components ──────────────────────────────────────────────────────
+
 
 interface StatCardProps {
   label: string
@@ -448,7 +448,7 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────
+
 
 export default function Page() {
   const { data: session, status } = useSession()
@@ -457,7 +457,7 @@ export default function Page() {
   const [stage, setStage] = useState<1 | 2>(1)
   const [stats, setStats] = useState<Stats | null>(null)
 
-  // Stage 2 state
+ 
   const [activeTable, setActiveTable] = useState<TableType>("campaigns")
   const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("all")
   const [tableData, setTableData] = useState<any[]>([])
@@ -467,7 +467,7 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(1)
   const [txTotal, setTxTotal] = useState(0)
 
-  // Modal state
+
   const [kycModalOpen, setKycModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
   const [selectedKyc, setSelectedKyc] = useState<KycData | null>(null)
@@ -475,7 +475,7 @@ export default function Page() {
   const [centerModalOpen, setCenterModalOpen] = useState(false)
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null)
 
-  // ─── Fetch Stats ─────────────────────────────────────────────────
+
 
   const fetchUserData = async () => {
     setLoading(true)
@@ -499,7 +499,7 @@ export default function Page() {
     }
   }
 
-  // ─── Fetch Table Data ────────────────────────────────────────────
+
 
   const fetchTableData = async (
     targetTable: TableType,
@@ -531,13 +531,14 @@ export default function Page() {
     }
   }
 
-  // ─── Fetch KYC ───────────────────────────────────────────────────
+
 
   const fetchKyc = async (userId: number) => {
     try {
       const resp = await fetch(`/api/ad45667899/kyc?userId=${userId}`)
       if (!resp.ok) return null
       const data = await resp.json()
+      console.log(data)
       return data.kyc as KycData || null
     } catch (error) {
       console.log(error)
@@ -545,10 +546,11 @@ export default function Page() {
     }
   }
 
-  // ─── Actions ─────────────────────────────────────────────────────
+ 
 
   const openKycModal = async (user: UserData) => {
     setSelectedUser(user)
+    console.log(user)
     const kyc = user.id ? await fetchKyc(user.id) : null
     setSelectedKyc(kyc)
     setKycModalOpen(true)
@@ -609,7 +611,7 @@ export default function Page() {
     } catch (error) { console.log(error) }
   }
 
-  // ─── Stage Navigation ──────────────────────────────────────────────
+
 
   const goToStage2 = (table: TableType, filter?: CampaignFilter) => {
     setActiveTable(table)
@@ -621,7 +623,7 @@ export default function Page() {
     setStage(2)
   }
 
-  // ─── Effects ─────────────────────────────────────────────────────
+
 
   useEffect(() => { fetchUserData() }, [status])
 
@@ -637,7 +639,7 @@ export default function Page() {
     return true
   })
 
-  // Format Date.now() timestamp
+
   const formatCampaignDate = (ts: number) => {
     if (!ts || ts < 100000000000) return "—" // sanity check
     return new Date(ts).toLocaleDateString()
@@ -648,7 +650,7 @@ export default function Page() {
     return ts > Date.now()
   }
 
-  // ─── Loading / Error ─────────────────────────────────────────────
+
 
   if (loading) {
     return (
@@ -713,7 +715,7 @@ export default function Page() {
     <div className="bg-white w-screen min-h-screen">
       <NavBar />
 
-      {/* Modals */}
+
       <KycModal
         isOpen={kycModalOpen}
         onClose={() => { setKycModalOpen(false); setSelectedUser(null); setSelectedKyc(null) }}
@@ -933,7 +935,7 @@ export default function Page() {
                         <td className="px-6 py-4">
                           <StatusBadge status={center.is_verified_status} />
                         </td>
-                        <td className="px-6 py-4 text-gray-600 max-w-[200px] truncate">
+                        <td className="px-6 py-4 text-gray-600 max-w-50 truncate">
                           {center.address}
                         </td>
                         <td className="px-6 py-4">
@@ -1029,9 +1031,9 @@ export default function Page() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1.5">
-                            <Calendar className={`w-3.5 h-3.5 ${isCampaignDue(campaign.date_to_completion) ? 'text-amber-500' : 'text-gray-400'}`} />
-                            <span className={`${isCampaignDue(campaign.date_to_completion) ? 'text-amber-600 font-medium' : 'text-gray-600'}`}>
-                              {formatCampaignDate(campaign.date_to_completion)}
+                            <Calendar className={`w-3.5 h-3.5 ${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-500' : 'text-gray-400'}`} />
+                            <span className={`${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-600 font-medium' : 'text-gray-600'}`}>
+                              {formatCampaignDate(Number(campaign.date_to_completion))}
                             </span>
                           </div>
                         </td>

@@ -5,8 +5,8 @@ const ALLOWED_TABLES = ["users", "centers", "campaigns", "transactions"] as cons
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLE_COLUMNS: Record<AllowedTable, string> = {
-  users: "full_name, email, is_verified, created_at, image, donations, recived, method",
-  centers: "name, registration_number, email,  phone, address, website, is_verified_status, about, logourl, geo_location",
+  users: "full_name, email, is_verified, created_at, image, donations, recived, method , id",
+  centers: "name, registration_number, email,  phone, address, website, is_verified_status, about, logourl, geo_location , verification_documents",
   campaigns: "id, name, details, story, main_img, goal, raised, _type, center_name, center_id, user_id, date_to_completion, created_at, currency, category, donation_count, safety_rating, reports",
   transactions: "id, owner_id, ammount, payer_id ,  paid_to, refrence",
 };
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const rawTable = request.nextUrl.searchParams.get("table") || "users";
   const _type = request.nextUrl.searchParams.get("_type");
 
-  // ─── Validate table (prevent SQL injection) ───────────────────────
+
   if (!ALLOWED_TABLES.includes(rawTable as AllowedTable)) {
     return NextResponse.json(
       { error: "Invalid table" },
