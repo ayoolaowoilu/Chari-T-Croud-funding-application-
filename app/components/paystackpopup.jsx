@@ -1,10 +1,19 @@
 'use client';
 import PaystackPop from '@paystack/inline-js';
-import { ChevronRight, CreditCard, CheckCircle, XCircle, Home, ArrowRight, Copy, Check } from 'lucide-react';
+import { 
+  ChevronRight, 
+  CreditCard, 
+  CheckCircle, 
+  XCircle, 
+  Home, 
+  ArrowRight, 
+  Copy, 
+  Check,
+  Receipt,
+  Wallet
+} from 'lucide-react';
 import { useState } from 'react';
 import { updateDonate } from '../lib/fetchRequests';
-
-
 
 export default function PaystackPopup({ 
   email, 
@@ -15,13 +24,27 @@ export default function PaystackPopup({
   onCancel,
   metadata,
   homeUrl = '/',
-  causesUrl = '/causes/get',id,isAuthed,name,isBlind,owner_id,donor_name,message,center_id
+  causesUrl = '/causes/get',
+  id,
+  isAuthed,
+  name,
+  isBlind,
+  owner_id,
+  donor_name,
+  message,
+  center_id,
+  platform_fee = 0,
+  bearer = 'account'
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [transaction, setTransaction] = useState(null);
   const [status, setStatus] = useState('idle');
   const [copied, setCopied] = useState(false);
+
+  // Ensure platform_fee is a number
+  const safePlatformFee = Number(platform_fee) || 0;
+  const safeAmount = Number(amount) || 0;
 
   const handlePayment = () => {
     if (!publicKey) {
@@ -30,6 +53,14 @@ export default function PaystackPopup({
     }
     if (!email) {
       setError('Please provide an email address');
+      return;
+    }
+    if (!amount || safeAmount <= 0) {
+      setError('Invalid donation amount');
+      return;
+    }
+    if (safePlatformFee >= safeAmount) {
+      setError('Platform fee cannot be equal to or greater than the donation amount');
       return;
     }
 
@@ -43,54 +74,66 @@ export default function PaystackPopup({
       paystack.newTransaction({
         key: publicKey,
         email: email,
-        first_name:name?.split(" ")[0] || "Unknown user",
-        last_name:name?.split(" ")[1] || "Unknown user",
-        amount: amount * 100,
+        first_name: name?.split(" ")[0] || "Unknown user",
+        last_name: name?.split(" ")[1] || "Unknown user",
+        amount: safeAmount * 100,
+        transaction_charge: safePlatformFee * 100,
         subaccount: subaccount,
+        bearer: bearer,
         metadata: metadata || {
           custom_fields: [{
-            display_name: 'Cart ID',
-            variable_name: 'cart_id',
-            value: '8393',
+            display_name: 'Campaign ID',
+            variable_name: 'campaign_id',
+            value: String(id),
           }]
         },
-        onSuccess: async(trx) => {
-             try{
-              const payload = {
-                        campaign_id:id,
-                        isAuthed:isAuthed,
-                        email:email,
-                        isBlind:isBlind,
-                        name:name,
-                        owner_id:owner_id,
-                        amount:amount,
-                        transaction_id:trx.reference,
-                        donor_name:donor_name,
-                        message:message,center_id:center_id
-              }
-                const resp = await updateDonate(payload)
-                if(resp.error){
-                    setError("Payment successful but , has not been recorded")
-                    
-        
-                    localStorage.setItem("pending_donations",JSON.stringify({reference:trx.reference,id:id}))
-                }
-                 setTransaction(trx);
-                  setStatus('success');
-                  localStorage.removeItem("pending_donations")
-                     setLoading(false);
-                 console.log('Payment successful:', trx);
-          if (onSuccess) onSuccess(trx);
-             }catch(error){
-                setError("Error Updating donations")
-                 localStorage.setItem("pending_donations",JSON.stringify({reference:trx.reference,id:id}))
-             }
+        onSuccess: async (trx) => {
+          try {
+            // Amount that goes to the subaccount (campaign owner)
+            const subaccountAmount = safeAmount - safePlatformFee;
 
-       
+            const payload = {
+              campaign_id: id,
+              isAuthed: isAuthed,
+              email: email,
+              isBlind: isBlind,
+              name: name,
+              owner_id: owner_id,
+              amount: subaccountAmount,
+              platform_fee: safePlatformFee,
+              total_amount: safeAmount,
+              transaction_id: trx.reference,
+              donor_name: donor_name,
+              message: message,
+              center_id: center_id
+            };
 
+            const resp = await updateDonate(payload);
+            
+            if (resp.error) {
+              setError("Payment successful, but donation was not recorded");
+              localStorage.setItem("pending_donations", JSON.stringify({
+                reference: trx.reference,
+                id: id,
+                payload: payload
+              }));
+            }
 
-        
-       
+            setTransaction(trx);
+            setStatus('success');
+            localStorage.removeItem("pending_donations");
+            setLoading(false);
+            console.log('Payment successful:', trx);
+            
+            if (onSuccess) onSuccess(trx);
+          } catch (error) {
+            setError("Error recording donation");
+            localStorage.setItem("pending_donations", JSON.stringify({
+              reference: trx.reference,
+              id: id
+            }));
+            setLoading(false);
+          }
         },
         onCancel: () => {
           setLoading(false);
@@ -129,7 +172,6 @@ export default function PaystackPopup({
     setError(null);
   };
 
- 
   const SuccessCard = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -139,19 +181,52 @@ export default function PaystackPopup({
             <CheckCircle className="w-8 h-8 text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-white">Payment Successful!</h2>
-          <p className="text-emerald-100 mt-1">Thank you for your donation</p>
+          <p className="text-emerald-100 mt-1">Thank you for your generous donation</p>
         </div>
 
         {/* Transaction Details */}
         <div className="p-6 space-y-4">
           <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+            {/* Total Amount */}
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Amount Paid</span>
+              <span className="text-slate-500 text-sm flex items-center gap-1.5">
+                <Receipt className="w-3.5 h-3.5" />
+                Total Donation
+              </span>
               <span className="text-lg font-bold text-slate-900">
-                ₦{transaction?.amount ? (transaction.amount / 100).toLocaleString() : amount?.toLocaleString()}
+                ₦{safeAmount.toLocaleString()}
               </span>
             </div>
+            
             <div className="h-px bg-slate-200" />
+            
+            {/* Platform Fee */}
+            {safePlatformFee > 0 && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-sm flex items-center gap-1.5">
+                    <Wallet className="w-3.5 h-3.5" />
+                    Platform Fee
+                  </span>
+                  <span className="text-sm font-medium text-amber-600">
+                    ₦{safePlatformFee.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-px bg-slate-200" />
+              </>
+            )}
+
+            {/* Net to Campaign */}
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 text-sm font-medium">Net to Campaign</span>
+              <span className="text-base font-bold text-emerald-600">
+                ₦{(safeAmount - safePlatformFee).toLocaleString()}
+              </span>
+            </div>
+
+            <div className="h-px bg-slate-200" />
+
+            {/* Reference */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Reference</span>
               <button 
@@ -162,19 +237,28 @@ export default function PaystackPopup({
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
+
             <div className="h-px bg-slate-200" />
+
+            {/* Email */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Email</span>
               <span className="text-sm font-medium text-slate-900">{email}</span>
             </div>
+
             <div className="h-px bg-slate-200" />
+
+            {/* Status */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Status</span>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                 Completed
               </span>
             </div>
+
             <div className="h-px bg-slate-200" />
+
+            {/* Date */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Date</span>
               <span className="text-sm font-medium text-slate-900">
@@ -218,7 +302,6 @@ export default function PaystackPopup({
     </div>
   );
 
- 
   const CancelledCard = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -234,16 +317,54 @@ export default function PaystackPopup({
         {/* Details */}
         <div className="p-6 space-y-4">
           <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+            {/* Attempted Amount */}
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Attempted Amount</span>
-              <span className="text-lg font-bold text-slate-900">₦{amount?.toLocaleString()}</span>
+              <span className="text-slate-500 text-sm flex items-center gap-1.5">
+                <Receipt className="w-3.5 h-3.5" />
+                Attempted Donation
+              </span>
+              <span className="text-lg font-bold text-slate-900">
+                ₦{safeAmount.toLocaleString()}
+              </span>
             </div>
+
             <div className="h-px bg-slate-200" />
+
+            {/* Platform Fee (shown as what would have been charged) */}
+            {safePlatformFee > 0 && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-sm flex items-center gap-1.5">
+                    <Wallet className="w-3.5 h-3.5" />
+                    Platform Fee
+                  </span>
+                  <span className="text-sm font-medium text-slate-400 line-through">
+                    ₦{safePlatformFee.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-px bg-slate-200" />
+              </>
+            )}
+
+            {/* Net to Campaign */}
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 text-sm">Would Go to Campaign</span>
+              <span className="text-sm font-medium text-slate-400 line-through">
+                ₦{(safeAmount - safePlatformFee).toLocaleString()}
+              </span>
+            </div>
+
+            <div className="h-px bg-slate-200" />
+
+            {/* Email */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Email</span>
               <span className="text-sm font-medium text-slate-900">{email}</span>
             </div>
+
             <div className="h-px bg-slate-200" />
+
+            {/* Status */}
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-sm">Status</span>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
@@ -286,6 +407,27 @@ export default function PaystackPopup({
         </div>
       )}
 
+      {/* Amount + Fee Breakdown Preview */}
+      <div className="bg-slate-50 rounded-lg p-3 space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-slate-500">Donation Amount</span>
+          <span className="font-medium text-slate-900">₦{safeAmount.toLocaleString()}</span>
+        </div>
+        {safePlatformFee > 0 && (
+          <>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Platform Fee</span>
+              <span className="font-medium text-amber-600">₦{safePlatformFee.toLocaleString()}</span>
+            </div>
+            <div className="h-px bg-slate-200" />
+            <div className="flex justify-between">
+              <span className="text-slate-600 font-medium">Campaign Receives</span>
+              <span className="font-bold text-emerald-600">₦{((safeAmount - safePlatformFee)).toLocaleString()}</span>
+            </div>
+          </>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={handlePayment}
@@ -302,13 +444,12 @@ export default function PaystackPopup({
           ) : (
             <>
               <CreditCard className="w-4 h-4" />
-              Donate ₦{amount?.toLocaleString()}
+              Donate ₦{safeAmount.toLocaleString()}
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </>
           )}
         </span>
       </button>
-
 
       {status === 'success' && <SuccessCard />}
       {status === 'cancelled' && <CancelledCard />}

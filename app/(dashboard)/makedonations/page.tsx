@@ -13,6 +13,7 @@ import Footer from '@/app/components/layout/footer';
 import PaystackPopup from '@/app/components/paystackpopup';
 import Explain from '@/app/components/layout/explain';
 
+    const FEE_PRESETS = [0, 500, 1000,2000,3000,4000 ];
 
 
 export default function Page(){
@@ -20,12 +21,38 @@ export default function Page(){
 
     const [campaign,setCampaign] = useState<Campaign | null>(); 
       const [centerCache, setCenterCache] = useState<Record<number, { full_name: string; image: string }>>({});
+   const currency = campaign?.currency
+   
+        const presetAmounts = useMemo(()=>{
+     if(currency === "NG"){
+    return  ['1000', '5000', '10000', '250000', '500000']  }else {
+     return ['25', '50', '100', '250', '500'];}
+  },[currency])
+    const [amount, setAmount] = useState<string>(presetAmounts[0]);
 
+    const [customAmount, setCustomAmount] = useState<string>('');
+
+    const [formData, setFormData] = useState({
+      name: '',
+      email: '',
+      message: ''
+    });
+
+
+ 
     const donationId = searchParams.get("id") as string
      const name = campaign?.name
-     const currency = campaign?.currency
+  
     const [loading , setLoading] = useState(true)
     const { status,data:session } = useSession();
+       const platformFee = useMemo(()=>{
+          if(amount == "custom"){
+               return Number(customAmount) * 0.04
+          }else{
+               return Number(amount) * 0.04
+          }
+    },[amount , customAmount])
+    const [platFormFee , setPlatformFee] = useState<number>(2000)
     
     const fetchData = async()=>{
        try{
@@ -71,28 +98,9 @@ export default function Page(){
   const centerData = centerCache[Number(campaign?.center_id)]
   console.log(centerData , centerCache)
 
-  const presetAmounts = useMemo(()=>{
-     if(currency === "NG"){
-    return  ['1000', '5000', '10000', '250000', '500000']  }else {
-     return ['25', '50', '100', '250', '500'];}
-  },[currency])
-    const [amount, setAmount] = useState<string>(presetAmounts[0]);
 
-    const [customAmount, setCustomAmount] = useState<string>('');
-
-    const [formData, setFormData] = useState({
-      name: '',
-      email: '',
-      message: ''
-    });
     const remaining  = (Number(campaign?.goal) - Number(campaign?.raised))
-    const platformFee = useMemo(()=>{
-          if(amount == "custom"){
-               return Number(customAmount) * 0.04
-          }else{
-               return Number(amount) * 0.04
-          }
-    },[amount , customAmount])
+
   
       if((Number(amount) > remaining) || (Number(customAmount) > remaining) ){
          if(!campaign?.center_id){
@@ -363,6 +371,68 @@ export default function Page(){
               </div>
             </div>
 
+
+           {
+           
+       
+
+<div className="space-y-3">
+  <div className="flex items-center justify-between">
+    <small className="text-gray-500 text-xs font-medium uppercase tracking-wider">Support Chari-T</small>
+    {platFormFee > 0 && (
+      <span className="text-xs text-emerald-600 font-medium">
+        Campaign gets ₦{amount == "custom" ? Number(customAmount) : Number(amount) }
+      </span>
+    )}
+  </div>
+  
+  <div className="flex flex-wrap gap-2">
+    {FEE_PRESETS.map((fee) => (
+      <button
+        key={fee}
+        type="button"
+        onClick={() => setPlatformFee(fee)}
+        className={`
+          px-4 py-2 rounded-lg text-sm font-medium transition-all
+          ${platFormFee === fee
+            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200'
+            : 'bg-white border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-600'
+          }
+        `}
+      >
+        {fee === 0 ? 'None' : `₦${fee}`}
+      </button>
+    ))}
+  </div>
+  
+  {/* Custom amount option */}
+  <div className="relative">
+    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₦</span>
+    <input
+      type="number"
+    
+      placeholder="Custom amount"
+      value={!FEE_PRESETS.includes(platFormFee) ? platFormFee || '' : ''}
+      onChange={(e) => {
+        const val = Number(e.target.value);
+       
+        setPlatformFee(Math.abs(Number(val)));
+      }}
+      className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-8 pr-4 text-gray-900 placeholder-gray-400 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-50 transition-all"
+    />
+  </div>
+  
+  <p className="text-xs text-gray-400">
+    {platFormFee > 0 
+      ? `₦${platFormFee.toLocaleString()} helps us maintain the platform. Campaign receives ₦${(Math.abs(Number(amount) - platFormFee)).toLocaleString()}.`
+      : "Optional — 100% of your donation goes to the campaign."
+    }
+  </p>
+</div>}
+
+
+               
+    
              
                  <PaystackPopup 
       email={session?.user.email || formData.email}
@@ -370,7 +440,7 @@ export default function Page(){
       subaccount={campaign.bank_details.subAccountCode}
       onSuccess={()=>{console.log("success popup opened")}}
       onCancel={()=>{console.log("popup canceled")}}
-      amount={amount == "custom" ? Number(customAmount) : Number(amount) }
+      amount={amount == "custom" ? Number(customAmount) + platformFee : Number(amount) + platFormFee}
       metadata={{
     custom_fields: [{
       display_name: 'Order ID',
@@ -378,6 +448,7 @@ export default function Page(){
       value: '12345'
     }]
   }}
+  platform_fee={platFormFee}
   name={isBlind ? null : status == "authenticated" ? session.user.name : formData.name}
   isBlind={isBlind}
   isAuthed={status == "authenticated"}

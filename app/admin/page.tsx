@@ -476,7 +476,6 @@ export default function Page() {
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null)
 
 
-
   const fetchUserData = async () => {
     setLoading(true)
     setError(false)
@@ -498,9 +497,6 @@ export default function Page() {
       setLoading(false)
     }
   }
-
-
-
   const fetchTableData = async (
     targetTable: TableType,
     targetPage: number = 0,
@@ -530,9 +526,6 @@ export default function Page() {
       setTableLoading(false)
     }
   }
-
-
-
   const fetchKyc = async (userId: number) => {
     try {
       const resp = await fetch(`/api/ad45667899/kyc?userId=${userId}`)
@@ -545,22 +538,16 @@ export default function Page() {
       return null
     }
   }
-
- 
-
   const openKycModal = async (user: UserData) => {
     setSelectedUser(user)
-    console.log(user)
     const kyc = user.id ? await fetchKyc(user.id) : null
     setSelectedKyc(kyc)
     setKycModalOpen(true)
   }
-
   const openCenterModal = (center: Center) => {
     setSelectedCenter(center)
     setCenterModalOpen(true)
   }
-
   const handleVerifyUser = async (email: string, verify: boolean) => {
     try {
       await fetch(`/api/ad45667899/users/verify`, {
@@ -571,7 +558,6 @@ export default function Page() {
       fetchTableData(activeTable, page, campaignFilter)
     } catch (error) { console.log(error) }
   }
-
   const handleBanUser = async (email: string) => {
     if (!confirm("Ban this user permanently?")) return
     try {
@@ -583,7 +569,6 @@ export default function Page() {
       fetchTableData(activeTable, page, campaignFilter)
     } catch (error) { console.log(error) }
   }
-
   const handleVerifyCenter = async (email: string, verify: boolean) => {
     try {
       await fetch(`/api/ad45667899/centers/verify`, {
@@ -594,7 +579,6 @@ export default function Page() {
       fetchTableData(activeTable, page, campaignFilter)
     } catch (error) { console.log(error) }
   }
-
   const handleTakeDownCampaign = async (id: number) => {
     if (!confirm("Take down this campaign?")) return
     try {
@@ -602,7 +586,6 @@ export default function Page() {
       fetchTableData(activeTable, page, campaignFilter)
     } catch (error) { console.log(error) }
   }
-
   const handleRefundTransaction = async (id: number) => {
     if (!confirm("Refund this transaction?")) return
     try {
@@ -610,9 +593,6 @@ export default function Page() {
       fetchTableData(activeTable, page, campaignFilter)
     } catch (error) { console.log(error) }
   }
-
-
-
   const goToStage2 = (table: TableType, filter?: CampaignFilter) => {
     setActiveTable(table)
     if (filter) setCampaignFilter(filter)
@@ -641,16 +621,13 @@ export default function Page() {
 
 
   const formatCampaignDate = (ts: number) => {
-    if (!ts || ts < 100000000000) return "—" // sanity check
+    if (!ts || ts < 100000000000) return "—" 
     return new Date(ts).toLocaleDateString()
   }
-
   const isCampaignDue = (ts: number) => {
     if (!ts) return false
     return ts > Date.now()
   }
-
-
 
   if (loading) {
     return (
@@ -663,7 +640,6 @@ export default function Page() {
       </div>
     )
   }
-
   if (error) {
     return (
       <>
@@ -680,9 +656,6 @@ export default function Page() {
       </>
     )
   }
-
-
-
   if (stage === 1) {
     return (
       <div className="bg-white w-screen min-h-screen">
@@ -708,8 +681,6 @@ export default function Page() {
       </div>
     )
   }
-
-
 
   return (
     <div className="bg-white w-screen min-h-screen">
