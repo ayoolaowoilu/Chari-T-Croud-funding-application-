@@ -172,14 +172,18 @@ export default function PaystackPopup({
   const downloadReceipt = () => {
     if (!receiptRef.current) return;
 
-    const receiptHTML = receiptRef.current.innerHTML;
-    const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Donation Receipt - ${transaction?.reference || 'N/A'}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#f8fafc;padding:40px 20px}.receipt-container{max-width:480px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.1)}</style></head><body><div class="receipt-container">${receiptHTML}</div></body></html>`;
-
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
+  
+    const url = `http://localhost:3000/api/receipts?email=${email}&amount=${amount}&platform_fee=${platform_fee}&time=${new Date().toLocaleDateString('en-NG', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}&transaction_id=${transaction?.reference}`;
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chari-t-receipt-${transaction?.reference || 'donation'}.html`;
+    a.download = `chari-t-receipt-${transaction?.reference || 'donation'}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
