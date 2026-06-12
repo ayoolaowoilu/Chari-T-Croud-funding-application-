@@ -70,7 +70,7 @@ export default function CampaignPage() {
 
    
     const [centerData, setCenterData] = useState<FetchedCenterData | null>(null);
-      const link = `http:localhost/dashboard/centers/profile?id=${centerData?.id}`
+       const [link , setLink ] = useState("")
     const [name, setName] = useState("");
     const [category, setCategory] = useState<CampaignPayload["category"]>("CroudFunding");
     const [deadline, setDeadline] = useState(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -323,7 +323,7 @@ export default function CampaignPage() {
                 throw new Error(resp.error);
             }
      
-
+            setLink(JSON.parse(resp).link)
             setStage(4);
         } catch (err: any) {
             setErrorMsg(err?.message || "Failed to create campaign. Please try again.");
@@ -355,7 +355,7 @@ export default function CampaignPage() {
     };
 
     const goToDashboard = () => {
-        redirect("/dashboard");
+        redirect("/donor/dashboard");
     };
 
     const resetForm = () => {
@@ -483,8 +483,7 @@ export default function CampaignPage() {
                     </div>
                 )}
 
-                {/* Stage 1: Campaign Info */}
-                {stage === 1 && (
+                      {stage === 1 && (
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
                         <div>
                             <label className="block text-sm font-semibold text-slate-900 mb-2">
