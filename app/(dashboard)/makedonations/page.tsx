@@ -424,7 +424,7 @@ export default function Page(){
   
   <p className="text-xs text-gray-400">
     {platFormFee > 0 
-      ? `₦${platFormFee.toLocaleString()} helps us maintain the platform. Campaign receives ₦${(Math.abs(Number(amount) - platFormFee)).toLocaleString()}.`
+      ? `₦${platFormFee.toLocaleString()} helps us maintain the platform. Campaign receives ₦${(amount == "custom" ? Number(customAmount) : Number(amount) ).toLocaleString()}.`
       : "Optional — 100% of your donation goes to the campaign."
     }
   </p>

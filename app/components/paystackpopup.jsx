@@ -10,9 +10,18 @@ import {
   Copy, 
   Check,
   Receipt,
-  Wallet
+  Wallet,
+  Download,
+  Calendar,
+  Mail,
+  Hash,
+  ShieldCheck,
+  RotateCcw,
+  AlertTriangle,
+  User,
+  Tag
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { updateDonate } from '../lib/fetchRequests';
 
 export default function PaystackPopup({ 
@@ -41,10 +50,11 @@ export default function PaystackPopup({
   const [transaction, setTransaction] = useState(null);
   const [status, setStatus] = useState('idle');
   const [copied, setCopied] = useState(false);
+  const receiptRef = useRef(null);
 
-  // Ensure platform_fee is a number
   const safePlatformFee = Number(platform_fee) || 0;
   const safeAmount = Number(amount) || 0;
+  const netToCampaign = safeAmount - safePlatformFee;
 
   const handlePayment = () => {
     if (!publicKey) {
@@ -89,9 +99,6 @@ export default function PaystackPopup({
         },
         onSuccess: async (trx) => {
           try {
-            // Amount that goes to the subaccount (campaign owner)
-            const subaccountAmount = safeAmount - safePlatformFee;
-
             const payload = {
               campaign_id: id,
               isAuthed: isAuthed,
@@ -99,7 +106,7 @@ export default function PaystackPopup({
               isBlind: isBlind,
               name: name,
               owner_id: owner_id,
-              amount: subaccountAmount,
+              amount: netToCampaign,
               platform_fee: safePlatformFee,
               total_amount: safeAmount,
               transaction_id: trx.reference,
@@ -109,7 +116,7 @@ export default function PaystackPopup({
             };
 
             const resp = await updateDonate(payload);
-            
+
             if (resp.error) {
               setError("Payment successful, but donation was not recorded");
               localStorage.setItem("pending_donations", JSON.stringify({
@@ -123,8 +130,7 @@ export default function PaystackPopup({
             setStatus('success');
             localStorage.removeItem("pending_donations");
             setLoading(false);
-            console.log('Payment successful:', trx);
-            
+
             if (onSuccess) onSuccess(trx);
           } catch (error) {
             setError("Error recording donation");
@@ -138,7 +144,6 @@ export default function PaystackPopup({
         onCancel: () => {
           setLoading(false);
           setStatus('cancelled');
-          console.log('Payment cancelled by user');
           if (onCancel) onCancel();
         },
         onLoad: (response) => {
@@ -146,14 +151,12 @@ export default function PaystackPopup({
         },
         onError: (error) => {
           setLoading(false);
-          console.error('Paystack error:', error);
           setError(error.message || 'Payment failed. Please try again.');
         }
       });
 
     } catch (err) {
       setLoading(false);
-      console.error('ERROR:', err);
       setError('Something went wrong: ' + (err.message || err));
     }
   };
@@ -166,6 +169,23 @@ export default function PaystackPopup({
     }
   };
 
+  const downloadReceipt = () => {
+    if (!receiptRef.current) return;
+
+    const receiptHTML = receiptRef.current.innerHTML;
+    const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Donation Receipt - ${transaction?.reference || 'N/A'}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#f8fafc;padding:40px 20px}.receipt-container{max-width:480px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.1)}</style></head><body><div class="receipt-container">${receiptHTML}</div></body></html>`;
+
+    const blob = new Blob([fullHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chari-t-receipt-${transaction?.reference || 'donation'}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const resetPayment = () => {
     setStatus('idle');
     setTransaction(null);
@@ -173,127 +193,191 @@ export default function PaystackPopup({
   };
 
   const SuccessCard = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        {/* Header */}
-        <div className="bg-emerald-500 px-6 py-8 text-center">
-          <div className="mx-auto w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8 text-emerald-500" />
+    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="min-h-screen flex flex-col">
+
+        {/* Top Status Bar */}
+        <div className="bg-emerald-50 border-b border-emerald-100 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-emerald-600 text-sm">Payment Confirmed</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Payment Successful!</h2>
-          <p className="text-emerald-100 mt-1">Thank you for your generous donation</p>
+          <span className="text-gray-400 text-sm">{transaction?.reference}</span>
         </div>
 
-        {/* Transaction Details */}
-        <div className="p-6 space-y-4">
-          <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-            {/* Total Amount */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm flex items-center gap-1.5">
-                <Receipt className="w-3.5 h-3.5" />
-                Total Donation
-              </span>
-              <span className="text-lg font-bold text-slate-900">
-                ₦{safeAmount.toLocaleString()}
-              </span>
+        {/* Main Content */}
+        <div className="flex-1 px-6 py-8 sm:px-10 sm:py-12 max-w-2xl mx-auto w-full">
+
+          {/* Hero Section */}
+          <div className="text-center mb-10">
+            <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-100">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
             </div>
-            
-            <div className="h-px bg-slate-200" />
-            
-            {/* Platform Fee */}
-            {safePlatformFee > 0 && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-sm flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5" />
-                    Platform Fee
-                  </span>
-                  <span className="text-sm font-medium text-amber-600">
-                    ₦{safePlatformFee.toLocaleString()}
-                  </span>
+            <h1 className="text-3xl text-gray-900 mb-2">Thank You</h1>
+            <p className="text-gray-500">Your donation has been received</p>
+          </div>
+
+          {/* Amount Card */}
+          <div ref={receiptRef} className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-8 shadow-sm">
+
+            {/* Amount Header */}
+            <div className="bg-gray-50 px-6 py-8 text-center border-b border-gray-100">
+              <p className="text-gray-500 text-sm mb-2">Total Amount Paid</p>
+              <p className="text-4xl text-gray-900">₦{safeAmount.toLocaleString()}</p>
+            </div>
+
+            {/* Breakdown */}
+            <div className="p-6 space-y-4">
+
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Receipt className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-gray-900 text-sm">Donation</p>
+                    <p className="text-gray-400 text-xs">Base contribution</p>
+                  </div>
                 </div>
-                <div className="h-px bg-slate-200" />
-              </>
-            )}
+                <p className="text-gray-900">₦{netToCampaign.toLocaleString()}</p>
+              </div>
 
-            {/* Net to Campaign */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm font-medium">Net to Campaign</span>
-              <span className="text-base font-bold text-emerald-600">
-                ₦{(safeAmount - safePlatformFee).toLocaleString()}
-              </span>
-            </div>
+              {safePlatformFee > 0 && (
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Wallet className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-gray-900 text-sm">Platform Fee</p>
+                      <p className="text-gray-400 text-xs">Supports Chari-T</p>
+                    </div>
+                  </div>
+                  <p className="text-amber-600">₦{safePlatformFee.toLocaleString()}</p>
+                </div>
+              )}
 
-            <div className="h-px bg-slate-200" />
+              <div className="h-px bg-gray-100" />
 
-            {/* Reference */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Reference</span>
-              <button 
-                onClick={copyReference}
-                className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                {transaction?.reference || 'N/A'}
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-
-            <div className="h-px bg-slate-200" />
-
-            {/* Email */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Email</span>
-              <span className="text-sm font-medium text-slate-900">{email}</span>
-            </div>
-
-            <div className="h-px bg-slate-200" />
-
-            {/* Status */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Status</span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                Completed
-              </span>
-            </div>
-
-            <div className="h-px bg-slate-200" />
-
-            {/* Date */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Date</span>
-              <span className="text-sm font-medium text-slate-900">
-                {new Date().toLocaleDateString('en-NG', { 
-                  weekday: 'short', 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-emerald-700 text-sm">Net to Campaign</p>
+                    <p className="text-gray-400 text-xs">What the cause receives</p>
+                  </div>
+                </div>
+                <p className="text-emerald-600 text-lg">₦{netToCampaign.toLocaleString()}</p>
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
+          {/* Transaction Details */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
+            <h3 className="text-gray-400 text-sm uppercase mb-4">Transaction Details</h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Hash className="w-4 h-4" />
+                  <span className="text-sm">Reference</span>
+                </div>
+                <button 
+                  onClick={copyReference}
+                  className="flex items-center gap-2 text-blue-600 text-sm hover:text-blue-700 transition-colors"
+                >
+                  {transaction?.reference || 'N/A'}
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Mail className="w-4 h-4" />
+                  <span className="text-sm">Email</span>
+                </div>
+                <span className="text-gray-900 text-sm">{email}</span>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">Donor</span>
+                </div>
+                <span className="text-gray-900 text-sm">{donor_name || name || 'Anonymous'}</span>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm">Date</span>
+                </div>
+                <span className="text-gray-900 text-sm">
+                  {new Date().toLocaleDateString('en-NG', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Tag className="w-4 h-4" />
+                  <span className="text-sm">Status</span>
+                </div>
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Completed
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <button
+              onClick={downloadReceipt}
+              className="flex items-center justify-center gap-2 w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-xl transition-colors text-sm"
+            >
+              <Download className="w-4 h-4" />
+              Download Receipt
+            </button>
+
             <a 
               href={causesUrl}
-              className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl transition-colors text-sm"
             >
               View More Causes
               <ArrowRight className="w-4 h-4" />
             </a>
+
             <a 
               href={homeUrl}
-              className="flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl transition-colors text-sm"
             >
               <Home className="w-4 h-4" />
               Back to Home
             </a>
+
             <button
               onClick={resetPayment}
-              className="w-full text-slate-400 hover:text-slate-600 text-sm font-medium py-2 transition-colors"
+              className="w-full text-gray-400 hover:text-gray-600 text-sm py-3 transition-colors flex items-center justify-center gap-2"
             >
+              <RotateCcw className="w-4 h-4" />
               Make Another Donation
             </button>
           </div>
@@ -303,92 +387,108 @@ export default function PaystackPopup({
   );
 
   const CancelledCard = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        {/* Header */}
-        <div className="bg-amber-500 px-6 py-8 text-center">
-          <div className="mx-auto w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-            <XCircle className="w-8 h-8 text-amber-500" />
+    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="min-h-screen flex flex-col">
+
+        {/* Top Status Bar */}
+        <div className="bg-amber-50 border-b border-amber-100 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-amber-600 text-sm">Payment Cancelled</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Payment Cancelled</h2>
-          <p className="text-amber-100 mt-1">You closed the payment window</p>
         </div>
 
-        {/* Details */}
-        <div className="p-6 space-y-4">
-          <div className="bg-slate-50 rounded-xl p-4 space-y-3">
-            {/* Attempted Amount */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm flex items-center gap-1.5">
-                <Receipt className="w-3.5 h-3.5" />
-                Attempted Donation
-              </span>
-              <span className="text-lg font-bold text-slate-900">
-                ₦{safeAmount.toLocaleString()}
-              </span>
+        {/* Main Content */}
+        <div className="flex-1 px-6 py-8 sm:px-10 sm:py-12 max-w-2xl mx-auto w-full">
+
+          {/* Hero Section */}
+          <div className="text-center mb-10">
+            <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-100">
+              <AlertTriangle className="w-10 h-10 text-amber-500" />
             </div>
+            <h1 className="text-3xl text-gray-900 mb-2">Payment Cancelled</h1>
+            <p className="text-gray-500">No charges were applied to your account</p>
+          </div>
 
-            <div className="h-px bg-slate-200" />
+          {/* Summary Card */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
+            <h3 className="text-gray-400 text-sm uppercase mb-4">Payment Summary</h3>
 
-            {/* Platform Fee (shown as what would have been charged) */}
-            {safePlatformFee > 0 && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-sm flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5" />
-                    Platform Fee
-                  </span>
-                  <span className="text-sm font-medium text-slate-400 line-through">
-                    ₦{safePlatformFee.toLocaleString()}
-                  </span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Receipt className="w-4 h-4" />
+                  <span className="text-sm">Attempted Amount</span>
                 </div>
-                <div className="h-px bg-slate-200" />
-              </>
-            )}
+                <span className="text-gray-900 text-sm">₦{safeAmount.toLocaleString()}</span>
+              </div>
 
-            {/* Net to Campaign */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Would Go to Campaign</span>
-              <span className="text-sm font-medium text-slate-400 line-through">
-                ₦{(safeAmount - safePlatformFee).toLocaleString()}
-              </span>
-            </div>
+              {safePlatformFee > 0 && (
+                <>
+                  <div className="h-px bg-gray-100" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-gray-500">
+                      <Wallet className="w-4 h-4" />
+                      <span className="text-sm">Platform Fee</span>
+                    </div>
+                    <span className="text-gray-400 text-sm">₦{safePlatformFee.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
 
-            <div className="h-px bg-slate-200" />
+              <div className="h-px bg-gray-100" />
 
-            {/* Email */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Email</span>
-              <span className="text-sm font-medium text-slate-900">{email}</span>
-            </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Mail className="w-4 h-4" />
+                  <span className="text-sm">Email</span>
+                </div>
+                <span className="text-gray-900 text-sm">{email}</span>
+              </div>
 
-            <div className="h-px bg-slate-200" />
+              <div className="h-px bg-gray-100" />
 
-            {/* Status */}
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 text-sm">Status</span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                Cancelled
-              </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Tag className="w-4 h-4" />
+                  <span className="text-sm">Status</span>
+                </div>
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-100">
+                  <XCircle className="w-3 h-3" />
+                  Cancelled
+                </span>
+              </div>
             </div>
           </div>
 
-          <p className="text-sm text-slate-500 text-center">
-            No money was deducted from your account. You can try again whenever you are ready.
-          </p>
+          {/* Message */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-8">
+            <p className="text-gray-500 text-sm text-center">
+              Your payment was not processed. You can try again or browse other causes to support.
+            </p>
+          </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
+          {/* Actions */}
+          <div className="space-y-3">
             <button
               onClick={resetPayment}
-              className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-xl transition-colors text-sm"
             >
               <CreditCard className="w-4 h-4" />
               Try Again
             </button>
+
+            <a 
+              href={causesUrl}
+              className="flex items-center justify-center gap-2 w-full bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-xl transition-colors text-sm"
+            >
+              Browse Other Causes
+              <ArrowRight className="w-4 h-4" />
+            </a>
+
             <a 
               href={homeUrl}
-              className="flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl transition-colors text-sm"
             >
               <Home className="w-4 h-4" />
               Back to Home
@@ -403,26 +503,26 @@ export default function PaystackPopup({
     <div className="w-full space-y-3 relative">
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700 font-medium">{error}</p>
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      {/* Amount + Fee Breakdown Preview */}
-      <div className="bg-slate-50 rounded-lg p-3 space-y-2 text-sm">
+      {/* DARK donation stats */}
+      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-slate-500">Donation Amount</span>
-          <span className="font-medium text-slate-900">₦{safeAmount.toLocaleString()}</span>
+          <span className="text-white">₦{safeAmount.toLocaleString()}</span>
         </div>
         {safePlatformFee > 0 && (
           <>
             <div className="flex justify-between">
               <span className="text-slate-500">Platform Fee</span>
-              <span className="font-medium text-amber-600">₦{safePlatformFee.toLocaleString()}</span>
+              <span className="text-amber-400">₦{safePlatformFee.toLocaleString()}</span>
             </div>
-            <div className="h-px bg-slate-200" />
+            <div className="h-px bg-slate-800" />
             <div className="flex justify-between">
-              <span className="text-slate-600 font-medium">Campaign Receives</span>
-              <span className="font-bold text-emerald-600">₦{((safeAmount - safePlatformFee)).toLocaleString()}</span>
+              <span className="text-slate-400">Campaign Receives</span>
+              <span className="text-emerald-400">₦{netToCampaign.toLocaleString()}</span>
             </div>
           </>
         )}
@@ -432,7 +532,7 @@ export default function PaystackPopup({
         type="button"
         onClick={handlePayment}
         disabled={loading}
-        className="group relative w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 disabled:shadow-none overflow-hidden"
+        className="group relative w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 disabled:shadow-none overflow-hidden"
       >
         <div className={`absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full ${!loading ? 'group-hover:translate-x-full' : ''} transition-transform duration-1000`} />
         <span className="relative flex items-center justify-center gap-2">
