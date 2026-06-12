@@ -594,7 +594,7 @@ const Style2 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── STYLE 3: TICKET STYLE ─────────────────────────────────────────
+
 const Style3 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -771,7 +771,7 @@ const Style3 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── STYLE 4: FULL BLEED STORY ────────────────────────────────────
+
 const Style4 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -920,7 +920,7 @@ const Style4 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── STYLE 5: EDITORIAL GRID ──────────────────────────────────────
+
 const Style5 = ({ data }: { data: Flier }) => (
   <div style={{
     width: '100%',
@@ -1082,7 +1082,7 @@ const Style5 = ({ data }: { data: Flier }) => (
   </div>
 );
 
-// ─── MAIN EXPORT ────────────────────────────────────────────────────
+
 
 const FlierImage = ({ data }: { data: Flier }) => {
   const renderStyle = () => {
