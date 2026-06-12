@@ -1,29 +1,32 @@
 "use client"
 
+
 import { motion, AnimatePresence } from 'framer-motion';
 import NavBar from "@/app/components/layout/NavBar";
 import { DualRingSpinner } from "@/app/components/ui/loading";
 import { fetchOneCauseById, GetUserDetailsDyId, ReportCampaign } from "@/app/lib/fetchRequests";
 import { XCircle, AlertTriangle, Flag, EyeOff, ShieldAlert, HeartCrack, Trash2, Send, CheckCircle2, Image } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useSession } from 'next-auth/react';
-import { Campaign, Donor, UserData } from '@/app/lib/types';
+import { Campaign, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
 import { formatNumber } from '@/app/components/layout/card';
 import Button from '@/app/components/ui/button';
-import { Span } from 'next/dist/trace';
+
 
   export const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US').format(amount);
   };
 
-export default function Page() {
-  const searchParams = useSearchParams();
+export default  function Page() {
+ 
+ 
   const router = useRouter();
-  const id = searchParams.get("id");
-  const name = searchParams.get("name");
+ const params = useSearchParams();  
+  const id = params.get("id")
+ 
 
   const [reportStage, setReportStage] = useState(1);
   const [reportType, setReportType] = useState('');

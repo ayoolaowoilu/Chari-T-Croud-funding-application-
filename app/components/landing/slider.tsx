@@ -47,30 +47,26 @@ export default function HeroSlider() {
         return () => clearInterval(timer);
     }, [paginate]);
 
-    const slideVariants = {
-        enter: (direction: number) => ({
-            x: direction > 0 ? '100%' : '-100%',
-            opacity: 0,
-        }),
-        center: {
-            x: 0,
-            opacity: 1,
-        },
-        exit: (direction: number) => ({
-            x: direction < 0 ? '100%' : '-100%',
-            opacity: 0,
-        }),
-    };
+  const slideVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? "100%" : "-100%",
+        opacity: 0,
+    }),
+    center: { x: 0, opacity: 1 },
+    exit: (direction: number) => ({
+        x: direction < 0 ? "100%" : "-100%",
+        opacity: 0,
+    }),
+} as any;
 
-    const textVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: (delay: number) => ({
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, delay, ease: "easeOut" }
-        }),
-    };
-
+const textVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (delay: number) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, delay, ease: "easeOut" }
+    }),
+} as any;
     return (
         <section className="relative w-full h-[600px] md:h-[700px] overflow-hidden bg-gray-900">
             {/* Slides */}

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./components/provider";
 import PageProgress from "./components/pageProgress";
+import { Suspense } from "react";
 
 
 const geistSans = Geist({
@@ -26,7 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
+    <Suspense>
+        <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
@@ -37,5 +39,6 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
+    </Suspense>
   );
 }

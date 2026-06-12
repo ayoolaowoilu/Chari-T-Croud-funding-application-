@@ -14,8 +14,12 @@ import { AlertTriangle, FileCheck, Landmark, Lock, Shield, Sparkles, Zap } from 
 import { 
   LineChart, Line, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, ComposedChart
+  ResponsiveContainer, ComposedChart,
+  TooltipPayloadEntry,
+  TooltipPayload
 } from "recharts"
+
+import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent"
 
 
 
@@ -81,7 +85,7 @@ function parseApiDate(dateStr: string): Date {
   return new Date(dateStr.replace(' ', 'T'))
 }
 
-function formatNaira(amount: number): string {
+function formatNaira(amount: any): string {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
@@ -206,12 +210,19 @@ function ReceivedDonationsChart({ data }: { data: Donation[] }) {
               boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
               padding: '12px 16px'
             }}
-            formatter={(value: number, name: string) => {
-              if (name === 'total') return [formatNaira(value), 'Total Received']
-              if (name === 'center') return [formatNaira(value), 'Centers']
-              if (name === 'normal') return [formatNaira(value), 'From Users']
-              return [value, name]
-            }}
+              formatter={(
+    value: ValueType | undefined,
+    name: NameType | undefined,
+    item: TooltipPayloadEntry,
+    index: number,
+    payload: TooltipPayload
+  ) => {
+    const num = Number(value ?? 0)
+    if (name === "received") return [formatNaira(num), "Received"] as [string, string]
+    if (name === "given") return [formatNaira(num), "Given"] as [string, string]
+    return [String(value ?? ""), String(name ?? "")] as [string, string]
+  }}
+
             labelStyle={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}
           />
           <Legend 
@@ -361,12 +372,19 @@ function GivenDonationsChart({ data }: { data: Donation[] }) {
               boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
               padding: '12px 16px'
             }}
-            formatter={(value: number, name: string) => {
-              if (name === 'total') return [formatNaira(value), 'Total Given']
-              if (name === 'center') return [formatNaira(value), 'To Centers']
-              if (name === 'normal') return [formatNaira(value), 'To Users']
-              return [value, name]
-            }}
+          formatter={(
+    value: ValueType | undefined,
+    name: NameType | undefined,
+    item: TooltipPayloadEntry,
+    index: number,
+    payload: TooltipPayload
+  ) => {
+    const num = Number(value ?? 0)
+    if (name === "received") return [formatNaira(num), "Received"] as [string, string]
+    if (name === "given") return [formatNaira(num), "Given"] as [string, string]
+    return [String(value ?? ""), String(name ?? "")] as [string, string]
+  }}
+
             labelStyle={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}
           />
           <Legend 
@@ -497,12 +515,20 @@ function CombinedDonationsChart({ received, given }: { received: Donation[]; giv
               boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
               padding: '12px 16px'
             }}
-            formatter={(value: number, name: string) => {
-              if (name === 'received') return [formatNaira(value), 'Received']
-              if (name === 'given') return [formatNaira(value), 'Given']
-              return [value, name]
-            }}
-            labelStyle={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}
+              formatter={(
+    value: ValueType | undefined,
+    name: NameType | undefined,
+    item: TooltipPayloadEntry,
+    index: number,
+    payload: TooltipPayload
+  ) => {
+    const num = Number(value ?? 0)
+    if (name === "received") return [formatNaira(num), "Received"] as [string, string]
+    if (name === "given") return [formatNaira(num), "Given"] as [string, string]
+    return [String(value ?? ""), String(name ?? "")] as [string, string]
+  }}
+
+   labelStyle={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}
           />
           <Legend 
             iconType="circle" 
