@@ -1308,28 +1308,11 @@ export default function StartCausePage() {
     </div>
   )
 
-    const getFlierUrl = useCallback(
-    (style: number , id:number):string => {
-      const sp = new URLSearchParams();
-      sp.set("style", String(style));
-      sp.set("campaign_name", causeName);
-      sp.set("raised", "0");
-      if (goal) sp.set("goal", String(goal));
-      sp.set("campaign_id", String(id));
-      sp.set("campaign_logo_url", String(mainImage?.url));
-      sp.set("qr_code_url", `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.origin}/causes/cause?id=${id}`);
-        sp.set("tagline", details);
-      if (story) sp.set("details", story);
-      sp.set("_type", "normal");
-      return `${window.origin}/api/flier?${sp.toString()}`;
-    },
-    [stage]
-  );
-
+   
 
 const renderStage5 = () => {
   const id = new URL(link).searchParams.get("id") 
-  const flierUrls = [1, 2, 3, 4, 5].map((style) => getFlierUrl(style , Number(id)));
+
 
 
   return (
@@ -1351,7 +1334,7 @@ const renderStage5 = () => {
         </p>
 
         {/* Flier Previews - Visible at start */}
-        <div className="mb-10">
+        {/* <div className="mb-10">
           <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Pick a Flier</h3>
           <div className="grid grid-cols-5 gap-3">
             {flierUrls.map((url, idx) => (
@@ -1377,7 +1360,7 @@ const renderStage5 = () => {
             ))}
           </div>
           <p className="text-xs text-slate-400 mt-3">Click any flier to open in full size</p>
-        </div>
+        </div> */}
 
         {/* Campaign Link */}
         <div className="max-w-lg mx-auto mb-8">
