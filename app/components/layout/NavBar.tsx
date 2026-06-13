@@ -1,264 +1,379 @@
 "use client";
-
-import { ChevronDown, CircleHelp, Fullscreen, Menu, Search, User } from "lucide-react";
-
+import {
+  ChevronDown,
+  CircleHelp,
+  Menu,
+  User,
+  Heart,
+  TreePine,
+  GraduationCap,
+  Stethoscope,
+  Home,
+  Globe,
+  BriefcaseBusiness,
+  HandHeart,
+  Users,
+  Megaphone,
+  Info,
+  ShieldCheck,
+  FileText,
+  Mail,
+  Newspaper,
+  TrendingUp,
+  Landmark,
+  ArrowRight,
+} from "lucide-react";
 import Button from "../ui/button";
-import { useEffect, useState } from "react";
-import LoadingCards from "./loadingCards";
+import { useEffect, useState} from "react";
 import SideBar from "./sidebar";
 import { redirect, usePathname } from "next/navigation";
-
-import { useSession } from "next-auth/react"
+import { useSession } from "next-auth/react";
 import { Logo } from "./footer";
-
+import Link from "next/link";
 
 export default function NavBar() {
-    const [wcu, setWcu] = useState(false);
-    const [faq, setFaq] = useState(false);
-    const [searchIndex, setSearchIndex] = useState("");
-    const [baRshown, setBarshown] = useState(false);
-    const [profileDropDown, setProfileDropDown] = useState(false)
-    const pathname = usePathname()
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [getInvolvedOpen, setGetInvolvedOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [baRshown, setBarshown] = useState(false);
+  const [profileDropDown, setProfileDropDown] = useState(false);
+  const pathname = usePathname();
+  const { data: session, status } = useSession();
 
-    const { data: session, status } = useSession()
-   useEffect(()=>{
-      
-   },[])
-    useEffect(() => {
-        if (status === "unauthenticated") {
-             if(pathname === "/makedonations" || pathname === "/causes/get" || pathname === "/causes/cause" || pathname === "/"){  
-           return
-       }else{
-             return redirect(`/auth/signin?redir=${pathname}`)
-       }
-           
-        }
-       
-    }, [status])
+  // Close dropdowns on route change
+  useEffect(() => {
+    setAboutOpen(false);
+    setGetInvolvedOpen(false);
+    setCategoriesOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      const publicPaths = [
+        "/makedonations",
+        "/causes/get",
+        "/causes/cause",
+        "/",
+        "/about",
+        "/t&c",
+        "/privacy-policy",
+        "/dashboard/centers/profile",
+        "/causes/flier",
+      ];
+      if (!publicPaths.includes(pathname)) {
+        return redirect(`/auth/signin?redir=${window.location.href}`);
+      }
+    }
+  }, [status, pathname]);
+
+  const categories = [
+    { name: "Health", icon: Stethoscope, color: "bg-rose-50 text-rose-600", href: "/causes/get?category=Health" },
+    { name: "Education", icon: GraduationCap, color: "bg-blue-50 text-blue-600", href: "/causes/get?category=Education" },
+    { name: "Environment", icon: TreePine, color: "bg-emerald-50 text-emerald-600", href: "/causes/get?category=Environment" },
+    { name: "Housing", icon: Home, color: "bg-amber-50 text-amber-600", href: "/causes/get?category=Housing" },
+    { name: "Humanitarian", icon: Heart, color: "bg-red-50 text-red-600", href: "/causes/get?category=Humanitarian" },
+    { name: "Community", icon: Globe, color: "bg-violet-50 text-violet-600", href: "/causes/get?category=Community" },
+    { name: "Business", icon: BriefcaseBusiness, color: "bg-sky-50 text-sky-600", href: "/causes/get?category=Business" },
+    { name: "Crowdfunding", icon: TrendingUp, color: "bg-orange-50 text-orange-600", href: "/causes/get?category=Croudfunding" },
+  ];
+
+  const aboutLinks = [
+    { name: "Our Story", desc: "How Chari-T started and our mission", icon: Info, href: "/about" },
+    { name: "How It Works", desc: "Simple steps to donate or start a cause", icon: ShieldCheck, href: "/how-it-works" },
+    { name: "Impact Report", desc: "See the difference we've made together", icon: TrendingUp, href: "/impact" },
+    { name: "Blog & News", desc: "Latest updates and stories", icon: Newspaper, href: "/blog" },
+  ];
+
+  const getInvolvedLinks = [
+    { name: "Start a Cause", desc: "Launch your own fundraising campaign", icon: Megaphone, href: "/startcauses" },
+    { name: "Donate Now", desc: "Find causes that need your support", icon: HandHeart, href: "/causes/get" },
+    { name: "Volunteer", desc: "Offer your time and skills", icon: Users, href: "/volunteer" },
+    { name: "Partner With Us", desc: "Corporate and organization partnerships", icon: Landmark, href: "/partners" },
+  ];
 
 
+  const openAbout = () => {
+    setAboutOpen(true);
+    setGetInvolvedOpen(false);
+    setCategoriesOpen(false);
+  };
+  const openGetInvolved = () => {
+    setAboutOpen(false);
+    setGetInvolvedOpen(true);
+    setCategoriesOpen(false);
+  };
+  const openCategories = () => {
+    setAboutOpen(false);
+    setGetInvolvedOpen(false);
+    setCategoriesOpen(true);
+  };
 
+  return (
+    <>
+      <nav className="px-6 py-2 shadow-sm bg-white border-b border-gray-100 fixed top-0 w-full z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
+          {/* LEFT: Logo + Nav Links */}
+          <div className="hidden md:flex items-center gap-1">
+            <Link href="/" className="mr-6">
+              <Logo nav />
+            </Link>
 
+            {/* About Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={openAbout}
+              onMouseLeave={() => setAboutOpen(false)}
+            >
+              <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all">
+                About
+                <ChevronDown size={14} className={`transition-transform duration-200 ${aboutOpen ? "rotate-180" : ""}`} />
+              </button>
 
-    return (
-        <>
-            <nav className="px-6 py-1 shadow bg-white border-b border-gray-100 fixed top-0 w-full z-50">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-
-                    <div className="hidden md:flex items-center gap-8 w-full">
-                        <a href="/" className="text-2xl  text-gray-900 tracking-tight">
-           <Logo nav />
-                        </a>
-
-
-
-                        <div
-                            className="relative"
-                            onMouseEnter={() => setWcu(true)}
-                            onMouseLeave={() => setWcu(false)}
+              {aboutOpen && (
+                <div className="absolute top-full left-0 pt-2">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-80 overflow-hidden">
+                    <div className="p-2">
+                      {aboutLinks.map((link) => (
+                        <Link
+                          key={link.name}
+                          href={link.href}
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                         >
-                            <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors py-2">
-                                <span className="text-sm font-medium">Why Us</span>
-                                <ChevronDown size={16} className={`transition-transform ${wcu ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {wcu && (
-                                <div className="absolute top-full left-0 pt-2">
-                                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 w-64 p-4">
-                                        <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                                            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                                                <User size={16} className="text-blue-600" />
-                                            </div>
-                                            <span className="font-medium text-gray-900">Why Choose Us</span>
-                                        </div>
-                                        <p className="mt-3 text-sm text-gray-500 leading-relaxed">
-                                            We deliver globally with transparency and measurable impact.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-
-                        <div
-                            className="relative"
-                            onMouseEnter={() => setFaq(true)}
-                            onMouseLeave={() => setFaq(false)}
-                        >
-                            <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors py-2">
-                                <span className="text-sm font-medium">FAQ</span>
-                                <ChevronDown size={16} className={`transition-transform ${faq ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {faq && (
-                                <div className="absolute top-full left-0 pt-2">
-                                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 w-72 p-4">
-                                        <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                                            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                                                <CircleHelp size={16} className="text-emerald-600" />
-                                            </div>
-                                            <span className="font-medium text-gray-900">Frequently Asked Questions</span>
-                                        </div>
-                                        <p className="mt-3 text-sm text-gray-500 leading-relaxed">
-                                            Find answers to common questions about donations and our process.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div
-                        >
-                            <button onClick={()=>redirect("/startcauses")} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors py-2">
-                                <span className="text-sm font-medium">Start Cause</span>
-
-                            </button>
-                        </div>
-
-                        
-                        <div
-                        >
-                            <button onClick={()=>redirect("/causes/get")} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors py-2">
-                                <span className="text-sm font-medium">View causes</span>
-
-                            </button>
-                        </div> 
-
-                       {status == "authenticated" && (
-                            <div
-                        >
-                            <button onClick={()=>redirect("/dashboard/donor")} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors py-2">
-                                <span className="text-sm font-medium">DashBoard</span>
-
-                            </button>
-                        </div> 
-                       )}
-
-
-
-
-                        {/* <div className="relative w-64">
-                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                onChange={(e) => setSearchIndex(e.target.value)}
-                                type="text"
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-                                placeholder="Search causes..."
-                            />
-                        </div> */}
-
-
+                          <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors shrink-0">
+                            <link.icon size={18} className="text-gray-500 group-hover:text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {link.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
-
-
-
-
-
-
-                    <div className="flex flex-row space-x-2 justify-between md:justify-end w-full md:w-64">
-
-                        <a href="/" className="text-2xl flex space-x-2  text-gray-900 tracking-tight md:hidden">
-                           <Logo nav />
-                       
-                        </a>
-
-
-
-                        <div className="flex space-x-2">
-
-                            {status == "authenticated" ? (
-                                <div className="">
-                                    <div
-                                        onMouseEnter={() => setProfileDropDown(true)}
-                                        onMouseLeave={() => setProfileDropDown(false)}
-                                        className="flex justify-end items-center space-x-3  rounded-xl   cursor-pointer relative"
-                                    >
-                                        <div className="overflow-hidden rounded-full border-2 border-gray-200">
-                                            <img
-                                                src={session?.user.image || "/default-avatar.png"}
-                                                width={40}
-                                                height={40}
-                                               alt="l"
-                                                className="object-cover "
-                                            />
-                                        </div>
-
-                                        <small className="text-black hidden md:block">{session.user.name}</small>
-
-                                        
-
-
-
-                                        {profileDropDown && (
-                                            <div className="absolute right-0 top-14 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 py-3 px-4 z-50">
-                                                <div className="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100">
-                                                    <img
-                                                        src={session?.user.image || "/default-avatar.png"}
-                                                        width={40}
-                                                        height={40}
-                                                        alt="l"
-                                                        className="rounded-full object-cover"
-                                                    />
-                                                    <div>
-                                                        <p className="font-semibold text-gray-800">{session?.user.name}</p>
-                                                        <p className="text-sm text-gray-500">{session?.user.email}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <button onClick={()=>redirect("/dashboard/donor?goto=profile")} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
-                                                        Profile
-                                                    </button>
-                                                    <button onClick={()=>redirect("/dashboard/donor?goto=settings")}  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
-                                                        Settings
-                                                    </button>
-                                                    <button
-
-                                                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                                    >
-                                                        Sign Out
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-
-
-                                    </div>
-
-
-
-
-                                </div>) :
-                                (<Button
-                                    size="sm"
-                                    variant="secondary"
-                                    details="Sign in"
-                                    className="bg-blue-600 hover:bg-blue-700  text-white"
-                                    onClick={() => window.location.href = `/auth/signin?redir=${pathname}`}
-                                />)
-                            }
-                            <div onClick={() => setBarshown(!baRshown)} className="md:hidden bg-gray-300 rounded p-2 text-gray-900 hover:opacity-50">
-                                <Menu size={25} />
-                            </div>
-
-
-
-                        </div>
-
-
-                    </div>
-
-
-
-
+                  </div>
                 </div>
-            </nav>
+              )}
+            </div>
 
-            {/* Spacer for fixed nav */}
-            <div className="h-10" />
-            <SideBar onClose={() => setBarshown(!baRshown)} isAuthenticated={status === "authenticated" ? true : false} show={baRshown} />
-           
+            {/* Get Involved Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={openGetInvolved}
+              onMouseLeave={() => setGetInvolvedOpen(false)}
+            >
+              <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all">
+                Get Involved
+                <ChevronDown size={14} className={`transition-transform duration-200 ${getInvolvedOpen ? "rotate-180" : ""}`} />
+              </button>
 
-        
-        </>
-    );
-} 2
+              {getInvolvedOpen && (
+                <div className="absolute top-full left-0 pt-2">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-80 overflow-hidden">
+                    <div className="p-2">
+                      {getInvolvedLinks.map((link) => (
+                        <Link
+                          key={link.name}
+                          href={link.href}
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                        >
+                          <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-50 transition-colors shrink-0">
+                            <link.icon size={18} className="text-gray-500 group-hover:text-emerald-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                              {link.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* View Causes Mega Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={openCategories}
+              onMouseLeave={() => setCategoriesOpen(false)}
+            >
+              <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all">
+                View Causes
+                <ChevronDown size={14} className={`transition-transform duration-200 ${categoriesOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {categoriesOpen && (
+                <div className="absolute top-full left-0 pt-2">
+                  <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-[520px] overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                      <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
+                        <CircleHelp size={18} className="text-emerald-600" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-900 text-sm">Browse by Category</span>
+                        <p className="text-xs text-gray-500 mt-0.5">Find causes that match your passion</p>
+                      </div>
+                    </div>
+
+                    {/* 8 Category Boxes */}
+                    <div className="grid grid-cols-4 gap-2 p-4">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.name}
+                          href={cat.href}
+                          className="group flex flex-col items-center gap-2 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 bg-white"
+                        >
+                          <div className={`w-11 h-11 ${cat.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                            <cat.icon size={20} />
+                          </div>
+                          <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900 text-center">
+                            {cat.name}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Footer CTA */}
+                    <div className="px-4 pb-4">
+                      <Link
+                        href="/causes/get"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                      >
+                        View All Causes
+                        <ArrowRight size={14} />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Links */}
+            <Link
+              href="/startcauses"
+              className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all"
+            >
+              Start Cause
+            </Link>
+
+            {status === "authenticated" && (
+              <Link
+                href="/dashboard/donor"
+                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all"
+              >
+                Dashboard
+              </Link>
+            )}
+          </div>
+
+          {/* RIGHT: CTA + Profile + Mobile Menu */}
+          <div className="flex items-center gap-3">
+            {/* Donate Button (always visible) */}
+            <Link
+              href="/causes/get"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm hover:shadow-md"
+            >
+              <HandHeart size={16} />
+              Donate
+            </Link>
+
+            {/* Mobile Logo */}
+            <Link href="/" className="md:hidden">
+              <Logo nav />
+            </Link>
+
+            {/* Auth Section */}
+            <div className="flex items-center gap-2">
+              {status === "authenticated" ? (
+                <div
+                  className="relative"
+                  onMouseEnter={() => setProfileDropDown(true)}
+                  onMouseLeave={() => setProfileDropDown(false)}
+                >
+                  <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 rounded-full border-2 border-gray-200 overflow-hidden">
+                      <img
+                        src={session?.user.image || "/default-avatar.png"}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="hidden lg:block text-sm font-medium text-gray-700">
+                      {session.user.name?.split(" ")[0]}
+                    </span>
+                    <ChevronDown size={14} className="text-gray-400" />
+                  </button>
+
+                  {profileDropDown && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 px-2 z-50 overflow-hidden">
+                      <div className="flex items-center gap-3 px-3 pb-3 mb-2 border-b border-gray-100">
+                        <img
+                          src={session?.user.image || "/default-avatar.png"}
+                          alt="Profile"
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-800 text-sm truncate">{session?.user.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{session?.user.email}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-0.5">
+                        <button
+                          onClick={() => redirect("/dashboard/donor?goto=profile")}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <User size={16} className="text-gray-400" />
+                          Profile
+                        </button>
+                        <button
+                          onClick={() => redirect("/dashboard/donor?goto=settings")}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <FileText size={16} className="text-gray-400" />
+                          Settings
+                        </button>
+                        <div className="border-t border-gray-100 my-1" />
+                        <button className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
+                          <ArrowRight size={16} className="rotate-90" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  details="Sign in"
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  onClick={() => (window.location.href = `/auth/signin?redir=${pathname}`)}
+                />
+              )}
+
+              {/* Mobile Hamburger */}
+              <button
+                onClick={() => setBarshown(!baRshown)}
+                className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Menu size={24} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Spacer for fixed nav */}
+      <div className="h-16" />
+      <SideBar
+        onClose={() => setBarshown(!baRshown)}
+        isAuthenticated={status === "authenticated"}
+        show={baRshown}
+      />
+    </>
+  );
+}
