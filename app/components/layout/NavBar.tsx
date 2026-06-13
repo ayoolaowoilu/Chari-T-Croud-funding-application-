@@ -112,13 +112,13 @@ export default function NavBar() {
     <>
       <nav className="px-6 py-2 shadow-sm bg-white border-b border-gray-100 fixed top-0 w-full z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
-          {/* LEFT: Logo + Nav Links */}
+     
           <div className="hidden md:flex items-center gap-1">
             <Link href="/" className="mr-6">
               <Logo nav />
             </Link>
 
-            {/* About Dropdown */}
+    
             <div
               className="relative"
               onMouseEnter={openAbout}
@@ -156,7 +156,7 @@ export default function NavBar() {
               )}
             </div>
 
-            {/* Get Involved Dropdown */}
+           
             <div
               className="relative"
               onMouseEnter={openGetInvolved}
@@ -194,7 +194,7 @@ export default function NavBar() {
               )}
             </div>
 
-            {/* View Causes Mega Dropdown */}
+            
             <div
               className="relative"
               onMouseEnter={openCategories}
@@ -251,8 +251,15 @@ export default function NavBar() {
                 </div>
               )}
             </div>
+                
+             <Link
+              href="/startcauses"
+              className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all"
+            >
+              
+              Local Charities
+            </Link>
 
-            {/* Direct Links */}
             <Link
               href="/startcauses"
               className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all"
