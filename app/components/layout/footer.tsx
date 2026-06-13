@@ -1,4 +1,5 @@
 import { Heart, Mail, Phone, MapPin, ArrowUp, Leaf, ExternalLink } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 const footerLinks = {
     causes: [
@@ -8,21 +9,21 @@ const footerLinks = {
         { name: 'Emergency Relief', href: `/causes/get?category=Community` }
     ],
     company: [
-        { name: 'About Us', href: '#' },
-        { name: 'Our Team', href: '#' },
-        { name: 'Careers', href: '#' },
-        { name: 'Press', href: '#' }
+        { name: 'About Us', href: '/about' },
+        { name: 'Our Team', href: '/about#teams' },
+       
     ],
     resources: [
-        { name: 'Blog', href: '#' },
-        { name: 'Reports', href: '#' },
-        { name: 'FAQ', href: '#' },
-        { name: 'Contact', href: '#' }
+        { name: 'Blog', href: '/blog' },
+        { name: 'Reports', href: '/reports' },
+        { name: 'FAQ', href: '/faq' },
+        { name: 'Contact', href: '/contact' },
+            { name: 'How it works', href: '/how-it-works' }
     ],
     legal: [
-        { name: 'Privacy Policy', href: '#' },
-        { name: 'Terms of Service', href: '#' },
-        { name: 'Cookie Policy', href: '#' }
+        { name: 'Privacy Policy', href: '/privacy-policy' },
+        { name: 'Terms of Service', href: '/t&c' },
+        
     ]
 };
 
@@ -53,7 +54,7 @@ export default function Footer() {
                         <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Ready to make an impact?</h3>
                         <p className="text-gray-400">Join thousands of donors changing lives every day.</p>
                     </div>
-                    <button className="relative z-10 px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
+                    <button onClick={()=>redirect("/causes/get")} className="relative z-10 px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
                         Start Giving Today
                     </button>
                 </div>
@@ -63,7 +64,7 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-6 md:px-8 py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
-                    {/* Brand Block - Large */}
+                 
                     <div className="lg:col-span-5 bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
                         <div className="mb-6">
                             <Logo />

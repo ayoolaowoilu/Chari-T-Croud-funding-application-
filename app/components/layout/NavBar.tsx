@@ -294,10 +294,7 @@ export default function NavBar() {
               Donate
             </Link>
 
-           
-         
-
-          
+                 
             <div className="flex items-center gap-2">
               {status === "authenticated" ? (
                 <div

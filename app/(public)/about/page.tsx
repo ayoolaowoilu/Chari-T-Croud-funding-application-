@@ -132,15 +132,15 @@ export default function Page() {
         </section>
 
         {/* Team Section */}
-        <section className="mb-16">
+        <section className="mb-16 mt-4" id="teams">
           <h2 className="text-2xl font-semibold mb-8 text-center">Meet the Team</h2>
 
           {/* CEO Card - Prominent */}
         <div className="mb-10 p-8 border border-gray-200 rounded-2xl bg-gray-50">
   <div className="flex flex-col md:flex-row gap-8 items-start">
     {/* Image Space */}
-    <div className="w-full md:w-64 flex-shrink-0">
-      <div className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-gray-200">
+    <div className="w-full md:w-64 shrink-0">
+      <div className="relative w-full aspect-3/4 rounded-xl overflow-hidden bg-gray-200">
         <Image
           src="/ayoola1.png"
           alt="Ayoola Khaleed Owoilu - Founder & CEO of Chari-T"
