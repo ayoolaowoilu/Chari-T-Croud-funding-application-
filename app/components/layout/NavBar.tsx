@@ -111,7 +111,8 @@ export default function NavBar() {
   return (
     <>
       <nav className="px-6 py-2 shadow-sm bg-white border-b border-gray-100 fixed top-0 w-full z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
+
+        <div className="max-w-7xl mx-auto flex  justify-between h-14 ">
      
           <div className="hidden md:flex items-center gap-1">
             <Link href="/" className="mr-6">
@@ -276,10 +277,15 @@ export default function NavBar() {
               </Link>
             )}
           </div>
+             <div className="flex items-center">
 
-          {/* RIGHT: CTA + Profile + Mobile Menu */}
-          <div className="flex items-center gap-3">
-            {/* Donate Button (always visible) */}
+                    <Link href="/" className="md:hidden ">
+              <Logo nav />
+            </Link>
+             </div>
+        
+          <div className="flex items-center gap-3  ">
+       
             <Link
               href="/causes/get"
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm hover:shadow-md"
@@ -288,12 +294,10 @@ export default function NavBar() {
               Donate
             </Link>
 
-            {/* Mobile Logo */}
-            <Link href="/" className="md:hidden">
-              <Logo nav />
-            </Link>
+           
+         
 
-            {/* Auth Section */}
+          
             <div className="flex items-center gap-2">
               {status === "authenticated" ? (
                 <div
@@ -362,7 +366,7 @@ export default function NavBar() {
                 />
               )}
 
-              {/* Mobile Hamburger */}
+           
               <button
                 onClick={() => setBarshown(!baRshown)}
                 className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -370,6 +374,8 @@ export default function NavBar() {
                 <Menu size={24} />
               </button>
             </div>
+
+
           </div>
         </div>
       </nav>
