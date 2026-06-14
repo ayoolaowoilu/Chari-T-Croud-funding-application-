@@ -9,6 +9,8 @@ import { redirect, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { compressImageIfNeeded, validateImageFile, formatFileSize } from "@/app/lib/imageCompression";
 import { uploadImage } from "@/app/lib/upload";
+import Button from "@/app/components/ui/button";
+import { Image } from "lucide-react";
 
 export interface CampaignPayload {
     name: string;
@@ -33,6 +35,7 @@ interface FetchedCenterData {
     bank_details: string;
     total_donators: number;
     user_id: number;
+    address:string
 }
 
 interface UploadState {
@@ -70,7 +73,7 @@ export default function CampaignPage() {
 
    
     const [centerData, setCenterData] = useState<FetchedCenterData | null>(null);
-       const [link , setLink ] = useState("")
+       const [link , setLink ] = useState("https://charit.com?id=22")
     const [name, setName] = useState("");
     const [category, setCategory] = useState<CampaignPayload["category"]>("CroudFunding");
     const [deadline, setDeadline] = useState(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -128,7 +131,6 @@ export default function CampaignPage() {
 
             if (!resp?.kyc) {
                 redirect(`/dashboard/kyc?redir=/dashboard/centers/campaign${id ? `?id=${id}` : ""}`);
-                return;
             }
 
             if (!id) {
@@ -314,7 +316,7 @@ export default function CampaignPage() {
                 mainImage: { url: imageUrl },
                 user_email: session?.user?.email as string,
                 _type: "center",
-                location: centerData.geo_location,
+                location: centerData.address,
             };
 
             const resp = await uploadCause(payload);
@@ -542,7 +544,7 @@ export default function CampaignPage() {
                     </div>
                 )}
 
-                {/* Stage 2: Category & Deadline */}
+                
                 {stage === 2 && (
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
                         <div>
@@ -871,11 +873,19 @@ export default function CampaignPage() {
                                         </>
                                     )}
                                 </button>
+
+
                             </div>
                             <p className="text-xs text-slate-400 mt-3">Share this link with supporters to start receiving donations immediately</p>
                         </div>
 
-                        {/* Action Buttons */}
+
+                            <Button onClick={()=>{
+               const flierUrl = `/causes/flier?_type=${"center"}&center_name=${encodeURIComponent(centerData?.name as string)}&campaign_name=${encodeURIComponent(name)}&raised=${0}&goal=${0}&campaign_id=${new URL(link).searchParams.get("id")}&campaign_logo_url=${upload.url || centerData?.logourl}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${link}`)}&tagline=${encodeURIComponent(details || '')}&details=${encodeURIComponent(details?.slice(0,1500) + "..." || '')}`;
+    window.open(flierUrl, '_blank');
+            }} variant="outline" className='w-full my-2' size="md" details={<span className='flex gap-2 justify-center '><Image size={20}  /> Get Flier</span>}  />
+
+                        
                         <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto pt-4">
                             <button
                                 onClick={goToDashboard}

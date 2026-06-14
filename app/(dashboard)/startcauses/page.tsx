@@ -37,6 +37,7 @@ import {
   Zap,
   Upload,
   X,
+  Image,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { FetchProfile, uploadCause } from "@/app/lib/fetchRequests"
@@ -48,6 +49,7 @@ import LocationAutocomplete from "@/app/components/locationAutoComplete"
 import Footer from "@/app/components/layout/footer"
 import { compressImageIfNeeded, validateImageFile, formatFileSize, MAX_FILE_SIZE } from "@/app/lib/imageCompression"
 import { CampaignPayload } from "../dashboard/centers/campaign/page"
+import Button from "@/app/components/ui/button"
 
 interface UploadingImage extends CloudinaryImage {
   compressionStatus?: 'checking' | 'compressing' | 'compressed' | 'original' | 'failed';
@@ -124,7 +126,7 @@ export default function StartCausePage() {
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
 
   const { data: session, status } = useSession();
-    const [link ,setLink]= useState(``)
+    const [link ,setLink]= useState(`https:chari-t.com?id=3`)
 
  
   useEffect(() => {
@@ -1333,36 +1335,7 @@ const renderStage5 = () => {
           <span className="font-semibold text-slate-900">"{causeName}"</span> is now live and ready to receive donations.
         </p>
 
-        {/* Flier Previews - Visible at start */}
-        {/* <div className="mb-10">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Pick a Flier</h3>
-          <div className="grid grid-cols-5 gap-3">
-            {flierUrls.map((url, idx) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-3/4 bg-slate-100 rounded-lg border-2 border-slate-200 hover:border-emerald-500 transition-all overflow-hidden block"
-              >
-                <img
-                  src={url}
-                  alt={`Flier style ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center">
-                  <span className="opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-xs font-semibold px-2 py-1 rounded-md transition-opacity">
-                    Style {idx + 1}
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-          <p className="text-xs text-slate-400 mt-3">Click any flier to open in full size</p>
-        </div> */}
-
-        {/* Campaign Link */}
+      
         <div className="max-w-lg mx-auto mb-8">
           <div className="bg-slate-50 rounded-xl p-2 border border-slate-200 flex items-center gap-2">
             <div className="flex-1 min-w-0 px-3 py-2">
@@ -1398,6 +1371,12 @@ const renderStage5 = () => {
           </div>
           <p className="text-xs text-slate-400 mt-3">Share this link with supporters to start receiving donations immediately</p>
         </div>
+
+            <Button onClick={()=>{
+               const flierUrl = `/causes/flier?_type=${"normal"}&center_name=${encodeURIComponent('')}&campaign_name=${encodeURIComponent(causeName)}&raised=${0}&goal=${goal}&campaign_id=${id}&campaign_logo_url=${mainImage?.url}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${id}`)}&tagline=${encodeURIComponent(details || '')}&details=${encodeURIComponent(story?.slice(0,1500) + "..." || '')}`;
+    window.open(flierUrl, '_blank');
+            }} variant="outline" className='w-full my-2' size="md" details={<span className='flex gap-2 justify-center '><Image size={20}  /> Get Flier</span>}  />
+       
 
         {/* Stats Summary */}
         <div className="bg-slate-50 rounded-xl p-5 mb-8 text-left space-y-3 border border-slate-100">

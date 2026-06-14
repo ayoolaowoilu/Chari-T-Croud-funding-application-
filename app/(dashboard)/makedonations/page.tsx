@@ -158,12 +158,12 @@ export default function Page(){
   }else{
         return (
   <>
-      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4 md:p-8 mt-13">
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4 md:p-8 mt-15">
       <NavBar />
   
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         
-        {/* Left Side - Image Section */}
+      
         <div className="relative order-2 lg:order-1">
           <div className="relative rounded-3xl overflow-hidden bg-linear-to-br from-blue-50 via-white to-gray-100 border border-gray-200 shadow-xl shadow-gray-200/50">
             {/* Image */}

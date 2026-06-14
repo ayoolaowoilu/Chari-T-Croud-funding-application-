@@ -22,12 +22,13 @@ import {
   TrendingUp,
   Landmark,
   ArrowRight,
+  History,
 } from "lucide-react";
 import Button from "../ui/button";
 import { useEffect, useState} from "react";
 import SideBar from "./sidebar";
 import { redirect, usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Logo } from "./footer";
 import Link from "next/link";
 
@@ -337,15 +338,25 @@ export default function NavBar() {
                           <User size={16} className="text-gray-400" />
                           Profile
                         </button>
+
                         <button
-                          onClick={() => redirect("/dashboard/donor?goto=settings")}
+                          onClick={() => redirect("/dashboard/donor?goto=explore")}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
                         >
                           <FileText size={16} className="text-gray-400" />
-                          Settings
+                            Track Campaigns
                         </button>
+
+                           <button
+                          onClick={() => redirect("/dashboard/donor?goto=history")}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <History size={16} className="text-gray-400" />
+                            Donation history
+                        </button>
+
                         <div className="border-t border-gray-100 my-1" />
-                        <button className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
+                        <button onClick={()=>signOut({callbackUrl:"/"})} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
                           <ArrowRight size={16} className="rotate-90" />
                           Sign Out
                         </button>

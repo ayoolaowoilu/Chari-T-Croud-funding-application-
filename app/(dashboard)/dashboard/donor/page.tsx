@@ -17,7 +17,7 @@ import {
   Menu,
   X
 } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import { redirect, useSearchParams } from "next/navigation"
 import DonationsPage from "@/app/components/dashboad/donations"
 import CharityProp from "@/app/components/dashboad/charity"
@@ -130,7 +130,7 @@ function Sidebar({
         />
       )}
 
-      {/* Desktop Sidebar */}
+    
       <aside
         className={`
           hidden md:flex fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200
@@ -189,11 +189,8 @@ function Sidebar({
         <div className="shrink-0 p-3 border-t border-gray-100">
           {!collapsed ? (
             <div className="space-y-1">
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                <Settings className="w-4 h-4 text-gray-400" />
-                <span>Settings</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+             
+              <button onClick={()=>signOut({callbackUrl:"/"})} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>

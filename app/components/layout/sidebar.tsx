@@ -16,6 +16,8 @@ import {
   ChevronRight,
   LogIn,
   UserPlus,
+  HouseHeart,
+  UserCircle2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Button from "../ui/button";
@@ -170,6 +172,31 @@ const SideBar: React.FC<SideBarProps> = ({ show, onClose, isAuthenticated }) => 
             </div>
           )}
         </div>
+       <div className="px-4 pb-4">
+          <div className="border-t border-gray-100 pt-4 space-y-1">
+            <Link
+              href="/dashboard/centers/local-centers"
+              onClick={onClose}
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-600 transition-colors"
+            >
+              <HouseHeart size={18} className="text-gray-400" />
+              <span className="text-sm font-medium">Local Charites</span>
+            </Link>
+          </div>
+        </div>
+
+          <div className="px-4 pb-4">
+          <div className="border-t border-gray-100 pt-4 space-y-1">
+            <Link
+              href="/dashboard/donor?goto=profile"
+              onClick={onClose}
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-600 transition-colors"
+            >
+              <UserCircle2 size={18} className="text-gray-400" />
+              <span className="text-sm font-medium">Profile</span>
+            </Link>
+          </div>
+        </div>
 
         {/* Help Section */}
         <div className="px-4 pb-4">
@@ -185,6 +212,8 @@ const SideBar: React.FC<SideBarProps> = ({ show, onClose, isAuthenticated }) => 
           </div>
         </div>
 
+        
+
        
         {!isAuthenticated && (
           <div className="mt-auto p-4 border-t border-gray-100 space-y-2">
@@ -197,7 +226,7 @@ const SideBar: React.FC<SideBarProps> = ({ show, onClose, isAuthenticated }) => 
               Sign In
             </Link>
             <Link
-              href="/auth/signup"
+              href="/auth/signin"
               onClick={onClose}
               className="flex items-center justify-center gap-2 w-full p-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
             >

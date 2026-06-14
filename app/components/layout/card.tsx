@@ -344,12 +344,12 @@ const CenterCard: React.FC<Don> = ({
 
 
             <div className="flex flex-col grow p-5">
-                {/* Title */}
+               
                 <h3 className="text-base font-bold text-gray-900 leading-snug line-clamp-1 mb-2">
                     {title}
                 </h3>
 
-                {/* Center Name + Verification */}
+              
                 <div title={centerName} className="flex items-center gap-1.5 mb-2">
                     <span title={centerName} className="text-xs text-gray-600 leading-relaxed line-clamp-3">
                         {centerName}
