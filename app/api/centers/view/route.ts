@@ -1,8 +1,8 @@
 import db from "@/app/lib/DBschema";
 import { NextRequest, NextResponse } from "next/server";
 
-const CENTERS_FIELDS = "name, email,  phone, address, website, logourl";
-const CAMPAIGNS_FIELDS = "id, name, details, main_img, raised, center_name, center_id, date_to_completion, donation_count";
+const CENTERS_FIELDS = "name, email, phone, address, website, logourl , id";
+const CAMPAIGNS_FIELDS = "id, name, details, main_img, raised, center_name, center_id, date_to_completion, donation_count, category";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,27 +20,33 @@ export async function GET(request: NextRequest) {
     let centersParams: (string | number)[] = [];
     let campaignsParams: (string | number)[] = [];
 
-    const searchCondition = searchQuery
-      ? `AND (name LIKE ? OR details LIKE ? OR center_name LIKE ?)`
+    const searchConditionCampaign = searchQuery
+      ? `AND (name LIKE ? OR details LIKE ? OR center_name LIKE "%${searchQuery}%" )`
+      : "";
+
+       const searchConditionCenter = searchQuery
+      ? `AND (name LIKE ? OR about LIKE ?)`
       : "";
 
     const searchValues = searchQuery
-      ? [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`]
+      ? [`%${searchQuery}%`, `%${searchQuery}%`]
       : [];
 
     if (type === "both") {
+      // Centers: show verified ones, no date filter (centers don't expire)
       centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
-        WHERE is_verified_status <> "verified"
-        ${searchCondition}
+        WHERE is_verified_status = "verified"
+        ${searchConditionCenter}
         ORDER BY id DESC 
         LIMIT ? OFFSET ?`;
 
-      centersParams = [now, ...searchValues, limit + 1, offset];
+      centersParams = [...searchValues, limit + 1, offset];
 
+  
       campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
         WHERE date_to_completion > ? 
         AND center_id IS NOT NULL 
-        ${searchCondition}
+        ${searchConditionCampaign}
         ORDER BY id DESC 
         LIMIT ? OFFSET ?`;
 
@@ -50,21 +56,21 @@ export async function GET(request: NextRequest) {
       campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
         WHERE date_to_completion > ? 
         AND center_id IS NOT NULL 
-        ${searchCondition}
+        ${searchConditionCampaign}
         ORDER BY id DESC 
         LIMIT ? OFFSET ?`;
 
       campaignsParams = [now, ...searchValues, limit + 1, offset];
 
     } else {
-      // Default: centers only
+      // Default: centers only — verified ones
       centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
-        WHERE  is_verified_status == "verified"
-        ${searchCondition}
+        WHERE is_verified_status = "verified"
+        ${searchConditionCenter}
         ORDER BY id DESC 
         LIMIT ? OFFSET ?`;
 
-      centersParams = [now, ...searchValues, limit + 1, offset];
+      centersParams = [...searchValues, limit + 1, offset];
     }
 
     let centers: any[] = [];
@@ -86,10 +92,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: {
-        centers,
-        campaigns,
-      },
+      data: { centers, campaigns },
       pagination: {
         page,
         limit,

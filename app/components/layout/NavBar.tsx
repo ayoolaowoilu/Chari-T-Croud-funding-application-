@@ -40,7 +40,7 @@ export default function NavBar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  // Close dropdowns on route change
+
   useEffect(() => {
     setAboutOpen(false);
     setGetInvolvedOpen(false);
@@ -58,7 +58,7 @@ export default function NavBar() {
         "/t&c",
         "/privacy-policy",
         "/dashboard/centers/profile",
-        "/causes/flier",
+        "/causes/flier","/dashboard/centers/local-centers"
       ];
       if (!publicPaths.includes(pathname)) {
         return redirect(`/auth/signin?redir=${window.location.href}`);
@@ -254,7 +254,7 @@ export default function NavBar() {
             </div>
                 
              <Link
-              href="/startcauses"
+              href="/dashboard/centers/local-centers"
               className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-50 transition-all"
             >
               
