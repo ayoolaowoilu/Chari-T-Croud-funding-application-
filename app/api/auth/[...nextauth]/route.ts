@@ -37,7 +37,7 @@ const handler  = NextAuth({
 
       if (rows.length === 0) {
         await db.query(
-          "INSERT INTO users(Full_name, Image, Email, Method) VALUES(?,?,?,?)",
+          "INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)",
           [profile?.name, profile?.image || profile?.picture, profile?.email, account?.provider]
         )
       }
