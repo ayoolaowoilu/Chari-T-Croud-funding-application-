@@ -318,7 +318,7 @@ export default function Profile() {
                   Total Donations
                 </p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                 ₦{userData.donations.toLocaleString()}
+                 ₦{userData.donations?.toLocaleString()}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -335,7 +335,7 @@ export default function Profile() {
                   Total Received
                 </p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                  ₦{userData.recived.toLocaleString()}
+                  ₦{userData.recived?.toLocaleString()}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -541,10 +541,7 @@ export default function Profile() {
                 </div>
               </div>
               <button
-                onClick={() => {
-                  // TODO: Navigate to KYC verification flow
-                  console.log("Navigate to KYC verification");
-                }}
+               onClick={() => window.location.href = "/dashboard/kyc?redir=/dashboard/donor?goto=profile"}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-colors shadow-sm shrink-0"
               >
                 Verify Now
