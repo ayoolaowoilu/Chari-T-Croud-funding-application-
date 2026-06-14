@@ -335,7 +335,7 @@ export default function Profile() {
                   Total Received
                 </p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                  ₦{userData.recived?.toLocaleString()}
+                  ₦{userData.recived?.toLocaleString() || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
