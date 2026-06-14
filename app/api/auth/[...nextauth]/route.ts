@@ -31,7 +31,7 @@ const handler  = NextAuth({
     async signIn({ account, profile }) {
   
       const [rows]: any = await db.query(
-        "SELECT * FROM Users WHERE Email = ?",
+        "SELECT * FROM users WHERE email = ?",
         [profile?.email]
       )
 
