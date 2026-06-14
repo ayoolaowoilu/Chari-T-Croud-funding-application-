@@ -212,7 +212,7 @@ export default function Page() {
           <div className="grid md:grid-cols-3 gap-6">
             {team.map((member) => (
               <div key={member.name} className="p-6 border border-gray-200 rounded-lg bg-gray-50 flex items-start gap-4">
-                <div className="w-14 h-14 bg-gray-300 rounded-full flex-shrink-0 flex items-center justify-center text-gray-500 font-bold text-lg">
+                <div className="w-14 h-14 bg-gray-300 rounded-full shrink-0 flex items-center justify-center text-gray-500 font-bold text-lg">
                   {member.name.charAt(0)}
                 </div>
                 <div>

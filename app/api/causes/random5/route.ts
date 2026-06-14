@@ -1,12 +1,12 @@
 import db from "@/app/lib/DBschema";
 import { NextRequest, NextResponse } from "next/server";
 
-// Generate a seed that changes every 1.5 hours (90 minutes = 5400 seconds)
+
 function getTimeSeed() {
   const now = Date.now();
-  const windowMs = 90 * 60 * 1000; // 1.5 hours in milliseconds
+  const windowMs = 90 * 60 * 1000; 
   const windowIndex = Math.floor(now / windowMs);
-  return `chari-t-${windowIndex}`; // e.g., "chari-t-28473"
+  return `chari-t-${windowIndex}`; 
 }
 
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category") || "All";
   const page = Number(searchParams.get("page")) || 0;
 
-  const seed = getTimeSeed(); // same for all users, changes every 1.5hrs
+  const seed = getTimeSeed();
 
   try {
     let sql: string;

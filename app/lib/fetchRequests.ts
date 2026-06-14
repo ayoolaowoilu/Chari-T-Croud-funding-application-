@@ -85,7 +85,8 @@ const getFeatured  = async() =>{
 
             return rr;
        }catch(error){
-        
+              console.log(error)
+        return {error:"Unable to fetch data"}
        }
 }
 
@@ -98,7 +99,7 @@ const fetchOneCauseById = async(id:number,type:number) =>{
             return rr[0]
         } catch (error) {
             console.log(error)
-        
+           return {error:"Unable to fetch data"}
         }
 }
 
@@ -109,10 +110,8 @@ const ReportCampaign = async(data:Report)=>{
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(data)
           })
-
-          
-      
-          const rr =await resp.json()
+     
+          const rr = await resp.json()
           return rr;
        } catch(error){
            return {error:"Network Error"}
@@ -140,12 +139,13 @@ const FetchUserCauses = async(email:string) => {
 }
 
 const fetchRandom5Causes = async (query:string,category:string , page:number):Promise<any>=>{
-       console.log(query,category)
+    
         try {
                const resp = await fetch(`${API_URL}/api/causes/random5?query=${query}&category=${category}&page=${page}`)
                      return await resp.json()
         } catch (error) {
               console.log(error)
+              return {error:"Unable to fetch data"}
         }   
 }
 const DeleteCause = async(id:number) =>{
@@ -310,7 +310,22 @@ const DeleteCause = async(id:number) =>{
          }
   }
 
+
+  const GetCenterViews = async(type:"campaigns" | "centers"| "both" ,page:number , query?:string)=>{
+        try {
+
+            const resp = await fetch(`${API_URL}/api/centers/view?page=${page}&type=${type}${query ? `&query=${query}` : ""}`)
+            const data = resp.json()
+            return data;
+
+        } catch (error) {
+              console.log(error)
+               return {error:"Error Getting data"}
+        }
+  }
  
+
+
 export {
     type Report,
      type verifyCenter,
@@ -331,5 +346,5 @@ export {
     type kycPayload,
     updateDonate,
     UploadCenter,
-    GetCenter
+    GetCenter,GetCenterViews
 }

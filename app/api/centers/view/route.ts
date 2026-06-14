@@ -1,0 +1,120 @@
+import db from "@/app/lib/DBschema";
+import { NextRequest, NextResponse } from "next/server";
+
+const CENTERS_FIELDS = "name, email,  phone, address, website, logourl";
+const CAMPAIGNS_FIELDS = "id, name, details, main_img, raised, center_name, center_id, date_to_completion, donation_count";
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const page = Math.max(0, parseInt(searchParams.get("page") ?? "0", 10));
+    const type = searchParams.get("type") ?? "centers";
+    const searchQuery = searchParams.get("query")?.trim();
+
+    const limit = 25;
+    const offset = limit * page;
+    const now = Date.now();
+
+    let centersQuery: string | null = null;
+    let campaignsQuery: string | null = null;
+    let centersParams: (string | number)[] = [];
+    let campaignsParams: (string | number)[] = [];
+
+    const searchCondition = searchQuery
+      ? `AND (name LIKE ? OR details LIKE ? OR center_name LIKE ?)`
+      : "";
+
+    const searchValues = searchQuery
+      ? [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`]
+      : [];
+
+    if (type === "both") {
+      centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
+        WHERE is_verified_status <> "verified"
+        ${searchCondition}
+        ORDER BY id DESC 
+        LIMIT ? OFFSET ?`;
+
+      centersParams = [now, ...searchValues, limit + 1, offset];
+
+      campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
+        WHERE date_to_completion > ? 
+        AND center_id IS NOT NULL 
+        ${searchCondition}
+        ORDER BY id DESC 
+        LIMIT ? OFFSET ?`;
+
+      campaignsParams = [now, ...searchValues, limit + 1, offset];
+
+    } else if (type === "campaigns") {
+      campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
+        WHERE date_to_completion > ? 
+        AND center_id IS NOT NULL 
+        ${searchCondition}
+        ORDER BY id DESC 
+        LIMIT ? OFFSET ?`;
+
+      campaignsParams = [now, ...searchValues, limit + 1, offset];
+
+    } else {
+      // Default: centers only
+      centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
+        WHERE  is_verified_status == "verified"
+        ${searchCondition}
+        ORDER BY id DESC 
+        LIMIT ? OFFSET ?`;
+
+      centersParams = [now, ...searchValues, limit + 1, offset];
+    }
+
+    let centers: any[] = [];
+    let campaigns: any[] = [];
+    let hasMoreCenters = false;
+    let hasMoreCampaigns = false;
+
+    if (centersQuery) {
+      const [rows]: any = await db.query(centersQuery, centersParams);
+      hasMoreCenters = rows.length > limit;
+      centers = rows.slice(0, limit);
+    }
+
+    if (campaignsQuery) {
+      const [rows]: any = await db.query(campaignsQuery, campaignsParams);
+      hasMoreCampaigns = rows.length > limit;
+      campaigns = rows.slice(0, limit);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        centers,
+        campaigns,
+      },
+      pagination: {
+        page,
+        limit,
+        hasMore: type === "both" 
+          ? hasMoreCenters || hasMoreCampaigns 
+          : (centersQuery ? hasMoreCenters : hasMoreCampaigns),
+        hasMoreCenters,
+        hasMoreCampaigns,
+      },
+      meta: {
+        type,
+        searchQuery: searchQuery || null,
+        timestamp: now,
+      },
+    });
+
+  } catch (error) {
+    console.error("GET /api/centers-campaigns error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch data",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
