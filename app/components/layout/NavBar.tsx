@@ -382,7 +382,8 @@ export default function NavBar() {
           </div>
           <div className="space-y-0.5">
             <button onClick={() => { setProfileDropDown(false); redirect("/dashboard/donor?goto=profile"); }} className="w-full text-left px-2 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
-              <User size={14} className="text-gray-400" /> Profile
+              <User size=
+              {14} className="text-gray-400" /> Profile
             </button>
             <button onClick={() => { setProfileDropDown(false); redirect("/dashboard/donor?goto=explore"); }} className="w-full text-left px-2 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
               <FileText size={14} className="text-gray-400" /> Track Campaigns

@@ -160,197 +160,213 @@ export default  function Page() {
     }
   }, [campaign?.main_img]);
 
-  const renderReport = () => {
+ const renderReport = () => {
     if (isCenter) return null;
 
     return (
-      <div className="fixed z-40 bottom-4 sm:bottom-5 right-4 sm:right-5 w-[calc(100%-2rem)] sm:w-auto md:max-w-sm p-4 sm:p-5 rounded-2xl bg-white shadow-2xl border border-gray-100">
-        <AnimatePresence mode="wait">
+      <>
+        {/* Floating Report Button - Bottom Right */}
+        <AnimatePresence>
           {reportStage === 0 && (
-            <motion.div
-              key="stage0"
-              initial={{ opacity: 0, scale: 0.9 }}
+            <motion.button
+              key="report-trigger"
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setReportStage(1)}
-              className="flex items-center gap-3 cursor-pointer group"
+              className="fixed z-40 bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:shadow-xl transition-shadow"
+              aria-label="Report Campaign"
             >
-              <div className="rounded-full p-2 w-10 h-10 flex items-center justify-center bg-red-50 group-hover:bg-red-100 transition-colors">
-                <Flag className="w-5 h-5 text-red-500" />
-              </div>
-              <span className="text-sm font-semibold text-gray-700 group-hover:text-gray-900">Report Campaign</span>
-            </motion.div>
-          )}
-
-          {reportStage === 1 && (
-            <motion.div
-              key="stage1"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-5 h-5 text-amber-500" />
-                <h3 className="font-semibold text-gray-900">Report this campaign?</h3>
-              </div>
-              <p className="text-sm text-gray-500 mb-4">
-                Help us maintain trust by reporting campaigns that violate our guidelines.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setReportStage(2)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-colors"
-                >
-                  <Flag className="w-4 h-4" />
-                  Report
-                </button>
-                <button
-                  onClick={() => setReportStage(0)}
-                  className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-sm font-medium transition-colors"
-                >
-                  Ignore
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {reportStage === 2 && (
-            <motion.div
-              key="stage2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Flag className="w-5 h-5 text-red-500" />
-                <h3 className="font-semibold text-gray-900">Submit Report</h3>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
-                    Report Type
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'misrepresentation', label: 'Misrepresentation', icon: EyeOff },
-                      { id: 'fraud', label: 'Fraud', icon: ShieldAlert },
-                      { id: 'exploitative', label: 'Exploitative', icon: HeartCrack },
-                      { id: 'spam', label: 'Spam', icon: Trash2 },
-                    ].map((type) => (
-                      <button
-                        key={type.id}
-                        onClick={() => setReportType(type.id)}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${reportType === type.id
-                            ? 'bg-red-50 border-red-200 text-red-700'
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                          }`}
-                      >
-                        <type.icon className="w-3.5 h-3.5" />
-                        {type.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
-                    Additional Details
-                  </label>
-                  <textarea
-                    value={reportMessage}
-                    onChange={(e) => setReportMessage(e.target.value)}
-                    placeholder="Describe the issue in detail..."
-                    rows={3}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 resize-none"
-                  />
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={() => setReportStage(1)}
-                    className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={handleSubmitReport}
-                    disabled={!reportType}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium transition-colors"
-                  >
-                    <Send className="w-4 h-4" />
-                    Submit Report
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {reportStage === 3 && (
-            <motion.div
-              key="stage3"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-6"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"
-              >
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
-              </motion.div>
-              <h3 className="font-semibold text-gray-900 mb-1">Report Submitted</h3>
-              <p className="text-sm text-gray-500 mb-4">Thank you for helping keep our community safe.</p>
-              <button
-                onClick={() => setReportStage(0)}
-                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                Close
-              </button>
-            </motion.div>
-          )}
-
-          {reportStage === 4 && (
-            <motion.div
-              key="stage4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-6"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3"
-              >
-                <XCircle className="w-6 h-6 text-red-600" />
-              </motion.div>
-              <h3 className="font-semibold text-gray-900 mb-1">Report not Submitted</h3>
-              <p className="text-sm text-gray-500 mb-4">Network error</p>
-              <button
-                onClick={() => setReportStage(2)}
-                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                Try again
-              </button>
-            </motion.div>
-          )}
-
-          {reportStage === 5 && (
-            <div className='p-12'>
-              <DualRingSpinner />
-            </div>
+              <Flag className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+            </motion.button>
           )}
         </AnimatePresence>
-      </div>
+
+        {/* Report Modal */}
+        <AnimatePresence>
+          {reportStage > 0 && reportStage < 5 && (
+            <motion.div
+              key="report-modal"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="fixed z-40 bottom-4 sm:bottom-5 right-4 sm:right-5 w-[calc(100%-2rem)] sm:w-auto md:max-w-sm p-4 sm:p-5 rounded-2xl bg-white shadow-2xl border border-gray-100"
+            >
+              <AnimatePresence mode="wait">
+                {reportStage === 1 && (
+                  <motion.div
+                    key="stage1"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                      <h3 className="font-semibold text-gray-900">Report this campaign?</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Help us maintain trust by reporting campaigns that violate our guidelines.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setReportStage(2)}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-colors"
+                      >
+                        <Flag className="w-4 h-4" />
+                        Report
+                      </button>
+                      <button
+                        onClick={() => setReportStage(0)}
+                        className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-sm font-medium transition-colors"
+                      >
+                        Ignore
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {reportStage === 2 && (
+                  <motion.div
+                    key="stage2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Flag className="w-5 h-5 text-red-500" />
+                      <h3 className="font-semibold text-gray-900">Submit Report</h3>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                          Report Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { id: 'misrepresentation', label: 'Misrepresentation', icon: EyeOff },
+                            { id: 'fraud', label: 'Fraud', icon: ShieldAlert },
+                            { id: 'exploitative', label: 'Exploitative', icon: HeartCrack },
+                            { id: 'spam', label: 'Spam', icon: Trash2 },
+                          ].map((type) => (
+                            <button
+                              key={type.id}
+                              onClick={() => setReportType(type.id)}
+                              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all ${reportType === type.id
+                                  ? 'bg-red-50 border-red-200 text-red-700'
+                                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                                }`}
+                            >
+                              <type.icon className="w-3.5 h-3.5" />
+                              {type.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                          Additional Details
+                        </label>
+                        <textarea
+                          value={reportMessage}
+                          onChange={(e) => setReportMessage(e.target.value)}
+                          placeholder="Describe the issue in detail..."
+                          rows={3}
+                          className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 resize-none"
+                        />
+                      </div>
+
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={() => setReportStage(1)}
+                          className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                          Back
+                        </button>
+                        <button
+                          onClick={handleSubmitReport}
+                          disabled={!reportType}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium transition-colors"
+                        >
+                          <Send className="w-4 h-4" />
+                          Submit Report
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {reportStage === 3 && (
+                  <motion.div
+                    key="stage3"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-center py-6"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                      className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                    >
+                      <CheckCircle2 className="w-6 h-6 text-green-600" />
+                    </motion.div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Report Submitted</h3>
+                    <p className="text-sm text-gray-500 mb-4">Thank you for helping keep our community safe.</p>
+                    <button
+                      onClick={() => setReportStage(0)}
+                      className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </motion.div>
+                )}
+
+                {reportStage === 4 && (
+                  <motion.div
+                    key="stage4"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-center py-6"
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                      className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                    >
+                      <XCircle className="w-6 h-6 text-red-600" />
+                    </motion.div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Report not Submitted</h3>
+                    <p className="text-sm text-gray-500 mb-4">Network error</p>
+                    <button
+                      onClick={() => setReportStage(2)}
+                      className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      Try again
+                    </button>
+                  </motion.div>
+                )}
+
+                {reportStage === 5 && (
+                  <div className='p-12'>
+                    <DualRingSpinner />
+                  </div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
     )
   }
 
