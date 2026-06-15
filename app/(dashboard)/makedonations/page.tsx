@@ -198,14 +198,14 @@ export default function Page(){
         </div>
 
         {/* Right Side - divSection */}
-        <div className="order-1 lg:order-2 w-full max-w-md mx-auto lg:mx-0">
+        <div className="order-1 lg:order-2 w-full max-w-md mx-auto lg:mx-0 mt-5">
           <div className="mb-8">
 
 
-           {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mb-4">
+           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mb-4">
               <Heart className="w-3 h-3 fill-current" />
               <span>{campaign.category}</span>
-            </div>   */}
+            </div>  
 
 
             <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-3 text-gray-900">

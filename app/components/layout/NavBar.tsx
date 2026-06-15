@@ -111,7 +111,7 @@ export default function NavBar() {
 
   return (
     <>
-      <nav className="px-6 py-2 shadow-sm bg-white border-b border-gray-100 fixed top-0 w-full z-50">
+      <nav className="md:px-6 px-2 py-2 shadow-sm bg-white border-b border-gray-100 fixed top-0 w-full z-50">
 
         <div className="max-w-7xl mx-auto flex  justify-between h-14 ">
      
