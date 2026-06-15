@@ -173,7 +173,7 @@ export default function PaystackPopup({
     if (!receiptRef.current) return;
 
   
-    const url = `http://localhost:3000/api/receipts?email=${email}&amount=${amount}&platform_fee=${platform_fee}&time=${new Date().toLocaleDateString('en-NG', { 
+    const url = `${window.location.origin}/api/receipts?email=${email}&amount=${amount}&platform_fee=${platform_fee}&time=${new Date().toLocaleDateString('en-NG', { 
                     weekday: 'short', 
                     year: 'numeric', 
                     month: 'short', 
