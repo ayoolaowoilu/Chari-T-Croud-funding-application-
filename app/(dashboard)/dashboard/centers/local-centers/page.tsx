@@ -15,7 +15,7 @@ interface Campaign {
     id: number;
     name: string;
     details: string;
-    main_img: string;
+    main_img: {url:string};
     raised: number;
     center_name: string | null;
     center_id: string | number;
@@ -207,7 +207,7 @@ export default function Page() {
                                          centerName={campaign.center_name as string}
                                          center_name={campaign.center_name}
                                          raised={campaign.raised}
-                                         img={JSON.parse(campaign.main_img).url}
+                                         img={campaign.main_img.url}
                                          title={campaign.name}
                                          desc={campaign.details}
                                          daysLeft={campaign.date_to_completion}

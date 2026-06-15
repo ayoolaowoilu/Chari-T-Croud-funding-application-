@@ -3,7 +3,7 @@ interface Campaign {
   name: string;
   details: string;
   story: string;
-  main_img: string;
+  main_img: {url:string}
   imgs: string;   
   donors: Donor[];
   goal: number;

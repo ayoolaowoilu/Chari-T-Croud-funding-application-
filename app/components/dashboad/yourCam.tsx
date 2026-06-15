@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Trash2, Edit3, X, Check, AlertCircle, Clock, 
   Building2, User, Filter, LayoutGrid, List, Users, 
-  ImageIcon, ChevronDown, ChevronUp, DollarSign 
+  ImageIcon
 } from "lucide-react";
 import LoadingCards from "../layout/loadingCards";
 import { DotsWave, DualRingSpinner } from "../ui/loading";
@@ -246,7 +246,7 @@ export default function YourCam() {
   };
 
   const handleGenerateFlier = (item: Don) => {
-    const flierUrl = `/causes/flier?_type=${item._type}&center_name=${encodeURIComponent(item.center_name || '')}&campaign_name=${encodeURIComponent(item.name)}&raised=${item.raised}&goal=${item.goal}&campaign_id=${item.id}&campaign_logo_url=${encodeURIComponent(JSON.parse(item.main_img).url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${item.id}`)}&tagline=${encodeURIComponent(item.details || '')}&details=${encodeURIComponent(item.story.slice(0,1500) + "..." || '')}`;
+    const flierUrl = `/causes/flier?_type=${item._type}&center_name=${encodeURIComponent(item.center_name || '')}&campaign_name=${encodeURIComponent(item.name)}&raised=${item.raised}&goal=${item.goal}&campaign_id=${item.id}&campaign_logo_url=${encodeURIComponent(item.main_img.url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/causes/cause?id=${item.id}`)}&tagline=${encodeURIComponent(item.details || '')}&details=${encodeURIComponent(item.story.slice(0,1500) + "..." || '')}`;
     window.open(flierUrl, '_blank');
   };
 
@@ -466,7 +466,7 @@ export default function YourCam() {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
                       <div className="relative w-full sm:w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                         {item.main_img ? (
-                          <img src={JSON.parse(item.main_img).url} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={item.main_img.url} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                         )}
@@ -564,7 +564,7 @@ export default function YourCam() {
                     {/* Image */}
                     <div className="relative w-full h-40 bg-gray-100">
                       {item.main_img ? (
-                        <img src={JSON.parse(item.main_img).url} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={item.main_img.url} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Image</div>
                       )}

@@ -94,12 +94,12 @@ export default function FeaturedCauses() {
                 >
                     {causes.map((cause, index) => {
                         
-                        console.log(cause.main_img.url)
+                        
                         return (
                              <Card 
                              
                              key={index}
-                             img={JSON.parse(cause.main_img).url} 
+                             img={cause.main_img.url} 
                              desc={cause.details}
                              donors={cause.donation_count || 0 }
                              goal={cause.goal}
