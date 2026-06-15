@@ -299,7 +299,7 @@ export default function Explore() {
                     desc={item.details}
                     category={item.category}
                     currency={item.currency}
-                    img={JSON.parse(item.main_img).url}
+                    img={item.main_img.url}
                     goal={item.goal}
                     raised={item.raised}
                     id={item.id}
