@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
        const updateDonationForCenters =async() =>{
-           const [center]:any =await db.query("SELECT recived , total_donators FROM centers WHERE id = ?",[body.center_id])
-      const newRecived = Number(center[0].recived) + Number(body.amount)
+           const [center]:any =await db.query("SELECT recieved , total_donators FROM centers WHERE id = ?",[body.center_id])
+      const newrecieved = Number(center[0].recieved) + Number(body.amount)
       const oldDonators = Number(center[0].total_donators) || 0 
       if(!center){
              return NextResponse.json(
@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       ); 
       }
- await db.query("UPDATE centers SET recived = ? , total_donators = ? WHERE id = ?",[newRecived , oldDonators + 1 , body.center_id])
+if(body.center_id){
+      await db.query("UPDATE centers SET recieved = ? , total_donators = ? WHERE id = ?",[newrecieved , oldDonators + 1 , body.center_id])
+}
 
 
 
@@ -83,7 +85,7 @@ const updateTransacts1st = async() =>{
  
 
    const [owner_details]: any = await db.query(
-      body.center_id ?   "SELECT id, recived FROM centers WHERE id = ?" :   "SELECT id, recived FROM users WHERE id = ?",
+      body.center_id ?   "SELECT id, recieved FROM centers WHERE id = ?" :   "SELECT id, recieved FROM users WHERE id = ?",
       [campaign[0].user_id || campaign.center_id]
     );
 
@@ -94,7 +96,7 @@ const updateTransacts1st = async() =>{
       );
     }
 
-    const recived = Number(owner_details[0].recived) + Number(body.amount);
+    const recieved = Number(owner_details[0].recieved) + Number(body.amount);
     const donated_rate = Math.floor((raised / campaign[0].goal) * 100);
 
 
@@ -103,8 +105,8 @@ const updateTransacts1st = async() =>{
 if(!body.center_id){
     
     await db.query(
-      "UPDATE users SET recived = ? WHERE id = ?",
-      [recived, owner_details[0].id]
+      "UPDATE users SET recieved = ? WHERE id = ?",
+      [recieved, owner_details[0].id]
     );
 }else{
   updateDonationForCenters()
