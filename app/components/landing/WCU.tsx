@@ -1,26 +1,39 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { Workflow, Shield, Heart, Globe, Users, TrendingUp } from 'lucide-react';
+import { Shield, Heart, Globe, HandCoins, BadgeCheck, ArrowRight } from 'lucide-react';
 
 const features = [
     {
         icon: Shield,
         title: "100% Transparency",
-        desc: "Every dollar is tracked. Receive detailed reports showing exactly how your donation creates impact."
+        desc: "Every dollar is tracked in real-time. Receive detailed impact reports showing exactly how your donation changes lives."
     },
     {
-        icon: Heart,
-        title: "Direct to Beneficiaries",
-        desc: "92% of donations reach those in need. Minimal overhead means maximum impact."
+        icon: HandCoins,
+        title: "Zero Platform Fees",
+        desc: "We never deduct from your donation. 100% goes directly to the cause. Our operations run on voluntary tips only."
     },
     {
         icon: Globe,
         title: "Global Reach, Local Focus",
-        desc: "Operating in 25+ countries with community-led solutions tailored to local needs."
+        desc: "Operating in 25+ countries with community-led solutions tailored to local needs and cultural contexts."
     },
-
-  
+    {
+        icon: Heart,
+        title: "Direct to Beneficiaries",
+        desc: "Funds pass straight through to verified charities and local partners. No middlemen, no hidden cuts."
+    },
+    {
+        icon: BadgeCheck,
+        title: "Verified Partners",
+        desc: "Every organization on our platform undergoes rigorous vetting. You donate with complete confidence."
+    },
+    {
+        icon: ArrowRight,
+        title: "Seamless Experience",
+        desc: "Donate in seconds with an intuitive platform designed to remove friction between intent and impact."
+    }
 ];
 
 const containerVariants = {
@@ -28,65 +41,61 @@ const containerVariants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1,
+            staggerChildren: 0.12,
             delayChildren: 0.2
         }
     }
-};
+} as any;
 
+const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { 
+        opacity: 1, 
+        y: 0,
+        transition: { duration: 0.5, ease: "easeOut" }
+    }
+} as any;
 
 export default function WhyChooseUs() {
     return (
-        <section className="py-20 md:py-28 bg-gradient-to-br from-gray-700 via-gray-900 to-black text-white overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 md:px-8">
+        <section className="py-20 md:py-28 bg-white overflow-hidden">
+            <div className="max-w-6xl mx-auto px-6 md:px-8">
                 
                 {/* Header */}
                 <motion.div 
-                    className="text-center mb-16"
+                    className="text-center mb-16 md:mb-20"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
-         
+                    variants={containerVariants}
                 >
                     <motion.span 
-                        className="text-blue-400 font-semibold text-sm uppercase tracking-wider inline-block"
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
+                        className="text-blue-600 font-semibold text-sm uppercase tracking-[0.2em] block"
+                        variants={itemVariants}
                     >
                         Our Promise
                     </motion.span>
                     <motion.h2 
-                        className="mt-3 text-3xl md:text-5xl font-bold"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
+                        className="mt-4 text-4xl md:text-5xl font-bold text-gray-900 tracking-tight"
+                        variants={itemVariants}
                     >
                         Why Choose Us
                     </motion.h2>
                     <motion.p 
-                        className="mt-4 text-gray-400 max-w-2xl mx-auto"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className="mt-5 text-gray-500 max-w-2xl mx-auto text-lg leading-relaxed"
+                        variants={itemVariants}
                     >
-                        We're reimagining charitable giving with technology, transparency, and trust at the core.
+                        We're reimagining charitable giving with transparency, trust, and zero compromise at the core.
                     </motion.p>
                     <motion.div 
-                        className="mt-6 w-20 h-1 bg-orange-500 mx-auto rounded-full"
-                        initial={{ scaleX: 0 }}
-                        whileInView={{ scaleX: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.5, duration: 0.6 }}
+                        className="mt-6 w-12 h-1 bg-gray-900 mx-auto"
+                        variants={itemVariants}
                     />
                 </motion.div>
 
                 {/* Features Grid */}
                 <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
@@ -97,57 +106,26 @@ export default function WhyChooseUs() {
                         return (
                             <motion.div
                                 key={index}
-                                className="group relative p-8 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-orange-500/50 transition-all duration-300 cursor-pointer"
-                              
-                                whileHover={{ 
-                                    y: -8,
-                                    transition: { duration: 0.3 }
-                                }}
+                                className="group relative p-8 bg-gray-50 border border-gray-100 hover:border-blue-200 transition-colors duration-300"
+                                variants={itemVariants}
+                                whileHover={{ y: -6 }}
+                                transition={{ duration: 0.25 }}
                             >
-                                
-                                <motion.div
-                                    className="absolute inset-0 bg-orange-500/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"
-                                    initial={false}
-                                />
-                                
-                                <div className="relative z-10">
-                                    {/* Icon */}
-                                    <motion.div 
-                                        className="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-400 mb-5 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300"
-                               
-                                        whileHover="hover"
-                                    >
-                                        <Icon className="w-7 h-7" />
-                                    </motion.div>
-
-                                    {/* Content */}
-                                    <motion.h3 
-                                        className="text-xl font-bold mb-3 group-hover:text-orange-400 transition-colors"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        whileInView={{ opacity: 1, x: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: 0.3 + (index * 0.1) }}
-                                    >
-                                        {feature.title}
-                                    </motion.h3>
-                                    <motion.p 
-                                        className="text-gray-400 leading-relaxed text-sm"
-                                        initial={{ opacity: 0 }}
-                                        whileInView={{ opacity: 1 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: 0.4 + (index * 0.1) }}
-                                    >
-                                        {feature.desc}
-                                    </motion.p>
+                                {/* Icon */}
+                                <div className="w-12 h-12 bg-blue-50 flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                    <Icon className="w-6 h-6" strokeWidth={1.5} />
                                 </div>
 
-                                {/* Corner accent */}
-                                <motion.div
-                                    className="absolute top-4 right-4 w-2 h-2 bg-orange-500 rounded-full opacity-0 group-hover:opacity-100"
-                                    initial={{ scale: 0 }}
-                                    whileHover={{ scale: 1 }}
-                                    transition={{ duration: 0.2 }}
-                                />
+                                {/* Content */}
+                                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-gray-500 leading-relaxed text-sm">
+                                    {feature.desc}
+                                </p>
+
+                                {/* Hover accent line */}
+                                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300" />
                             </motion.div>
                         );
                     })}
@@ -155,26 +133,30 @@ export default function WhyChooseUs() {
 
                 {/* Trust badges */}
                 <motion.div 
-                    className="mt-16 flex flex-wrap justify-center gap-8 items-center opacity-60"
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 0.6, y: 0 }}
+                    className="mt-20 pt-12 border-t border-gray-100"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.8, duration: 0.6 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
                 >
-                    <span className="text-sm font-medium">Trusted by:</span>
-                    {['Forbes', 'UNICEF', 'Red Cross', 'UNDP'].map((org, i) => (
-                        <motion.span 
-                            key={org}
-                            className="text-lg font-bold"
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.9 + (i * 0.1) }}
-                            whileHover={{ opacity: 1, scale: 1.1 }}
-                        >
-                            {org}
-                        </motion.span>
-                    ))}
+                    <p className="text-center text-xs uppercase tracking-wider text-gray-400 mb-8 font-medium">
+                        Recognized By
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-10 md:gap-16 items-center">
+                        {['Forbes', 'UNICEF', 'Red Cross', 'UNDP', 'World Bank'].map((org, i) => (
+                            <motion.span 
+                                key={org}
+                                className="text-lg md:text-xl font-bold text-gray-300 hover:text-gray-600 transition-colors duration-300 cursor-default"
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.5 + (i * 0.08), duration: 0.4 }}
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                {org}
+                            </motion.span>
+                        ))}
+                    </div>
                 </motion.div>
 
             </div>
