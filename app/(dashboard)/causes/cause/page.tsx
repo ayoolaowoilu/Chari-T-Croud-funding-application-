@@ -22,7 +22,7 @@ export const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('en-US').format(amount);
 };
 
-// --- Gallery Slider Component ---
+
 function GallerySlider({ images, mainImage, onImageSelect }: {
   images: string[];
   mainImage: string;
@@ -65,7 +65,7 @@ function GallerySlider({ images, mainImage, onImageSelect }: {
           <motion.button
             key={idx}
             onClick={() => onImageSelect(img)}
-            className="relative flex-shrink-0 snap-start"
+            className="relative shrink-0 snap-start"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -100,7 +100,7 @@ function GallerySlider({ images, mainImage, onImageSelect }: {
   );
 }
 
-// --- Report Modal ---
+
 function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () => void }) {
   const [stage, setStage] = useState(1);
   const [type, setType] = useState('');
@@ -135,7 +135,7 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 text-black z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
       onClick={onClose}
     >
       <motion.div
@@ -143,7 +143,7 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-white w-full sm:w-[420px] sm:rounded-2xl rounded-t-2xl p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white w-full sm:w-105 sm:rounded-2xl rounded-t-2xl p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden" />
