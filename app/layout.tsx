@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./components/provider";
 import PageProgress from "./components/pageProgress";
 import { Suspense } from "react";
+import Laura from "./components/laura";
 
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white">
         <Suspense>
+          <Laura />
              <PageProgress />
         <Providers>
           {children}
