@@ -8,23 +8,125 @@ import {
   Send,
   Bot,
   User,
-  ChevronRight,
-  Sparkles,
   ArrowUpRight,
-  HelpCircle,
-  Shield,
-  Heart,
-  TrendingUp,
-  Wallet,
-  FileCheck,
-  LogIn,
+  Sparkles,
   PlusCircle,
+  Heart,
+  Wallet,
+  Shield,
+  HelpCircle,
   Landmark,
-  CreditCard,
-  Search,
   Copy,
   Check
 } from "lucide-react";
+
+// --- Female Avatar SVG Component ---
+function LauraAvatar({ className = "w-10 h-10" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Glow backdrop */}
+      <circle cx="50" cy="50" r="48" fill="url(#glowGradient)" opacity="0.3" />
+      
+      {/* Face circle */}
+      <circle cx="50" cy="50" r="40" fill="#F8D7C8" />
+      
+      {/* Hair back */}
+      <path
+        d="M15 45C15 25 30 10 50 10C70 10 85 25 85 45C85 55 82 62 78 68L75 72C75 72 70 55 50 55C30 55 25 72 25 72L22 68C18 62 15 55 15 45Z"
+        fill="#2D1B0E"
+      />
+      
+      {/* Hair front/bangs */}
+      <path
+        d="M25 35C25 35 30 20 50 20C70 20 75 35 75 35C75 35 70 28 50 28C30 28 25 35 25 35Z"
+        fill="#2D1B0E"
+      />
+      
+      {/* Eyes */}
+      <ellipse cx="38" cy="48" rx="4" ry="5" fill="#1A1A1A" />
+      <ellipse cx="62" cy="48" rx="4" ry="5" fill="#1A1A1A" />
+      
+      {/* Eye highlights */}
+      <circle cx="39.5" cy="46.5" r="1.5" fill="white" />
+      <circle cx="63.5" cy="46.5" r="1.5" fill="white" />
+      
+      {/* Eyebrows */}
+      <path d="M32 40Q38 37 44 40" stroke="#2D1B0E" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M56 40Q62 37 68 40" stroke="#2D1B0E" strokeWidth="2" strokeLinecap="round" fill="none" />
+      
+      {/* Nose */}
+      <path d="M50 52L48 58H52L50 52Z" fill="#E8B8A0" />
+      
+      {/* Smile */}
+      <path
+        d="M40 64Q50 72 60 64"
+        stroke="#C4785A"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+      
+      {/* Blush */}
+      <ellipse cx="30" cy="58" rx="5" ry="3" fill="#E8A090" opacity="0.4" />
+      <ellipse cx="70" cy="58" rx="5" ry="3" fill="#E8A090" opacity="0.4" />
+      
+      {/* Headset */}
+      <path
+        d="M12 45C12 30 25 18 50 18C75 18 88 30 88 45"
+        stroke="#2563EB"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <rect x="8" y="38" width="8" height="14" rx="4" fill="#2563EB" />
+      <rect x="84" y="38" width="8" height="14" rx="4" fill="#2563EB" />
+      
+      {/* Mic */}
+      <path
+        d="M84 52L80 62H76"
+        stroke="#2563EB"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <circle cx="76" cy="62" r="2.5" fill="#2563EB" />
+      
+      {/* Gradients */}
+      <defs>
+        <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// --- Small Avatar for Chat Header ---
+function LauraAvatarSmall({ className = "w-9 h-9" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" className={className} fill="none">
+      <circle cx="50" cy="50" r="40" fill="#F8D7C8" />
+      <path d="M15 45C15 25 30 10 50 10C70 10 85 25 85 45C85 55 82 62 78 68L75 72C75 72 70 55 50 55C30 55 25 72 25 72L22 68C18 62 15 55 15 45Z" fill="#2D1B0E" />
+      <path d="M25 35C25 35 30 20 50 20C70 20 75 35 75 35C75 35 70 28 50 28C30 28 25 35 25 35Z" fill="#2D1B0E" />
+      <ellipse cx="38" cy="48" rx="4" ry="5" fill="#1A1A1A" />
+      <ellipse cx="62" cy="48" rx="4" ry="5" fill="#1A1A1A" />
+      <circle cx="39.5" cy="46.5" r="1.5" fill="white" />
+      <circle cx="63.5" cy="46.5" r="1.5" fill="white" />
+      <path d="M40 64Q50 72 60 64" stroke="#C4785A" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <ellipse cx="30" cy="58" rx="5" ry="3" fill="#E8A090" opacity="0.4" />
+      <ellipse cx="70" cy="58" rx="5" ry="3" fill="#E8A090" opacity="0.4" />
+      <path d="M12 45C12 30 25 18 50 18C75 18 88 30 88 45" stroke="#2563EB" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <rect x="8" y="38" width="8" height="14" rx="4" fill="#2563EB" />
+      <rect x="84" y="38" width="8" height="14" rx="4" fill="#2563EB" />
+    </svg>
+  );
+}
 
 interface Message {
   id: string;
@@ -170,7 +272,6 @@ function findBestResponse(input: string): { response: string; steps?: string[]; 
     };
   }
 
-  // Fallback suggestions
   if (lower.length > 3) {
     return {
       response: "I'm not sure I understand. Here are some things I can help with:",
@@ -188,6 +289,7 @@ function findBestResponse(input: string): { response: string; steps?: string[]; 
 
 export default function Laura() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -202,6 +304,14 @@ export default function Laura() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Show "Ask Laura" tag after 3 seconds, hide after first open
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!hasOpened) setHasOpened(false); // trigger entrance animation
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [hasOpened]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -212,6 +322,7 @@ export default function Laura() {
 
   useEffect(() => {
     if (isOpen) {
+      setHasOpened(true);
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
@@ -230,10 +341,8 @@ export default function Laura() {
     setInput("");
     setIsTyping(true);
 
-    // Simulate thinking delay
     setTimeout(() => {
       const result = findBestResponse(text);
-      
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
@@ -242,7 +351,6 @@ export default function Laura() {
         links: result?.links,
         timestamp: new Date()
       };
-
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
     }, 600 + Math.random() * 400);
@@ -260,22 +368,57 @@ export default function Laura() {
 
   return (
     <>
-      {/* Floating Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-colors"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Floating Button + Tag Container */}
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3">
+        
+        {/* "Ask Laura" Tag — appears after delay */}
+        <AnimatePresence>
+          {!isOpen && !hasOpened && (
+            <motion.div
+              initial={{ opacity: 0, x: 20, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 20, scale: 0.9 }}
+              transition={{ delay: 2, duration: 0.4, type: "spring" }}
+              className="flex items-center gap-2 bg-white border border-gray-200 shadow-lg rounded-2xl px-4 py-2.5 cursor-pointer hover:shadow-xl transition-shadow"
+              onClick={() => setIsOpen(true)}
+            >
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+              </span>
+              <span className="text-sm font-semibold text-gray-800">Ask Laura</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main Button with Glow */}
+        <AnimatePresence>
+          {!isOpen && (
+            <motion.button
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsOpen(true)}
+              className="relative group"
+            >
+              {/* Glow rings */}
+              <div className="absolute inset-0 rounded-full bg-blue-500/30 blur-xl animate-pulse" />
+              <div className="absolute -inset-1 rounded-full bg-blue-400/20 blur-lg animate-pulse delay-75" />
+              
+              {/* Button */}
+              <div className="relative w-16 h-16 bg-white rounded-full shadow-xl border-2 border-blue-100 flex items-center justify-center overflow-hidden hover:border-blue-300 transition-colors">
+                <LauraAvatar className="w-12 h-12" />
+                
+                {/* Online dot */}
+                <div className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
+              </div>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -285,19 +428,20 @@ export default function Laura() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[calc(100vw-2rem)] sm:w-[420px] h-[600px] max-h-[calc(100vh-4rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-[100] w-[calc(100vw-2rem)] sm:w-[420px] h-[600px] max-h-[calc(100vh-4rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gray-900 text-white p-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
+                <div className="relative">
+                  <LauraAvatarSmall className="w-9 h-9" />
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-gray-900 rounded-full" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">Laura</h3>
                   <p className="text-xs text-gray-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                    Online
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    AI Assistant
                   </p>
                 </div>
               </div>
@@ -321,7 +465,7 @@ export default function Laura() {
                   {/* Avatar */}
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.type === "bot" ? "bg-blue-100" : "bg-gray-200"}`}>
                     {msg.type === "bot" ? (
-                      <Bot className="w-3.5 h-3.5 text-blue-600" />
+                      <LauraAvatarSmall className="w-6 h-6" />
                     ) : (
                       <User className="w-3.5 h-3.5 text-gray-600" />
                     )}
@@ -331,8 +475,6 @@ export default function Laura() {
                   <div className={`max-w-[80%] space-y-2 ${msg.type === "user" ? "items-end" : "items-start"}`}>
                     <div className={`relative p-3 rounded-2xl text-sm leading-relaxed ${msg.type === "bot" ? "bg-white border border-gray-200 text-gray-800 rounded-tl-sm" : "bg-blue-600 text-white rounded-tr-sm"}`}>
                       <p>{msg.content}</p>
-                      
-                      {/* Copy button for bot messages */}
                       {msg.type === "bot" && (
                         <button
                           onClick={() => handleCopy(msg.content, msg.id)}
@@ -348,7 +490,6 @@ export default function Laura() {
                       )}
                     </div>
 
-                    {/* Steps */}
                     {msg.steps && msg.steps.length > 0 && (
                       <div className="bg-white border border-gray-200 rounded-xl p-3 space-y-2">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Steps</p>
@@ -363,7 +504,6 @@ export default function Laura() {
                       </div>
                     )}
 
-                    {/* Links */}
                     {msg.links && msg.links.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {msg.links.map((link, idx) => (
@@ -386,7 +526,6 @@ export default function Laura() {
                 </motion.div>
               ))}
 
-              {/* Typing indicator */}
               {isTyping && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -394,25 +533,13 @@ export default function Laura() {
                   className="flex gap-3"
                 >
                   <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Bot className="w-3.5 h-3.5 text-blue-600" />
+                    <LauraAvatarSmall className="w-6 h-6" />
                   </div>
                   <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm p-3">
                     <div className="flex gap-1">
-                      <motion.div
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-                        className="w-2 h-2 bg-gray-300 rounded-full"
-                      />
-                      <motion.div
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
-                        className="w-2 h-2 bg-gray-300 rounded-full"
-                      />
-                      <motion.div
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
-                        className="w-2 h-2 bg-gray-300 rounded-full"
-                      />
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6 }} className="w-2 h-2 bg-gray-300 rounded-full" />
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }} className="w-2 h-2 bg-gray-300 rounded-full" />
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }} className="w-2 h-2 bg-gray-300 rounded-full" />
                     </div>
                   </div>
                 </motion.div>
@@ -441,7 +568,7 @@ export default function Laura() {
 
             {/* Input */}
             <div className="p-3 bg-white border-t border-gray-200 shrink-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black">
                 <input
                   ref={inputRef}
                   type="text"
