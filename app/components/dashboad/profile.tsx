@@ -400,7 +400,7 @@ export default function Profile() {
                           bankName: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-[200px]"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 border-b border-gray-100 gap-1.5 sm:gap-2">
@@ -414,7 +414,7 @@ export default function Profile() {
                           accountNumber: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-[200px]"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 border-b border-gray-100 gap-1.5 sm:gap-2">
@@ -428,7 +428,7 @@ export default function Profile() {
                           accountName: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-[200px]"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 gap-1.5 sm:gap-2">
@@ -442,7 +442,7 @@ export default function Profile() {
                           bankCode: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-[200px]"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                 </>
