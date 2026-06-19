@@ -3,10 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageCircle,
   X,
   Send,
-  Bot,
   User,
   ArrowUpRight,
   Sparkles,
@@ -20,8 +18,7 @@ import {
   Check
 } from "lucide-react";
 
-// --- Female Avatar SVG Component ---
-function LauraAvatar({ className = "w-10 h-10" }: { className?: string }) {
+export function LauraAvatar({ className = "w-10 h-10" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 100 100"
@@ -223,7 +220,7 @@ const knowledgeBase = [
     ]
   },
   {
-    keywords: ["safety", "scam", "fraud", "trust", "report", "fake", "verify cause"],
+    keywords: ["safety", "scam", "fraud", "trust", "report", "fake", "verify cause" , "ratings" , "rate"],
     response: "Every cause is rated for safety. We use AI + human review to protect donors.",
     steps: [
       "Check the safety badge on each cause (Verified, Likely Safe, Uncertain, Risky)",
