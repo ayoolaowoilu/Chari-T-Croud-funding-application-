@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+"use client";
+
+import React, { useState, useRef, useCallback } from "react";
 
 interface ExplainProps {
   topic: string;
@@ -11,48 +13,67 @@ const Explain: React.FC<ExplainProps> = ({ topic, details, link, link_details })
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLSpanElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const updatePosition = useCallback((clientX: number, clientY: number) => {
+    if (!tooltipRef.current) return;
+
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const gap = 16;
+
+    let x = clientX + gap;
+    let y = clientY + gap;
+
+    // Right edge overflow — flip to left of cursor
+    if (x + tooltipRect.width > viewportWidth - 16) {
+      x = clientX - tooltipRect.width - gap;
+    }
+    // Bottom overflow — flip above cursor
+    if (y + tooltipRect.height > viewportHeight - 16) {
+      y = clientY - tooltipRect.height - gap;
+    }
+    // Left edge overflow
+    if (x < 16) x = 16;
+    // Top edge overflow
+    if (y < 16) y = 16;
+
+    setPosition({ x, y });
+  }, []);
 
   const handleMouseEnter = (e: React.MouseEvent) => {
-    updatePosition(e);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsVisible(true);
+    requestAnimationFrame(() => {
+      updatePosition(e.clientX, e.clientY);
+    });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    updatePosition(e);
-  };
-
-  const updatePosition = (e: React.MouseEvent) => {
-    const offset = 12;
-    let x = e.clientX + offset;
-    let y = e.clientY + offset;
-
-    // Prevent tooltip from going off-screen
-    if (tooltipRef.current) {
-      const rect = tooltipRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      if (x + rect.width > viewportWidth) {
-        x = e.clientX - rect.width - offset;
-      }
-      if (y + rect.height > viewportHeight) {
-        y = e.clientY - rect.height - offset;
-      }
+    if (isVisible) {
+      updatePosition(e.clientX, e.clientY);
     }
-
-    setPosition({ x, y });
   };
 
   const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 200);
+  };
+
+  const handleTooltipMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+
+  const handleTooltipMouseLeave = () => {
     setIsVisible(false);
   };
 
   return (
     <>
       <span
-        ref={triggerRef}
-        className="inline relative cursor-help border-b-2 border-dotted border-blue-400 text-blue-600 font-medium transition-colors duration-200 hover:text-blue-800 hover:border-blue-600"
+        className="inline cursor-help font-semibold text-gray-900 underline decoration-gray-300 decoration-2 underline-offset-4 transition-colors duration-200 hover:decoration-gray-900"
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -63,44 +84,44 @@ const Explain: React.FC<ExplainProps> = ({ topic, details, link, link_details })
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="fixed z-50 max-w-xs bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-sm leading-relaxed animate-in fade-in zoom-in-95 duration-150 pointer-events-none"
+          className="fixed z-50 max-w-[260px] bg-white text-gray-900 rounded-xl shadow-xl border border-gray-200 p-4 text-sm leading-relaxed"
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
           }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
         >
-          <div className="font-semibold text-gray-900 mb-1">{topic}</div>
-          <div className="text-gray-600">{details}</div>
-          
+          {/* Topic */}
+          <div className="font-semibold text-gray-900 mb-1.5 text-base">{topic}</div>
+
+          {/* Details */}
+          <div className="text-gray-600 text-sm leading-relaxed">{details}</div>
+
+          {/* Link */}
           {link && (
-            <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="mt-3 pt-3 border-t border-gray-100">
               <a
                 href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors pointer-events-auto"
-                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 text-gray-900 font-medium text-sm hover:underline underline-offset-4 transition-colors"
               >
-                {link_details || 'Learn more'}
-                <svg 
-                  className="w-3 h-3 ml-1" 
-                  fill="none" 
-                  stroke="currentColor" 
+                {link_details || "Learn more"}
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
                   />
                 </svg>
               </a>
             </div>
           )}
-          
-          {/* Little arrow pointer */}
-          <div className="absolute -top-1 left-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45" />
         </div>
       )}
     </>
