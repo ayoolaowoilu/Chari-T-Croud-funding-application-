@@ -1,56 +1,39 @@
-
 import db from "@/app/lib/DBschema";
 import { NextRequest, NextResponse } from "next/server";
+import { addRedisData, getRedisData } from "@/app/lib/redis";
 
+export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get("id");
+  const type = Number(request.nextUrl.searchParams.get("type"));
 
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
 
-export async function GET(request:NextRequest){
+  const cacheKey = `campaign:${id}:type${type}`;
 
-
- const id = request.nextUrl.searchParams.get("id")
- const type = Number(request.nextUrl.searchParams.get("type"))
- 
-    if(type == 1){
-          try{
-                  const [data]:any = await db.query(
-            `SELECT * FROM campaigns WHERE id=?`,
-            [id]
-        )
-
-              return NextResponse.json(
-                   data,
-                    {status:200}
-                )
-
-    }catch(error){
-         console.log(error)
-          return NextResponse.json(
-     {error:"Internal Server error"},
-            {status:500}
-        )
+  try {
+    const cached = await getRedisData(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
     }
-    }else{
 
+    let sql: string;
 
-         try{
-                  const [data]:any = await db.query(
-            `SELECT id,name,currency,goal,raised,_type,center_name,center_id,user_id,category,bank_details FROM campaigns WHERE id=?`,
-            [id]
-        )
-
-              return NextResponse.json(
-                   data,
-                    {status:200}
-                )
-
-    }catch(error){
-         console.log(error)
-          return NextResponse.json(
-     {error:"Internal Server error"},
-            {status:500}
-        )
+    if (type === 1) {
+      sql = `SELECT * FROM campaigns WHERE id = ?`;
+    } else {
+      sql = `SELECT id, name, currency, goal, raised, _type, center_name, center_id, user_id, category, bank_details FROM campaigns WHERE id = ?`;
     }
-    }
-      
-   
+
+    const [data]: any = await db.query(sql, [id]);
+
+    addRedisData(data, cacheKey, 600);
+
+    return NextResponse.json(data, { status: 200 });
+
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: "Internal Server error" }, { status: 500 });
+  }
 }

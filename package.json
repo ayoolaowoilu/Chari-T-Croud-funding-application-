@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@paystack/inline-js": "^2.22.8",
+    "@upstash/redis": "^1.38.0",
     "browser-image-compression": "^2.0.2",
     "cloudinary": "^2.9.0",
     "framer-motion": "^12.38.0",

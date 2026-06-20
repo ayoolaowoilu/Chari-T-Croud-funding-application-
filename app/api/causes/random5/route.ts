@@ -1,4 +1,5 @@
 import db from "@/app/lib/DBschema";
+import { addRedisData, getRedisData } from "@/app/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -9,6 +10,10 @@ function getTimeSeed() {
   return `chari-t-${windowIndex}`; 
 }
 
+function getCacheKey(query: string, category: string, page: number, seed: string): string {
+  return `campaigns:${seed}:${category}:${query || 'all'}:page${page}`;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query") || "";
@@ -16,8 +21,15 @@ export async function GET(request: NextRequest) {
   const page = Number(searchParams.get("page")) || 0;
 
   const seed = getTimeSeed();
+  const cacheKey = getCacheKey(query, category, page, seed);
 
   try {
+    // Check Redis cache first
+    const cached = await getRedisData(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
+    }
+
     let sql: string;
     let params: any[] = [];
 
@@ -92,11 +104,13 @@ export async function GET(request: NextRequest) {
 
     const [results]: any = await db.query(sql, params);
 
-    // LIMIT 21 trick to detect hasMore
     const hasMore = results.length > 20;
     const data = results.slice(0, 20);
+    const response = { data, hasMore };
 
-    return NextResponse.json({ data, hasMore }, { status: 200 });
+    addRedisData(response, cacheKey, 900);
+
+    return NextResponse.json(response, { status: 200 });
 
   } catch (error) {
     console.error(error);
