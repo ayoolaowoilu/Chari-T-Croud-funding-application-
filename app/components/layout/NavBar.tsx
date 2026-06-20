@@ -61,7 +61,11 @@ export default function NavBar() {
         "/dashboard/centers/profile",
         "/causes/flier",
         "/dashboard/centers/local-centers",
-        "/blog"
+        "/blog",
+        "/contact",
+        "/faq",
+        "/how-it-works",
+        "/reports"
       ];
       if (!publicPaths.includes(pathname)) {
         return redirect(`/auth/signin?redir=${window.location.href}`);
