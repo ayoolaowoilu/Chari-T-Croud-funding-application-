@@ -24,10 +24,11 @@ export async function GET(request: NextRequest) {
   const cacheKey = getCacheKey(query, category, page, seed);
 
   try {
-    // Check Redis cache first
+    
     const cached = await getRedisData(cacheKey);
+    
     if (cached) {
-      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
+      return NextResponse.json(cached, { status: 200 });
     }
 
     let sql: string;

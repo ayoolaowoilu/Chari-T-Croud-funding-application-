@@ -9,7 +9,7 @@ export async function GET() {
 
     const cached = await getRedisData(cacheKey);
     if (cached) {
-      return NextResponse.json(JSON.parse(cached as string), { status: 200 });
+      return NextResponse.json(cached, { status: 200 });
     }
 
     const [data]: any = await db.query(
