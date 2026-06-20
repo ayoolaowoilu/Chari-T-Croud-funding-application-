@@ -195,7 +195,7 @@ export default function Page() {
     });
   };
 
-  // ─── ORIGINAL Card Design (Preserved Exactly) ────────────────────
+  
   const blog_cards = useCallback((cards: BlogCard) => {
     return (
       <div className="w-full mb-4 text-black shadow-xl rounded flex flex-col bg-white">
@@ -203,7 +203,7 @@ export default function Page() {
           <img className="object-cover w-full h-full" src={cards.img_url} alt={cards.topic} />
         </div>
         <div className="p-4">
-          <div className="font-bold text-2xl line-clamp-2 mb-3">
+          <div className="font-bold text-2xl line-clamp-2 h-18 mb-3" title={cards.topic} >
             {cards.topic}
           </div>
           <div className="text-xs flex justify-start gap-2 mb-3">
@@ -222,7 +222,7 @@ export default function Page() {
               </svg>
             </span>
           </div>
-          <div className="text-gray-700 text-sm mb-3 line-clamp-4">
+          <div className="text-gray-700 text-sm mb-3 h-20 line-clamp-4">
             {cards.description}
           </div>
           <div className="flex justify-start gap-4">
