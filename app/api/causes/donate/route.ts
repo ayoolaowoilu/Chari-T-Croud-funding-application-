@@ -2,7 +2,7 @@ import db from "@/app/lib/DBschema";
 import { uDonate } from "@/app/lib/fetchRequests";
 import { Campaign } from "@/app/lib/types";
 import { NextRequest, NextResponse } from "next/server";
-import { addRedisData, deleteRedisData } from "@/lib/redis";
+import { addRedisData, deleteRedisData } from "@/app/lib/redis";
 
 export async function POST(request: NextRequest) {
   try {
