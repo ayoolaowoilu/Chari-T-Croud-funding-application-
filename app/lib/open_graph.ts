@@ -38,7 +38,7 @@ export function buildOgMeta(
       images: [
         {
           url: campaign.id
-            ? `${SITE_URL}/api/og?id=${campaign.id}`
+            ? `${SITE_URL}/api/og/campaign?id=${campaign.id}`
             : image,
           width: 1200,
           height: 630,
