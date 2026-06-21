@@ -15,13 +15,21 @@ import { fetchOneCauseById, GetUserDetailsDyId, ReportCampaign } from "@/app/lib
 import { Campaign, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
-import { formatNumber } from '@/app/components/layout/card';
 import Button from '@/app/components/ui/button';
+import { buildOgMeta } from '@/app/lib/open_graph';
 
 export const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('en-US').format(amount);
 };
 
+
+export async function GenerateMeta(){
+    const params = useSearchParams();
+  const id = params.get("id");
+   
+  let data = await fetchOneCauseById(Number(id) , 1)
+ return buildOgMeta({title:data.name,description:data.details,id:data.id })
+}
 
 function GallerySlider({ images, mainImage, onImageSelect }: {
   images: string[];
@@ -226,12 +234,12 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
   );
 }
 
-// --- Main Page ---
-export default function Page() {
+
+export default async function Page() {
   const router = useRouter();
   const params = useSearchParams();
   const id = params.get("id");
-  const { data: session } = useSession();
+
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -281,7 +289,7 @@ export default function Page() {
     }
   };
 
-  const shareToTwitter = (text: string, url: string) => {
+  const shareToTwitter =   (text: string, url: string) => {
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=550,height=420');
   };
 
