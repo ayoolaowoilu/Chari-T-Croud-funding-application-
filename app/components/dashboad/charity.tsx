@@ -3,7 +3,8 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Button from "../ui/button"
 import { redirect } from "next/navigation"
-import { formatAmount } from "@/app/(dashboard)/causes/cause/page"
+import { formatAmount } from "@/app/(dashboard)/causes/cause/clientComponent"
+
 
 
 interface Center {

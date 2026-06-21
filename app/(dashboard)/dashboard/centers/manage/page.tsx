@@ -13,9 +13,8 @@ import Footer from '@/app/components/layout/footer'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import Button from '@/app/components/ui/button'
 import { redirect } from 'next/navigation'
-import { formatAmount } from '@/app/(dashboard)/causes/cause/page'
-import { number } from 'framer-motion'
-import { formatNumber } from '@/app/components/layout/card'
+import { formatAmount } from '@/app/(dashboard)/causes/cause/clientComponent'
+
 
 interface FormData {
   name: string
