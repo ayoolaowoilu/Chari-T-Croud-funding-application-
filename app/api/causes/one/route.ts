@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const cached = await getRedisData(cacheKey);
+    console.log(cached)
     if (cached) {
       return NextResponse.json(cached , { status: 200 });
     }

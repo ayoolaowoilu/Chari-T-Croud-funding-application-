@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       updateDonationForCenters();
       updateTransacts1st();
 
-      // Invalidate center cache
+    
       deleteRedisData(`center:${body.center_id}`);
       deleteRedisData(`center:${body.center_id}:type2`);
 
