@@ -54,7 +54,7 @@ export function buildOgMeta(
       description,
       images: [
         campaign.id
-          ? `${SITE_URL}/api/og?id=${campaign.id}`
+          ? `${SITE_URL}/api/campaign/og?id=${campaign.id}`
           : image,
       ],
     },

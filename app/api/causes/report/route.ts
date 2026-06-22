@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     await db.query(
-      "INSERT INTO reports (report_type, campaign_id, message, reporter_name) VALUES (?, ?, ?, ?)",
+      "INSERT INTO reports (report_type, campaign_id,meaasge, reporter_name) VALUES (?, ?, ?, ?)",
       [_type, campaign_id, message, reporter_name]
     );
 

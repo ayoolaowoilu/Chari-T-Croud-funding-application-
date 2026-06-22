@@ -324,7 +324,9 @@ const DeleteCause = async(id:number) =>{
         }
   }
  
-
+const FetchUserPublicProfileById  = () =>{
+        
+}
 
 export {
     type Report,
