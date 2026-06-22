@@ -324,9 +324,17 @@ const DeleteCause = async(id:number) =>{
         }
   }
  
-const FetchUserPublicProfileById  = () =>{
-        
+const FetchUserPublicProfileById  =async (id:number) =>{
+       const userDetails = await GetUserDetailsDyId(id,false)
+       const userCauses = await FetchUserCauses(userDetails.email);
+
+        return {
+                data:userDetails,
+                causes:userCauses
+        }
 }
+
+
 
 export {
     type Report,
@@ -348,5 +356,6 @@ export {
     type kycPayload,
     updateDonate,
     UploadCenter,
-    GetCenter,GetCenterViews
+    GetCenter,GetCenterViews,
+    FetchUserPublicProfileById
 }
