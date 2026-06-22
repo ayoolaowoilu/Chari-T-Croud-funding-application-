@@ -3,15 +3,13 @@ import { buildOgMeta } from "@/app/lib/open_graph";
 import { Metadata } from "next";
 import { ProfileComponent } from "./profileComponent";
 
-
 type Props = {
-    params: Promise<{ id?: string }>;
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{ id?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { id } = await params;
-    
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+    const { id } = await searchParams;
+
     if (!id) {
         return buildOgMeta({
             title: "Profile | Chari-T",
@@ -28,8 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
 }
 
-export default async function Page({ params }: Props) {
-    const { id } = await params;
+export default async function Page({ searchParams }: Props) {
+    const { id } = await searchParams;
 
     if (!id) {
         return (
@@ -38,9 +36,7 @@ export default async function Page({ params }: Props) {
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
                         User Not Found
                     </h1>
-                    <p className="text-gray-500">
-                        No user ID was provided.
-                    </p>
+                    <p className="text-gray-500">No user ID was provided.</p>
                 </div>
             </div>
         );
@@ -63,14 +59,19 @@ export default async function Page({ params }: Props) {
         );
     }
 
+    const userData = profileData.data || profileData;
+    const campaigns = profileData.causes || [];
+
     return (
         <ProfileComponent
             userData={{
-                full_name: profileData.data.name,
-                image: profileData.data.image,
-                email: profileData.data.email,
+                full_name: userData.name,
+                image: userData.image,
+                email: userData.email,
+                recieved:userData.recieved,
+                donations:userData.donations
             }}
-            campaigns={profileData.causes || []}
+            campaigns={campaigns}
         />
     );
 }

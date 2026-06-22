@@ -1,3 +1,5 @@
+"use client"
+
 import Card from "@/app/components/layout/card";
 import Footer from "@/app/components/layout/footer";
 import NavBar from "@/app/components/layout/NavBar";
@@ -6,6 +8,8 @@ interface UserData {
     full_name: string;
     image: string;
     email: string;
+     recieved:number,
+     donations:number
 }
 
 interface Campaign {
@@ -36,51 +40,7 @@ interface ProfileProp {
     campaigns: Campaign[];
 }
 
-const SafetyBadge = ({ rating }: { rating: Campaign["safety_rating"] }) => {
-    const config = {
-        verified_safe: {
-            bg: "bg-emerald-50",
-            text: "text-emerald-700",
-            dot: "bg-emerald-500",
-            label: "Verified Safe",
-        },
-        likely_safe: {
-            bg: "bg-blue-50",
-            text: "text-blue-700",
-            dot: "bg-blue-500",
-            label: "Likely Safe",
-        },
-        uncertain: {
-            bg: "bg-amber-50",
-            text: "text-amber-700",
-            dot: "bg-amber-500",
-            label: "Uncertain",
-        },
-        likely_risky: {
-            bg: "bg-orange-50",
-            text: "text-orange-700",
-            dot: "bg-orange-500",
-            label: "Likely Risky",
-        },
-        unsafe: {
-            bg: "bg-red-50",
-            text: "text-red-700",
-            dot: "bg-red-500",
-            label: "Unsafe",
-        },
-    };
 
-    const style = config[rating];
-
-    return (
-        <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}
-        >
-            <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-            {style.label}
-        </span>
-    );
-};
 
 const StatCard = ({
     label,
@@ -215,12 +175,8 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
 
                             {campaigns.length > 0 && (
                                 <div className="flex items-center justify-center md:justify-start gap-3 flex-wrap">
-                                    <SafetyBadge
-                                        rating={campaigns[0].safety_rating}
-                                    />
-                                    <span className="text-sm text-gray-400">
-                                        •
-                                    </span>
+                                    
+                                   
                                     <span className="text-sm text-gray-500">
                                         Member since{" "}
                                         {new Date(
@@ -333,7 +289,7 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
                                 centerName={campaign.center_name as string}
                                 center_name={campaign.center_name}
                                 safety_level={campaign.safety_rating}
-                                daysLeft={getDaysLeft(campaign.date_to_completion)}
+                                daysLeft={campaign.date_to_completion}
                             />
                         ))}
                     </div>

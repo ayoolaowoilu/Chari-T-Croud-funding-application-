@@ -16,7 +16,7 @@ export async function GET(request:NextRequest) {
     try {
        
         if(is_center == "false"){
-    const [res]:any =await db.query(`SELECT full_name,image,email FROM users WHERE id = ?`, [id]);
+    const [res]:any =await db.query(`SELECT full_name,image,email, recieved,donations FROM users WHERE id = ?`, [id]);
         return new Response(JSON.stringify(res[0]), { status: 200 });
         }else{
                       const [res]:any =await db.query(`SELECT name,logourl FROM centers WHERE id = ?`, [id]);
