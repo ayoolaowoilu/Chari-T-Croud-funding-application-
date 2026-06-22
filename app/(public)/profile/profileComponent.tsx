@@ -8,13 +8,14 @@ interface UserData {
     full_name: string;
     image: string;
     email: string;
-     recieved:number,
-     donations:number
+    recieved: number;
+    donations: number;
 }
 
 interface Campaign {
     id: number;
     name: string;
+    location: string;
     details: string;
     main_img: { url: string };
     goal: number;
@@ -40,33 +41,9 @@ interface ProfileProp {
     campaigns: Campaign[];
 }
 
-
-
-const StatCard = ({
-    label,
-    value,
-    suffix,
-}: {
-    label: string;
-    value: number;
-    suffix?: string;
-}) => (
-    <div className="bg-white border border-gray-100 rounded-xl p-5 text-center hover:shadow-md transition-shadow duration-200">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
-            {value.toLocaleString()}
-            {suffix && (
-                <span className="text-sm font-medium text-gray-500 ml-0.5">
-                    {suffix}
-                </span>
-            )}
-        </div>
-        <div className="text-sm text-gray-500 font-medium">{label}</div>
-    </div>
-);
-
 const EmptyState = () => (
     <div className="text-center py-16 px-4">
-        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
                 className="w-8 h-8 text-gray-400"
                 fill="none"
@@ -91,10 +68,8 @@ const EmptyState = () => (
 );
 
 const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
-    const totalRaised = campaigns.reduce((sum, c) => sum + (c.raised || 0), 0);
-    const totalGoal = campaigns.reduce((sum, c) => sum + c.goal, 0);
-    const activeCampaigns = campaigns.filter(
-        (c) => new Date(c.date_to_completion) > new Date()
+    const activeCampaigns = campaigns?.filter(
+        (c) => Number(c.date_to_completion) > Date.now()
     ).length;
 
     const getInitials = (name: string) => {
@@ -106,195 +81,193 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
             .slice(0, 2);
     };
 
-    const getDaysLeft = (dateStr: string) => {
-        const end = new Date(dateStr);
-        const now = new Date();
-        const diff = Math.ceil(
-            (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        return diff > 0 ? diff : 0;
-    };
+    const joinDate = campaigns.length > 0
+        ? new Date(campaigns[0].created_at).toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+          })
+        : null;
+
+    const bannerSeed = userData.email
+        ? userData.email.replace(/[^a-zA-Z0-9]/g, "")
+        : "default";
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             <NavBar />
 
-            {/* Profile Header */}
-            <section className="bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                        {/* Avatar */}
-                        <div className="relative shrink-0">
+            {/* Banner with random photo */}
+            <div className="w-full h-52 relative overflow-hidden">
+                <img
+                    src={`https://picsum.photos/seed/${bannerSeed}/1200/400`}
+                    alt="Profile banner"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/10" />
+            </div>
+
+            <div className="max-w-3xl mx-auto px-4">
+                {/* Profile Header Area */}
+                <div className="relative px-4">
+                    {/* Avatar - Overlapping banner */}
+                    <div className="absolute -top-16 left-4">
+                        <div className="w-32 h-32 rounded-full border-4 border-white bg-white shadow-md overflow-hidden">
                             {userData.image ? (
                                 <img
                                     src={userData.image}
                                     alt={userData.full_name}
-                                    className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
+                                    className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-28 h-28 rounded-2xl bg-gray-900 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                                <div className="w-full h-full bg-gray-900 flex items-center justify-center text-white text-3xl font-bold">
                                     {getInitials(userData.full_name)}
                                 </div>
                             )}
-                            <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-emerald-500 border-3 border-white rounded-full flex items-center justify-center">
-                                <svg
-                                    className="w-4 h-4 text-white"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
-                            </div>
                         </div>
+                    </div>
 
-                        {/* User Info */}
-                        <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    {/* Action Buttons */}
+                    <div className="flex justify-end pt-3 pb-2">
+                        <button className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 text-gray-900 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors">
+                            Contact
+                        </button>
+                    </div>
+
+                    {/* Name & Details */}
+                    <div className="mt-10">
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl font-bold text-gray-900">
                                 {userData.full_name}
                             </h1>
-                            <p className="text-gray-500 mb-4 flex items-center justify-center md:justify-start gap-2">
-                                <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                    />
-                                </svg>
-                                {userData.email}
-                            </p>
-
-                            {campaigns.length > 0 && (
-                                <div className="flex items-center justify-center md:justify-start gap-3 flex-wrap">
-                                    
-                                   
-                                    <span className="text-sm text-gray-500">
-                                        Member since{" "}
-                                        {new Date(
-                                            campaigns[0].created_at
-                                        ).toLocaleDateString("en-US", {
-                                            month: "long",
-                                            year: "numeric",
-                                        })}
-                                    </span>
-                                </div>
-                            )}
+                              <span 
+                        className="inline-flex items-center transition-transform duration-300 hover:scale-110" 
+                        title="Verified Charity"
+                    >
+                        <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                        </svg>
+                    </span>
                         </div>
-
-                        {/* Contact Button */}
-                        <div className="hidden md:block shrink-0">
-                            <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                                <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                    />
-                                </svg>
-                                Contact
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Bar */}
-            <section className="bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <StatCard
-                            label="Campaigns"
-                            value={campaigns.length}
-                        />
-                        <StatCard
-                            label="Active"
-                            value={activeCampaigns}
-                        />
-                        <StatCard
-                            label="Total Raised"
-                            value={totalRaised}
-                            suffix={campaigns[0]?.currency || ""}
-                        />
-                        <StatCard
-                            label="Avg. Goal"
-                            value={
-                                campaigns.length > 0
-                                    ? Math.round(totalGoal / campaigns.length)
-                                    : 0
-                            }
-                            suffix={campaigns[0]?.currency || ""}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Campaigns Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Causes by this user
-                        </h2>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {campaigns.length}{" "}
-                            {campaigns.length === 1 ? "campaign" : "campaigns"}{" "}
-                            created
+                        <p className="text-gray-500 text-sm mt-0.5">
+                            {userData.email}
                         </p>
+
+                        {/* Bio */}
+                        <p className="text-gray-900 text-sm mt-3 leading-relaxed">
+                            Supporting causes that matter. Every donation makes a difference.
+                        </p>
+
+                        {/* Meta Row */}
+                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                            {joinDate && (
+                                <span className="flex items-center gap-1">
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={1.5}
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    Joined {joinDate}
+                                </span>
+                            )}
+                            <span className="flex items-center gap-1">
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.5}
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                    />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.5}
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                </svg>
+                                Nigeria
+                            </span>
+                        </div>
+
+                        {/* Stats Row */}
+                        <div className="flex items-center gap-5 mt-4 pb-4">
+                            <span className="text-sm">
+                                <span className="font-bold text-gray-900">{campaigns.length}</span>{" "}
+                                <span className="text-gray-500">Campaigns</span>
+                            </span>
+                            <span className="text-sm">
+                                <span className="font-bold text-gray-900">
+                                    {activeCampaigns}
+                                </span>{" "}
+                                <span className="text-gray-500">Active</span>
+                            </span>
+                            <span className="text-sm">
+                                <span className="font-bold text-gray-900">
+                                    {userData.donations.toLocaleString()}
+                                </span>{" "}
+                                <span className="text-gray-500">Donated</span>
+                            </span>
+                            <span className="text-sm">
+                                <span className="font-bold text-gray-900">
+                                    {userData.recieved || 0}
+                                </span>{" "}
+                                <span className="text-gray-500">Received</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Campaigns Section */}
+                <div className="border-t border-gray-100 pt-6 pb-12">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-bold text-gray-900">
+                            Campaigns
+                        </h2>
+                        <span className="text-sm text-gray-500">
+                            {campaigns.length} {campaigns.length === 1 ? "cause" : "causes"}
+                        </span>
                     </div>
 
-                    {campaigns.length > 0 && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span className="hidden sm:inline">Sorted by:</span>
-                            <select className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
-                                <option>Newest First</option>
-                                <option>Most Funded</option>
-                                <option>Ending Soon</option>
-                            </select>
+                    {campaigns.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {campaigns.map((campaign) => (
+                                <Card
+                                    key={campaign.id}
+                                    id={campaign.id}
+                                    goal={campaign.goal}
+                                    raised={campaign.raised || 0}
+                                    title={campaign.name}
+                                    donors={campaign.donation_count || 0}
+                                    img={campaign.main_img.url}
+                                    category={campaign.category}
+                                    desc={campaign.details}
+                                    currency={campaign.currency}
+                                    center_id={campaign.center_id as string}
+                                    centerName={campaign.center_name as string}
+                                    center_name={campaign.center_name}
+                                    safety_level={campaign.safety_rating}
+                                    daysLeft={campaign.date_to_completion}
+                                    location={campaign.location}
+                                />
+                            ))}
                         </div>
                     )}
                 </div>
-
-                {campaigns.length === 0 ? (
-                    <EmptyState />
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {campaigns.map((campaign) => (
-                            <Card
-                                key={campaign.id}
-                                id={campaign.id}
-                                goal={campaign.goal}
-                                raised={campaign.raised || 0}
-                                title={campaign.name}
-                                donors={campaign.donation_count || 0}
-                                img={campaign.main_img.url}
-                                category={campaign.category}
-                                desc={campaign.details}
-                                currency={campaign.currency}
-                                center_id={campaign.center_id as string}
-                                centerName={campaign.center_name as string}
-                                center_name={campaign.center_name}
-                                safety_level={campaign.safety_rating}
-                                daysLeft={campaign.date_to_completion}
-                            />
-                        ))}
-                    </div>
-                )}
-            </section>
+            </div>
 
             <Footer />
         </div>

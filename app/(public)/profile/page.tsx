@@ -65,7 +65,7 @@ export default async function Page({ searchParams }: Props) {
     return (
         <ProfileComponent
             userData={{
-                full_name: userData.name,
+                full_name: userData.full_name,
                 image: userData.image,
                 email: userData.email,
                 recieved:userData.recieved,
