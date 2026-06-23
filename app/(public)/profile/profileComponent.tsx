@@ -128,11 +128,11 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
                     </div>
 
                     {/* Action Buttons */}
-                    {/* <div className="flex justify-end pt-3 pb-2">
+                    <div className="flex justify-end pt-3 pb-2">
                         <button className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 text-gray-900 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors">
                             Contact
                         </button>
-                    </div> */}
+                    </div>
 
                     {/* Name & Details */}
                     <div className="mt-10">
@@ -216,13 +216,13 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
                             </span>
                             <span className="text-sm">
                                 <span className="font-bold text-gray-900">
-                                    {userData.donations.toLocaleString()}
+                                    ₦{userData.donations.toLocaleString()}
                                 </span>{" "}
                                 <span className="text-gray-500">Donated</span>
                             </span>
                             <span className="text-sm">
                                 <span className="font-bold text-gray-900">
-                                    {userData.recieved || 0}
+                                    ₦{(userData.recieved )?.toLocaleString() || 0}
                                 </span>{" "}
                                 <span className="text-gray-500">Received</span>
                             </span>
