@@ -2,6 +2,8 @@ import { FetchUserPublicProfileById, GetUserDetailsDyId } from "@/app/lib/fetchR
 import { Metadata } from "next";
 import { ProfileComponent } from "./profileComponent";
 
+const SITE_URL = process.env.API_URL || "https://chari-t.com";
+
 type Props = {
     searchParams: Promise<{ id?: string }>;
 };
@@ -18,12 +20,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
     const userData = await GetUserDetailsDyId(Number(id), false);
 
-    const ogImage = userData?.image || window.location.origin;
+    const ogImage = userData?.image || `${SITE_URL}/default-og.png`;
 
     return {
         title: `${userData?.full_name || "User"} | Chari-T Profile`,
         description: `Support ${userData?.full_name || "this user"}'s causes on Chari-T.`,
-        metadataBase: new URL(window.location.origin),
+        metadataBase: new URL(SITE_URL),
         openGraph: {
             title: `${userData?.full_name || "User"} | Chari-T Profile`,
             description: `Support ${userData?.full_name || "this user"}'s causes on Chari-T.`,

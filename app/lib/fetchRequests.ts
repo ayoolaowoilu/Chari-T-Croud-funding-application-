@@ -327,7 +327,7 @@ const DeleteCause = async(id:number) =>{
 const FetchUserPublicProfileById  =async (id:number) =>{
        const userDetails = await GetUserDetailsDyId(id,false)
        const userCauses = await FetchUserCauses(userDetails.email);
-       console.log(userDetails)
+ 
 
         return {
                 data:userDetails,
