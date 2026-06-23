@@ -330,13 +330,13 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
       </AnimatePresence>
 
       {/* Mobile hero */}
-      <div className="lg:hidden relative w-full aspect-[4/3] bg-gray-200">
+      <div className="lg:hidden relative w-full aspect-4/3 bg-gray-200">
         <img
           src={displayedMainImg || undefined}
           alt={campaign.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <span className="inline-block px-2.5 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-semibold mb-2">
             {campaign.category}
@@ -360,7 +360,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 <Explain
                   topic={campaign.safety_rating}
                   details={campaign.safety_rating === 'likely_risky' ? 'Some users reported this as potentially fraudulent.' : campaign.safety_rating === 'likely_safe' ? 'Few reports, likely safe.' : campaign.safety_rating === 'verified_safe' ? 'Verified by our team.' : campaign.safety_rating === 'unsafe' ? 'Multiple scam reports confirmed.' : 'Not yet verified — do your research.'}
-                  link="/docs/safety-ratings"
+                  link="/how-it-works#ratings"
                   link_details="View Docs"
                 />
               </span>

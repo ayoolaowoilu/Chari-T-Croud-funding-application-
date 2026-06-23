@@ -123,7 +123,7 @@ function StepCard({
 }) {
   return (
     <div className="flex gap-4 sm:gap-5">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <span className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-900 text-white font-bold text-sm sm:text-base">
           {number}
         </span>
@@ -237,7 +237,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Safety Rankings - minimal text-only style */}
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <section id="ratings" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <div className="mb-8 sm:mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
               Safety Rankings

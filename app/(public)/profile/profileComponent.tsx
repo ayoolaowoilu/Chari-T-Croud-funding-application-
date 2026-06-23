@@ -128,8 +128,8 @@ const ProfileComponent: React.FC<ProfileProp> = ({ userData, campaigns }) => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end pt-3 pb-2">
-                        <button className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 text-gray-900 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors">
+                    <div  className="flex justify-end pt-3 pb-2">
+                        <button onClick={()=> window.location.href = `mailto:${userData.email}`} className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 text-gray-900 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors">
                             Contact
                         </button>
                     </div>
