@@ -9,18 +9,20 @@ function addRedisData(data: unknown, key: string, ttlSeconds: number = 3600): vo
   const stringifiedData = typeof data === 'string' ? data : JSON.stringify(data)
   const keyName = 'Chari-T:' + key
   redis.set(keyName, stringifiedData, { ex: ttlSeconds })
-  console.log("Cache set")
+    .catch(err => console.error("Redis set error:", err))
+  console.log("Cache set for key:", keyName)
 }
 
 function getRedisData(key: string): Promise<unknown> {
   const keyName = 'Chari-T:' + key
-  console.log("Cache hit")
-  return (redis.get(keyName))
+  console.log("Cache hit attempt for:", keyName)
+  return redis.get(keyName)
 }
 
 function deleteRedisData(key: string): void {
   const keyName = 'Chari-T:' + key
   redis.del(keyName)
+    .catch(err => console.error("Redis del error:", err))
 }
 
 export { addRedisData, getRedisData, deleteRedisData }
