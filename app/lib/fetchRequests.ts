@@ -261,6 +261,7 @@ const DeleteCause = async(id:number) =>{
                            }
                      
                      }
+                     
    type kycPayload = {
         email:string;
         formData:KycFormData;

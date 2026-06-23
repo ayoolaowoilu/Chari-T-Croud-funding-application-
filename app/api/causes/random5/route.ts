@@ -1,5 +1,5 @@
 import db from "@/app/lib/DBschema";
-import { addRedisData, getRedisData } from "@/app/lib/redis";
+
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -10,9 +10,7 @@ function getTimeSeed() {
   return `chari-t-${windowIndex}`; 
 }
 
-function getCacheKey(query: string, category: string, page: number, seed: string): string {
-  return `campaigns:${seed}:${category}:${query || 'all'}:page${page}`;
-}
+
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -21,15 +19,11 @@ export async function GET(request: NextRequest) {
   const page = Number(searchParams.get("page")) || 0;
 
   const seed = getTimeSeed();
-  const cacheKey = getCacheKey(query, category, page, seed);
+ 
 
   try {
     
-    const cached = await getRedisData(cacheKey);
-    
-    if (cached) {
-      return NextResponse.json(cached, { status: 200 });
-    }
+
 
     let sql: string;
     let params: any[] = [];
@@ -109,7 +103,7 @@ export async function GET(request: NextRequest) {
     const data = results.slice(0, 20);
     const response = { data, hasMore };
 
-    addRedisData(response, cacheKey, 900);
+   
 
     return NextResponse.json(response, { status: 200 });
 

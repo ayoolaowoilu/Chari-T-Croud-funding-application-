@@ -1,16 +1,13 @@
 import db from "@/app/lib/DBschema";
 import { NextResponse } from "next/server";
-import { addRedisData, getRedisData } from "@/app/lib/redis";
+
 
 export async function GET() {
-  const cacheKey = "featured:random";
+
 
   try {
 
-    const cached = await getRedisData(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached, { status: 200 });
-    }
+  
 
     const [data]: any = await db.query(
       `SELECT 
@@ -26,7 +23,7 @@ export async function GET() {
     );
 
 
-    addRedisData(data, cacheKey, 300);
+  
 
     return NextResponse.json(data, { status: 200 });
 

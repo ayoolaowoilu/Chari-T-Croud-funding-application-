@@ -1,6 +1,5 @@
 import db from "@/app/lib/DBschema";
 import { NextRequest, NextResponse } from "next/server";
-import { addRedisData, getRedisData } from "@/app/lib/redis";
 
 export async function GET(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id");
@@ -13,11 +12,7 @@ export async function GET(request: NextRequest) {
   const cacheKey = `campaign:${id}:type${type}`;
 
   try {
-    const cached = await getRedisData(cacheKey);
-    console.log(cached)
-    if (cached) {
-      return NextResponse.json(cached , { status: 200 });
-    }
+ 
 
     let sql: string;
 
@@ -29,7 +24,6 @@ export async function GET(request: NextRequest) {
 
     const [data]: any = await db.query(sql, [id]);
 
-    addRedisData(data, cacheKey, 600);
 
     return NextResponse.json(data, { status: 200 });
 
