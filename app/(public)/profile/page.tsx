@@ -19,11 +19,36 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
     const userData = await GetUserDetailsDyId(Number(id), false);
 
-    return buildOgMeta({
-        title: `${userData.name} | Chari-T Profile`,
-        description: `Support ${userData.name}'s causes on Chari-T.`,
-        imageUrl: userData.image,
-    });
+
+
+      return {
+ title: `${userData.full_name} | Chari-T Profile`,
+         description: `Support ${userData.full_name}'s causes on Chari-T.`,
+    openGraph: {
+       title: `${userData.full_name} | Chari-T Profile`,
+    description: `Support ${userData.full_name}'s causes on Chari-T.`,
+      url:userData.image,
+      siteName: "Chari-T",
+      images: [
+        {
+          url:userData.image,
+          width: 1200,
+          height: 630,
+          alt:`${userData.full_name} | Chari-T Profile`,
+        },
+      ],
+      type:"profile",
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${userData.full_name} | Chari-T Profile`,
+       description: `Support ${userData.full_name}'s causes on Chari-T.`,
+      images: [
+       userData.image
+      ],
+    },
+  };
 }
 
 export default async function Page({ searchParams }: Props) {
