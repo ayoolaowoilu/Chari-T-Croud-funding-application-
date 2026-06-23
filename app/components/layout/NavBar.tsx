@@ -65,7 +65,8 @@ export default function NavBar() {
         "/contact",
         "/faq",
         "/how-it-works",
-        "/reports"
+        "/reports",
+        "/profile"
       ];
       if (!publicPaths.includes(pathname)) {
         return redirect(`/auth/signin?redir=${window.location.href}`);
