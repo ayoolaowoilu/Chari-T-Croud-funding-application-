@@ -1,5 +1,4 @@
 import { FetchUserPublicProfileById, GetUserDetailsDyId } from "@/app/lib/fetchRequests";
-import { buildOgMeta } from "@/app/lib/open_graph";
 import { Metadata } from "next";
 import { ProfileComponent } from "./profileComponent";
 
@@ -11,44 +10,43 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     const { id } = await searchParams;
 
     if (!id) {
-        return buildOgMeta({
+        return {
             title: "Profile | Chari-T",
             description: "View user profile and support their causes on Chari-T.",
-        });
+        };
     }
 
     const userData = await GetUserDetailsDyId(Number(id), false);
 
+    const ogImage = userData?.image || window.location.origin;
 
-
-      return {
- title: `${userData.full_name} | Chari-T Profile`,
-         description: `Support ${userData.full_name}'s causes on Chari-T.`,
-    openGraph: {
-       title: `${userData.full_name} | Chari-T Profile`,
-    description: `Support ${userData.full_name}'s causes on Chari-T.`,
-      url:userData.image,
-      siteName: "Chari-T",
-      images: [
-        {
-          url:userData.image,
-          width: 1200,
-          height: 630,
-          alt:`${userData.full_name} | Chari-T Profile`,
+    return {
+        title: `${userData?.full_name || "User"} | Chari-T Profile`,
+        description: `Support ${userData?.full_name || "this user"}'s causes on Chari-T.`,
+        metadataBase: new URL(window.location.origin),
+        openGraph: {
+            title: `${userData?.full_name || "User"} | Chari-T Profile`,
+            description: `Support ${userData?.full_name || "this user"}'s causes on Chari-T.`,
+            url: `/profile?id=${id}`,
+            siteName: "Chari-T",
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: `${userData?.full_name || "User"} | Chari-T Profile`,
+                },
+            ],
+            type: "website",
+            locale: "en_US",
         },
-      ],
-      type:"profile",
-      locale: 'en_US',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${userData.full_name} | Chari-T Profile`,
-       description: `Support ${userData.full_name}'s causes on Chari-T.`,
-      images: [
-       userData.image
-      ],
-    },
-  };
+        twitter: {
+            card: "summary_large_image",
+            title: `${userData?.full_name || "User"} | Chari-T Profile`,
+            description: `Support ${userData?.full_name || "this user"}'s causes on Chari-T.`,
+            images: [ogImage],
+        },
+    };
 }
 
 export default async function Page({ searchParams }: Props) {
@@ -90,11 +88,11 @@ export default async function Page({ searchParams }: Props) {
     return (
         <ProfileComponent
             userData={{
-                full_name: userData.full_name,
-                image: userData.image,
-                email: userData.email,
-                recieved:userData.recieved,
-                donations:userData.donations
+                full_name: userData?.full_name || "Anonymous",
+                image: userData?.image || "",
+                email: userData?.email || "",
+                recieved: userData?.recieved || 0,
+                donations: userData?.donations || 0,
             }}
             campaigns={campaigns}
         />
