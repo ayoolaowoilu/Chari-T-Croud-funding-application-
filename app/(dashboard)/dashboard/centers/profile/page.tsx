@@ -119,3 +119,4 @@ export default async function CenterProfilePage({ searchParams }: Props) {
 
     return <CenterProfileClient centerId={centerId} initialCenter={center} initialError={loadError} />
 }
+
