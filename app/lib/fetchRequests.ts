@@ -40,7 +40,7 @@ const API_URL = process.env.API_URL || "http://localhost:3000"
 const TTL = {
   FEATURED: 300,
   CAUSE_DETAIL: 600,
-  RANDOM_CAUSES: 180,
+  RANDOM_CAUSES: 210,
   CENTER_PROFILE: 300,
   CENTER_LIST: 120,
   USER_STATS: 60,
@@ -261,7 +261,7 @@ const DeleteCause = async(id:number) =>{
                            }
                      
                      }
-                     
+
    type kycPayload = {
         email:string;
         formData:KycFormData;
@@ -321,7 +321,8 @@ const DeleteCause = async(id:number) =>{
               headers:{"Content-Type":"application/json"},
               body:JSON.stringify(data)
              })
-
+              deleteRedisData(`cause:${data.campaign_id}:type:${1}`)
+              deleteRedisData(`cause:${data.campaign_id}:type:${2}`)
              return await resp.json()
          }catch(error){
                console.log(error)
