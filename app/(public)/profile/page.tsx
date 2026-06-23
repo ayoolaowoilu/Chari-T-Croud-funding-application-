@@ -95,6 +95,7 @@ export default async function Page({ searchParams }: Props) {
                 email: userData?.email || "",
                 recieved: userData?.recieved || 0,
                 donations: userData?.donations || 0,
+                is_verified:userData.is_verified
             }}
             campaigns={campaigns}
         />
