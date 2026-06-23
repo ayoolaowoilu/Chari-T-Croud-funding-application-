@@ -444,7 +444,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                       <Explain
                         topic={userName as string}
                         details={isCenter ? 'Charity center profile' : 'Public profile'}
-                        link={`/dashboard/${isCenter ? 'centers' : 'center'}/profile?id=${userId}`}
+                        link={isCenter ? `/dashboard/${isCenter ? 'centers' : 'center'}/profile?id=${campaign.center_id}` :   `/profile?id=${campaign.user_id}`}
                         link_details="View profile"
                       />
                     </span>
