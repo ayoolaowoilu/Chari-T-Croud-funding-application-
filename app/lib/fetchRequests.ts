@@ -33,7 +33,7 @@ type Report = {
 
 const API_URL = process.env.API_URL || "http://localhost:3000"
 
-// ─── CACHE TTL CONFIGURATION ─────────────────────────────────────
+
 const TTL = {
   FEATURED: 300,        // 5 min — changes frequently
   CAUSE_DETAIL: 600,    // 10 min — moderate traffic
@@ -45,7 +45,7 @@ const TTL = {
   PUBLIC_PROFILE: 300,  // 5 min — public user data
 }
 
-// ─── HELPER: Try cache first, fallback to fetch ──────────────────
+
 async function withCache<T>(
   cacheKey: string,
   fetchFn: () => Promise<T>,
@@ -54,7 +54,7 @@ async function withCache<T>(
   try {
     const cached = await getRedisData(cacheKey)
     if (cached) {
-      // Handle both stringified JSON and raw objects from Redis
+      
       const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
       console.log(`[CACHE HIT] ${cacheKey}`)
       return parsed as T
@@ -65,7 +65,6 @@ async function withCache<T>(
 
   const data = await fetchFn()
   
-  // Only cache successful responses (no error field)
   if (data && typeof data === 'object' && !('error' in data)) {
     addRedisData(data, cacheKey, ttl)
   }
@@ -294,8 +293,7 @@ const UploadCenter = async (data: CenterRegistrationPayload & { type: string; id
     })
 
     const result = await resp.json()
-    
-    // Invalidate center caches
+   
     deleteRedisData('centers:*')
     
     return result
@@ -304,9 +302,6 @@ const UploadCenter = async (data: CenterRegistrationPayload & { type: string; id
   }
 }
 
-// ═════════════════════════════════════════════════════════════════
-// READ OPERATIONS — WITH REDIS CACHING
-// ═════════════════════════════════════════════════════════════════
 
 const getFeatured = async () => {
   return withCache('featured', async () => {
