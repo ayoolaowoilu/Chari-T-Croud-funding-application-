@@ -211,7 +211,7 @@ export default function NavBar() {
                 </button>
                 {categoriesOpen && (
                   <div className="absolute top-full left-0 pt-2">
-                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-[28rem] overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-md overflow-hidden">
                       <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                         <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
                           <CircleHelp size={18} className="text-emerald-600" />
