@@ -168,6 +168,7 @@ export default function StartCausePage() {
 
     try {
       const resp = await FetchProfile(session.user.email)
+      console.log(resp)
       if (resp?.error) {
         setErrorMsg(resp.error)
         setHasError(true)

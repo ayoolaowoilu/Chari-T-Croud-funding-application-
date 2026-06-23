@@ -33,14 +33,10 @@ type FetchedData = {
 
 type userData = Pick<UserData, "created_at" | "email" | "full_name" | "image" | "is_verified" | "bank_details"> & {
   donations: number
-  recived: number
+   recieved: number
 }
 
-type don = Pick<Campaign, "id" | "name" | "currency" | "goal" | "raised" | "center_name" | "center_id" | "category" | "details" | "main_img" | "donation_count" | "date_to_completion"> & {
-  donors: Donor[],
-  location: string,
-  safety_rating: string
-}
+
 
 interface Donation {
   id: number
@@ -732,7 +728,7 @@ export default function Dash() {
   const { userData: userdata } = data
 
   const totalDonated = userdata?.donations || 0
-  const totalReceived = userdata?.recived || 0
+  const totalReceived = userdata?.recieved || 0
   const activeCauses = data?.activeCampaigns || 0
   const memberSince = new Date(userdata?.created_at).toLocaleDateString("en-US", {
     month: "short",

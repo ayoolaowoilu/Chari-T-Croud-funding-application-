@@ -47,7 +47,7 @@ interface UserData {
   created_at: string
   image: string
   donations: number
-  recived: number
+   recieved: number
   bank_details:bankDetails;
   method:string
 }
