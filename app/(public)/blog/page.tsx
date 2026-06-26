@@ -23,7 +23,11 @@ type BlogCard = {
   img_url: string;
 };
 
-
+type PaginatedResponse = {
+  blogs: number;      // total count
+  page: number;       // current page
+  data: BlogCard[];   // actual blog cards
+};
 
 type Comment = {
   id: number;
@@ -56,24 +60,56 @@ const MOCK_COMMENTS: Record<number, Comment[]> = {
   ]
 };
 
+const ITEMS_PER_PAGE = 4; // adjust based on your API
+
 export default function Page() {
   const [stage, setStage] = useState<1 | 2>(1);
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Record<number, Comment[]>>(MOCK_COMMENTS);
   const [likedSections, setLikedSections] = useState<Set<string>>(new Set());
-  const [blog,setBlog] = useState<BlogCard[]>([]);
-  const activeCard  = blog[activeCardIndex];
+  
+  // ─── Pagination State ────────────────────────────────────────────
+  const [blog, setBlog] = useState<BlogCard[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalBlogs, setTotalBlogs] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const activeCard = blog[activeCardIndex];
 
-   const fetch_data = async() => {
-       const blog_data = await fetch(`${window.location.origin}/api/blog`)  
-       setBlog( await blog_data.json())
-   }
+  // ─── Fetch Data ──────────────────────────────────────────────────
+  const fetch_data = async (page: number) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${window.location.origin}/api/blog?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const result: PaginatedResponse = await response.json();
+      
+      setBlog(result.data);
+      setCurrentPage(result.page);
+      setTotalBlogs(result.blogs);
+      setTotalPages(Math.ceil(result.blogs / ITEMS_PER_PAGE));
+    } catch (error) {
+      console.error("Failed to fetch blog data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-   useEffect(()=>{
-     fetch_data()
-   },[])
+  // Initial load
+  useEffect(() => {
+    fetch_data(1);
+  }, []);
+
+  // ─── Pagination Handlers ───────────────────────────────────────────
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    fetch_data(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handlePrevPage = () => handlePageChange(currentPage - 1);
+  const handleNextPage = () => handlePageChange(currentPage + 1);
 
   const handleViewMore = (index: number) => {
     setActiveCardIndex(index);
@@ -118,7 +154,35 @@ export default function Page() {
     });
   };
 
-  
+  // ─── Generate Page Numbers for Pagination ──────────────────────────
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5; // max page buttons to show
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+      
+      // Adjust if near start or end
+      if (currentPage <= 2) end = 4;
+      if (currentPage >= totalPages - 1) start = totalPages - 3;
+      
+      if (start > 2) pages.push("...");
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push("...");
+      
+      // Always show last page
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
   const blog_cards = useCallback((cards: BlogCard) => {
     return (
       <div className="w-full mb-4 text-black shadow-xl rounded flex flex-col bg-white">
@@ -168,7 +232,7 @@ export default function Page() {
         </div>
       </div>
     );
-  }, []);
+  }, [blog]);
 
   // ─── Stage 2: Full Blog Post Reader (Mobile Optimized) ───────────
   const BlogReader = () => {
@@ -398,51 +462,76 @@ export default function Page() {
               <p className="text-gray-500 text-sm sm:text-base leading-relaxed">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui possimus culpa, cupiditate officia expedita saepe dicta modi. Aut numquam asperiores sunt iure molestiae atque dolorem facere, debitis animi laborum quas.
               </p>
+              <p className="text-gray-400 text-xs mt-2">
+                Showing {blog.length} of {totalBlogs} posts • Page {currentPage} of {totalPages}
+              </p>
             </div>
 
-            {/* ORIGINAL Layout: flex-col on mobile, md:flex-row on tablet+ */}
-            <div className="flex-col flex md:flex-row gap-3 sm:gap-4">
-              {blog.map((card, index) => (
-                <div key={index} className="w-full md:flex-1">
-                  {blog_cards(card)}
-                </div>
-              ))}
-            </div>
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+              </div>
+            )}
+
+            {/* Blog Grid */}
+            {!isLoading && (
+              <div className="flex-col flex md:flex-row gap-3 sm:gap-4">
+                {blog.map((card, index) => (
+                  <div key={index} className="w-full md:flex-1">
+                    {blog_cards(card)}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mt-8 sm:mt-12 mb-4 sm:mb-6">
-              <button
-                className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Prev</span>
-              </button>
+            {totalPages > 1 && !isLoading && (
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mt-8 sm:mt-12 mb-4 sm:mb-6">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Prev</span>
+                </button>
 
-              <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2">
-                <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-900 bg-gray-900 text-white shadow-sm transition-all">
-                  1
+                <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2">
+                  {getPageNumbers().map((page, idx) => (
+                    page === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 text-xs sm:text-sm">...</span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page as number)}
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border transition-all ${
+                          currentPage === page
+                            ? "border-gray-900 bg-gray-900 text-white shadow-sm"
+                            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
-                <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                  2
-                </button>
-                <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                  3
-                </button>
-                <span className="px-1 text-gray-400 text-xs sm:text-sm">...</span>
               </div>
-
-              <button
-                className="flex items-center gap-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-              >
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-              </button>
-            </div>
+            )}
           </div>
         </main>
       )}
 
-      {stage === 2 && <BlogReader />}
+      {stage === 2 && activeCard && <BlogReader />}
     </div>
   );
 }
