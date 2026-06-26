@@ -5,9 +5,9 @@ import { Logo } from "@/app/components/layout/footer";
 import NavBar from "@/app/components/layout/NavBar";
 import Button from "@/app/components/ui/button";
 import { ChevronLeft, ChevronRight, Heart, MessageCircleCode, Timer, Send, User } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-// ─── Unified Data Type ─────────────────────────────────────────────
+
 type StorySection = {
   topic: string;
   details: string;
@@ -23,95 +23,8 @@ type BlogCard = {
   img_url: string;
 };
 
-// ─── Dummy Data (Fixed Structure) ──────────────────────────────────
-const DUMMY_BLOG_CARDS: BlogCard[] = [
-  {
-    topic: "New Release Apache 2.0 (Bug fixes)",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat ipsum voluptate quasi ea iure. Vitae minus iure harum error fugiat excepturi debitis quia sapiente, suscipit consequatur quam, hic sed ipsam.",
-    likes: 0,
-    comments: 0,
-    min_read: 5,
-    content: [
-      {
-        topic: "How it works",
-        details: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat ipsum voluptate quasi ea iure. Vitae minus iure harum error fugiat excepturi debitis quia sapiente, suscipit consequatur quam, hic sed ipsam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat ipsum voluptate quasi ea iure."
-      },
-      {
-        topic: "Key Improvements",
-        details: "Vitae minus iure harum error fugiat excepturi debitis quia sapiente, suscipit consequatur quam, hic sed ipsam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat ipsum voluptate quasi ea iure."
-      },
-      {
-        topic: "Migration Guide",
-        details: "Quaerat ipsum voluptate quasi ea iure. Vitae minus iure harum error fugiat excepturi debitis quia sapiente, suscipit consequatur quam, hic sed ipsam."
-      }
-    ],
-    img_url: "https://picsum.photos/seed/apache-release/1584/396"
-  },
-  {
-    topic: "New Years Eve with Chari-T",
-    description: "Join us for a spectacular evening of giving and celebration as we ring in the new year together with our amazing community of donors and volunteers.",
-    likes: 0,
-    comments: 0,
-    min_read: 5,
-    content: [
-      {
-        topic: "Event Highlights",
-        details: "The evening featured live performances from local artists, a silent auction with over 50 items, and heartfelt stories from beneficiaries who have been impacted by your generosity over the past year."
-      },
-      {
-        topic: "Fundraising Results",
-        details: "Thanks to your incredible support, we raised over $150,000 during the event — exceeding our goal by 30%. These funds will directly support education programs in underserved communities."
-      },
-      {
-        topic: "Looking Ahead",
-        details: "As we step into the new year, we're excited to announce three new partnership programs that will expand our reach to 5,000 additional families across the region."
-      }
-    ],
-    img_url: "https://picsum.photos/seed/charity-nye/1584/396"
-  },
-  {
-    topic: "Community Drive Success",
-    description: "Our latest community drive brought together hundreds of volunteers to make a real difference in local neighborhoods.",
-    likes: 0,
-    comments: 0,
-    min_read: 5,
-    content: [
-      {
-        topic: "Volunteer Stories",
-        details: "Over 200 volunteers dedicated their weekend to sorting donations, preparing meals, and distributing essential supplies to families in need."
-      },
-      {
-        topic: "Impact Metrics",
-        details: "We distributed 5,000+ meals, 1,200 hygiene kits, and 800 winter clothing packages to families across 12 different neighborhoods."
-      }
-    ],
-    img_url: "https://picsum.photos/seed/community-drive/1584/396"
-  },
-  {
-    topic: "Technology for Good Initiative",
-    description: "Exploring how modern technology can bridge gaps and create opportunities for charitable organizations worldwide.",
-    likes: 0,
-    comments: 0,
-    min_read: 5,
-    content: [
-      {
-        topic: "Digital Transformation",
-        details: "Nonprofits are increasingly adopting cloud-based solutions to streamline operations, reduce overhead costs, and improve donor engagement through data-driven insights."
-      },
-      {
-        topic: "AI in Philanthropy",
-        details: "Machine learning algorithms now help identify the most effective intervention strategies by analyzing historical outcome data and predicting community needs."
-      },
-      {
-        topic: "Blockchain Transparency",
-        details: "Smart contracts and distributed ledgers are revolutionizing how donors track their contributions, ensuring every dollar reaches its intended destination with full accountability."
-      }
-    ],
-    img_url: "https://picsum.photos/seed/tech-good/1584/396"
-  }
-];
 
-// ─── Comment Type ──────────────────────────────────────────────────
+
 type Comment = {
   id: number;
   author: string;
@@ -149,8 +62,18 @@ export default function Page() {
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Record<number, Comment[]>>(MOCK_COMMENTS);
   const [likedSections, setLikedSections] = useState<Set<string>>(new Set());
+  const [blog,setBlog] = useState<BlogCard[]>([]);
+  const activeCard  = blog[activeCardIndex];
 
-  const activeCard = DUMMY_BLOG_CARDS[activeCardIndex];
+
+   const fetch_data = async() => {
+       const blog_data = await fetch(`${window.location.origin}/api/blog`)  
+       setBlog( await blog_data.json())
+   }
+
+   useEffect(()=>{
+     fetch_data()
+   },[])
 
   const handleViewMore = (index: number) => {
     setActiveCardIndex(index);
@@ -237,7 +160,7 @@ export default function Page() {
             </div>
           </div>
           <Button 
-            onClick={() => handleViewMore(DUMMY_BLOG_CARDS.indexOf(cards))} 
+            onClick={() => handleViewMore(blog.indexOf(cards))} 
             className="mt-4" 
             details={<span className="flex gap-2">View More <ChevronRight /></span>} 
             variant="secondary" 
@@ -433,16 +356,16 @@ export default function Page() {
           <div className="mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200">
             <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">More Stories</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {DUMMY_BLOG_CARDS.filter((_, idx) => idx !== activeCardIndex).slice(0, 2).map((card, idx) => (
+              {blog.filter((_, idx) => idx !== activeCardIndex).slice(0, 2).map((card, idx) => (
                 <button
                   key={idx}
                   onClick={() => {
-                    setActiveCardIndex(DUMMY_BLOG_CARDS.indexOf(card));
+                    setActiveCardIndex(blog.indexOf(card));
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                   className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all text-left bg-white"
                 >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
                     <img src={card.img_url} alt={card.topic} className="w-full h-full object-cover" />
                   </div>
                   <div className="min-w-0">
@@ -459,7 +382,7 @@ export default function Page() {
     );
   };
 
-  // ─── Main Render ─────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-white">
       <NavBar />
@@ -479,7 +402,7 @@ export default function Page() {
 
             {/* ORIGINAL Layout: flex-col on mobile, md:flex-row on tablet+ */}
             <div className="flex-col flex md:flex-row gap-3 sm:gap-4">
-              {DUMMY_BLOG_CARDS.map((card, index) => (
+              {blog.map((card, index) => (
                 <div key={index} className="w-full md:flex-1">
                   {blog_cards(card)}
                 </div>
