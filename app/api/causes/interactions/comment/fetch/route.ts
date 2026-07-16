@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
         );
         const total_count = countResult[0]?.total || 0;
 
-        // Get paginated comments, ordered by newest first
         const offset = page * limit;
         const [rows]: any = await db.query(
             "SELECT * FROM comments WHERE campaign_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
             [campaign_id, limit, offset]
         );
+
+        await db.query("UPDATE TABLE comments SET comments_count = comments_count + 1")
 
         return NextResponse.json(
             {
