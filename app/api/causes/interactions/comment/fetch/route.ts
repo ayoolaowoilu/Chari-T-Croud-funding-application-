@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
             [campaign_id, limit, offset]
         );
 
-        await db.query("UPDATE TABLE comments SET comments_count = comments_count + 1")
+        await db.query("UPDATE TABLE campaigns SET comments_count = comments_count + 1 WHERE id = ?",[campaign_id])
 
         return NextResponse.json(
             {
