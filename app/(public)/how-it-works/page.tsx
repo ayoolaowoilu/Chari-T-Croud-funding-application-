@@ -316,18 +316,21 @@ export default function HowItWorksPage() {
               </p>
               <div className="grid grid-cols-3 gap-4 sm:gap-6">
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">$2.4M+</div>
-                  <div className="text-xs sm:text-sm text-gray-400 mt-1">Raised</div>
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">0%</div>
+                  <div className="text-xs sm:text-sm text-gray-400 mt-1">Platform cut</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">500+</div>
-                  <div className="text-xs sm:text-sm text-gray-400 mt-1">Causes</div>
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">5</div>
+                  <div className="text-xs sm:text-sm text-gray-400 mt-1">Safety tiers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">50K+</div>
-                  <div className="text-xs sm:text-sm text-gray-400 mt-1">Donors</div>
+                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">100%</div>
+                  <div className="text-xs sm:text-sm text-gray-400 mt-1">To the cause*</div>
                 </div>
               </div>
+              <p className="text-xs text-gray-500 mt-6">
+                *Optional tips fund Chari-T. Payment processor fees may still apply via Paystack.
+              </p>
             </div>
           </div>
         </section>
@@ -345,7 +348,7 @@ export default function HowItWorksPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <a
-              href="/local-charities"
+              href="/dashboard/centers/local-centers"
               className="group p-6 sm:p-8 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors"
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center mb-4 group-hover:border-gray-300 transition-colors">

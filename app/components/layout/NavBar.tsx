@@ -4,11 +4,8 @@ import {
   CircleHelp,
   Menu,
   User,
-  Heart,
-  TreePine,
   GraduationCap,
   Stethoscope,
-  Home,
   Globe,
   BriefcaseBusiness,
   HandHeart,
@@ -77,26 +74,23 @@ export default function NavBar() {
   const categories = [
     { name: "Health", icon: Stethoscope, color: "bg-rose-50 text-rose-600", href: "/causes/get?category=Health" },
     { name: "Education", icon: GraduationCap, color: "bg-blue-50 text-blue-600", href: "/causes/get?category=Education" },
-    { name: "Environment", icon: TreePine, color: "bg-emerald-50 text-emerald-600", href: "/causes/get?category=Environment" },
-    { name: "Housing", icon: Home, color: "bg-amber-50 text-amber-600", href: "/causes/get?category=Housing" },
-    { name: "Humanitarian", icon: Heart, color: "bg-red-50 text-red-600", href: "/causes/get?category=Humanitarian" },
     { name: "Community", icon: Globe, color: "bg-violet-50 text-violet-600", href: "/causes/get?category=Community" },
     { name: "Business", icon: BriefcaseBusiness, color: "bg-sky-50 text-sky-600", href: "/causes/get?category=Business" },
-    { name: "Crowdfunding", icon: TrendingUp, color: "bg-orange-50 text-orange-600", href: "/causes/get?category=Croudfunding" },
+    { name: "Crowdfunding", icon: TrendingUp, color: "bg-orange-50 text-orange-600", href: "/causes/get?category=CroudFunding" },
   ];
 
   const aboutLinks = [
     { name: "Our Story", desc: "How Chari-T started and our mission", icon: Info, href: "/about" },
     { name: "How It Works", desc: "Simple steps to donate or start a cause", icon: ShieldCheck, href: "/how-it-works" },
-    { name: "Impact Report", desc: "See the difference we've made together", icon: TrendingUp, href: "/impact" },
+    { name: "Safety Ratings", desc: "How we help you donate with confidence", icon: TrendingUp, href: "/how-it-works#ratings" },
     { name: "Blog & News", desc: "Latest updates and stories", icon: Newspaper, href: "/blog" },
   ];
 
   const getInvolvedLinks = [
     { name: "Start a Cause", desc: "Launch your own fundraising campaign", icon: Megaphone, href: "/startcauses" },
     { name: "Donate Now", desc: "Find causes that need your support", icon: HandHeart, href: "/causes/get" },
-    { name: "Volunteer", desc: "Offer your time and skills", icon: Users, href: "/volunteer" },
-    { name: "Partner With Us", desc: "Corporate and organization partnerships", icon: Landmark, href: "/partners" },
+    { name: "Local Charities", desc: "Discover verified centers near you", icon: Users, href: "/dashboard/centers/local-centers" },
+    { name: "Partner With Us", desc: "Corporate and organization partnerships", icon: Landmark, href: "/contact" },
   ];
 
   const openAbout = () => {

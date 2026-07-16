@@ -13,9 +13,9 @@ export async function GET() {
       `SELECT 
         main_img, details, donation_count, goal, raised, category, 
         name, id, center_name, center_id, location, 
-        date_to_completion, safety_rating 
+        date_to_completion, safety_rating, currency
       FROM campaigns 
-      WHERE date_to_completion > ?
+      WHERE CAST(date_to_completion AS UNSIGNED) > ?
         AND goal <> raised 
       ORDER BY RAND() 
       LIMIT 3`,

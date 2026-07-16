@@ -318,7 +318,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const userName = isCenter ? campaign.center_name : user?.full_name;
   const userId = isCenter ? campaign.center_id : campaign.user_id;
 
-  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/cause?id=${campaign.id}&name=${campaign.name}`;
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/causes/cause?id=${campaign.id}`;
   const twitterText = `${campaign.name?.toUpperCase()} | Chari-T\n\n${campaign.details}\n\nDonate now: ${shareUrl}`;
 
   return (
@@ -444,7 +444,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                       <Explain
                         topic={userName as string}
                         details={isCenter ? 'Charity center profile' : 'Public profile'}
-                        link={isCenter ? `/dashboard/${isCenter ? 'centers' : 'center'}/profile?id=${campaign.center_id}` :   `/profile?id=${campaign.user_id}`}
+                        link={isCenter ? `/dashboard/centers/profile?id=${campaign.center_id}` : `/profile?id=${campaign.user_id}`}
                         link_details="View profile"
                       />
                     </span>
@@ -638,7 +638,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 </div>
                 <Button
                   onClick={() => {
-                    const flierUrl = `/causes/flier?_type=${campaign._type}&center_name=${encodeURIComponent(campaign.center_name || '')}&campaign_name=${encodeURIComponent(campaign.name)}&raised=${campaign.raised}&goal=${campaign.goal}&campaign_id=${campaign.id}&campaign_logo_url=${encodeURIComponent(campaign.main_img.url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/cause?id=${campaign.id}`)}&tagline=${encodeURIComponent(campaign.details || '')}&details=${encodeURIComponent(campaign?.story?.slice(0, 1500) + '...' || '')}`;
+                    const flierUrl = `/causes/flier?_type=${campaign._type}&center_name=${encodeURIComponent(campaign.center_name || '')}&campaign_name=${encodeURIComponent(campaign.name)}&raised=${campaign.raised}&goal=${campaign.goal}&campaign_id=${campaign.id}&campaign_logo_url=${encodeURIComponent(campaign.main_img?.url || '')}&qr_code_url=${encodeURIComponent(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${typeof window !== 'undefined' ? window.location.origin : ''}/causes/cause?id=${campaign.id}`)}&tagline=${encodeURIComponent(campaign.details || '')}&details=${encodeURIComponent(campaign?.story?.slice(0, 1500) + '...' || '')}`;
                     window.open(flierUrl, '_blank');
                   }}
                   variant="outline"

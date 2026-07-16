@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
                category, name, id, center_name, center_id, location,
                date_to_completion, safety_rating
         FROM campaigns
-        WHERE date_to_completion > ?
+        WHERE CAST(date_to_completion AS UNSIGNED) > ?
           AND goal <> raised
-        ORDER BY md5(id || ?)
+        ORDER BY MD5(CONCAT(id, ?))
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), seed, page * 20];
@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
                category, name, id, center_name, center_id, location,
                date_to_completion, safety_rating
         FROM campaigns
-        WHERE date_to_completion > ?
+        WHERE CAST(date_to_completion AS UNSIGNED) > ?
           AND category = ?
           AND goal <> raised
-        ORDER BY md5(id || ?)
+        ORDER BY MD5(CONCAT(id, ?))
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), category, seed, page * 20];
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
                category, name, id, center_name, center_id, location,
                date_to_completion, safety_rating
         FROM campaigns
-        WHERE date_to_completion > ?
+        WHERE CAST(date_to_completion AS UNSIGNED) > ?
           AND (
             name LIKE ?
             OR details LIKE ?
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
             OR category LIKE ?
           )
           AND goal <> raised
-        ORDER BY md5(id || ?)
+        ORDER BY MD5(CONCAT(id, ?))
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, seed, page * 20];
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
                category, name, id, center_name, center_id, location,
                date_to_completion, safety_rating
         FROM campaigns
-        WHERE date_to_completion > ?
+        WHERE CAST(date_to_completion AS UNSIGNED) > ?
           AND category = ?
           AND (
             name LIKE ?
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
             OR center_name LIKE ?
           )
           AND goal <> raised
-        ORDER BY md5(id || ?)
+        ORDER BY MD5(CONCAT(id, ?))
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), category, `%${query}%`, `%${query}%`, `%${query}%`, seed, page * 20];

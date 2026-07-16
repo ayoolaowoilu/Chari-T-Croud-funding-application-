@@ -1,8 +1,12 @@
 import db from "@/app/lib/DBschema";
+import { requireAdmin } from "@/app/lib/adminAuth";
 import { NextRequest, NextResponse } from "next/server";
 
 
 export async function GET(request:NextRequest){
+         const auth = await requireAdmin(request);
+         if (!auth.ok) return auth.response;
+
          const userId = request.nextUrl.searchParams.get("userId")
 
          try {

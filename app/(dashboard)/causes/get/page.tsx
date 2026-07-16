@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { fetchRandom5Causes } from "@/app/lib/fetchRequests";
+import { CAMPAIGN_CATEGORIES, categoryLabel } from "@/app/lib/categories";
 import { DotsWave, DualRingSpinner } from "@/app/components/ui/loading";
 import LoadingCards from "@/app/components/layout/loadingCards";
 import NavBar from "@/app/components/layout/NavBar";
@@ -12,6 +13,7 @@ import Card from "@/app/components/layout/card";
 import { Campaign } from "@/app/lib/types";
 import Footer from "@/app/components/layout/footer";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Don = Pick<Campaign, "id" | "name" | "details" | "main_img" | "goal" | "raised" | "category" | "currency" | "center_name" | "donation_count" | "date_to_completion" | "center_id"> & {
   location: string,
@@ -24,7 +26,23 @@ interface FetchResponse {
   hasMore?: boolean;
 }
 
-const categories = ["All", "Education", "Community", "CroudFunding", "Business", "Health"];
+const categories = ["All", ...CAMPAIGN_CATEGORIES] as const;
+
+function resolveMainImg(main_img: unknown): string {
+  if (!main_img) return "/slider1/hands.jpg";
+  if (typeof main_img === "string") {
+    try {
+      const parsed = JSON.parse(main_img);
+      return parsed?.url || main_img;
+    } catch {
+      return main_img;
+    }
+  }
+  if (typeof main_img === "object" && main_img !== null && "url" in main_img) {
+    return String((main_img as { url: string }).url);
+  }
+  return "/slider1/hands.jpg";
+}
 
 
 export default function Explore() {
@@ -34,7 +52,9 @@ export default function Explore() {
   const pageParam = searchParams.get("page");
   const initialPage = pageParam ? Math.max(0, parseInt(pageParam, 10)) : 0;
 
-  window.document.title = "Explore Causes | Chari-T";
+  useEffect(() => {
+    document.title = "Explore Causes | Chari-T";
+  }, []);
   const [data, setData] = useState<Don[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -190,7 +210,7 @@ export default function Explore() {
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
-                  {cat}
+                  {cat === "All" ? "All" : categoryLabel(cat)}
                 </button>
               ))}
             </div>
@@ -252,7 +272,7 @@ export default function Explore() {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
-              {cat}
+              {cat === "All" ? "All" : categoryLabel(cat)}
             </button>
           ))}
         </div>
@@ -299,7 +319,7 @@ export default function Explore() {
                     desc={item.details}
                     category={item.category}
                     currency={item.currency}
-                    img={item.main_img.url}
+                    img={resolveMainImg(item.main_img)}
                     goal={item.goal}
                     raised={item.raised}
                     id={item.id}
@@ -316,16 +336,32 @@ export default function Explore() {
           </div>
         ) : (
           /* Empty State */
-          <div className="text-center py-20">
+          <div className="text-center py-20 px-4">
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">
               No causes found
             </h3>
-            <p className="text-gray-500">
-              Try adjusting your search or filters
+            <p className="text-gray-500 max-w-md mx-auto mb-6">
+              {searchQuery || activeCategory !== "All"
+                ? "Try adjusting your search or filters."
+                : "Be the first to launch a campaign, or check back after demo seed data is loaded."}
             </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                href="/startcauses"
+                className="inline-flex items-center px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+              >
+                Start a cause
+              </Link>
+              <Link
+                href="/how-it-works"
+                className="inline-flex items-center px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50"
+              >
+                How it works
+              </Link>
+            </div>
           </div>
         )}
 

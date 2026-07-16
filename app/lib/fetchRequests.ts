@@ -301,18 +301,19 @@ const DeleteCause = async(id:number) =>{
   }
 
  export type uDonate = {
-        campaign_id:number,
-        isAuthed:boolean,
-        email?:string,
-        isBlind:boolean,
-        name?:string,
-        owner_id:string,
-        amount:string,
-        transaction_id:string,
-        donor_name?:string,
-        message?:string
-       center_id?:any
-                           
+        campaign_id?: number
+        isAuthed: boolean
+        email?: string
+        isBlind: boolean
+        name?: string
+        owner_id?: string | number
+        amount: string | number
+        transaction_id: string
+        donor_name?: string
+        message?: string
+        center_id?: number | string | null
+        platform_fee?: number
+        total_amount?: number
   }
   const updateDonate = async(data:uDonate) => {
          try{
@@ -321,9 +322,16 @@ const DeleteCause = async(id:number) =>{
               headers:{"Content-Type":"application/json"},
               body:JSON.stringify(data)
              })
-              deleteRedisData(`cause:${data.campaign_id}:type:${1}`)
-              deleteRedisData(`cause:${data.campaign_id}:type:${2}`)
-             return await resp.json()
+             const json = await resp.json()
+             if (data.campaign_id) {
+               deleteRedisData(`cause:${data.campaign_id}:type:${1}`)
+               deleteRedisData(`cause:${data.campaign_id}:type:${2}`)
+               deleteRedisData(`cause:${data.campaign_id}:type:0`)
+             }
+             if (!resp.ok) {
+               return { error: json.error || json.message || "Error updating transactions", ...json }
+             }
+             return json
          }catch(error){
                console.log(error)
                return {error:"Error updating transactions"}

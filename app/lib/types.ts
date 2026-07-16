@@ -18,7 +18,7 @@ interface Campaign {
   category: "Education" | "Community" | "CroudFunding" | "Business" | "Health";
     donation_count:number,
     bank_details:bankDetails,
-    escrowed:number,
+    escrowed?:number,
     safety_rating:  'verified_safe' |
     'likely_safe' |
     'uncertain' |

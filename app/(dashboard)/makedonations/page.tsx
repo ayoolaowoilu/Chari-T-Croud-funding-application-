@@ -45,69 +45,87 @@ export default function Page(){
   
     const [loading , setLoading] = useState(true)
     const { status,data:session } = useSession();
-       const platformFee = useMemo(()=>{
-          if(amount == "custom"){
-               return Number(customAmount) * 0.04
-          }else{
-               return Number(amount) * 0.04
-          }
-    },[amount , customAmount])
-    const [platFormFee , setPlatformFee] = useState<number>(2000)
+    /** Optional tip that supports Chari-T — never deducted from the campaign amount */
+    const [platFormFee , setPlatformFee] = useState<number>(0)
+    const [isBlind , setIsBlind] = useState(false)
+
+    const baseDonation = useMemo(() => {
+      if (amount === "custom") return Math.max(0, Number(customAmount) || 0);
+      return Math.max(0, Number(amount) || 0);
+    }, [amount, customAmount]);
+
+    const totalCharge = baseDonation + Math.max(0, platFormFee);
     
-    const fetchData = async()=>{
-       try{
-        setLoading(true)
-            const data = await fetchOneCauseById(Number(donationId),0)
-        
-             setAmount("1000")
-              setCampaign(data)
-       }catch(error){
-          console.log(error)
-       }finally{
-            setLoading(false)
-       };
-       
-
-    }
-
-    document.title = "Donate | " + name
-
-    useEffect(()=>{
-       fetchData()
-    },[])
-
-      useEffect(() => {
-    if (campaign?.center_id && !centerCache[Number(campaign.center_id)]) {
-      const getCenter = async () => {
+    useEffect(() => {
+      let cancelled = false;
+      const fetchData = async () => {
+        if (!donationId) {
+          setLoading(false);
+          setCampaign(null);
+          return;
+        }
         try {
-          const resp = await GetUserDetailsDyId(Number(campaign.center_id) , true);
-         
-          if (resp.error) {
-            console.error("Failed to fetch center:", resp.error);
-            return;
+          setLoading(true);
+          const data = await fetchOneCauseById(Number(donationId), 0);
+          if (cancelled) return;
+          if (data?.error || !data?.id) {
+            setCampaign(null);
+          } else {
+            setCampaign(data);
+            setAmount(data.currency === "NG" ? "1000" : "25");
           }
-          setCenterCache(prev => ({ ...prev, [campaign.center_id!]: resp }));
-        } catch (err) {
-          console.error("Error fetching center:", err);
+        } catch (error) {
+          console.error(error);
+          if (!cancelled) setCampaign(null);
+        } finally {
+          if (!cancelled) setLoading(false);
         }
       };
-      getCenter();
-    }
-  }, [campaign?.center_id, centerCache]);
-  
-  const centerData = centerCache[Number(campaign?.center_id)]
-  console.log(centerData , centerCache)
+      fetchData();
+      return () => {
+        cancelled = true;
+      };
+    }, [donationId]);
 
+    useEffect(() => {
+      if (name) document.title = `Donate | ${name}`;
+    }, [name]);
 
-    const remaining  = (Number(campaign?.goal) - Number(campaign?.raised))
+    useEffect(() => {
+      if (campaign?.center_id && !centerCache[Number(campaign.center_id)]) {
+        const getCenter = async () => {
+          try {
+            const resp = await GetUserDetailsDyId(Number(campaign.center_id), true);
+            if (resp.error) return;
+            setCenterCache((prev) => ({
+              ...prev,
+              [campaign.center_id!]: resp,
+            }));
+          } catch (err) {
+            console.error("Error fetching center:", err);
+          }
+        };
+        getCenter();
+      }
+    }, [campaign?.center_id, centerCache]);
 
-  
-      if((Number(amount) > remaining) || (Number(customAmount) > remaining) ){
-         if(!campaign?.center_id){
-              setAmount(String(remaining))
-           setCustomAmount(String(remaining)) 
-         }    
-    }
+    const centerData = centerCache[Number(campaign?.center_id)];
+    const remaining = Math.max(
+      0,
+      Number(campaign?.goal || 0) - Number(campaign?.raised || 0)
+    );
+
+    // Clamp amounts over remaining goal (personal campaigns only)
+    useEffect(() => {
+      if (!campaign || campaign.center_id) return;
+      if (remaining <= 0) return;
+      if (amount !== "custom" && Number(amount) > remaining) {
+        setAmount(String(remaining));
+      }
+      if (amount === "custom" && Number(customAmount) > remaining) {
+        setCustomAmount(String(remaining));
+      }
+    }, [campaign, amount, customAmount, remaining]);
 
   const handleAmountSelect = (val: string) => {
     setAmount(val);
@@ -118,10 +136,6 @@ export default function Page(){
     setCustomAmount(val);
     setAmount('custom');
   };
-
-
-
-  const [isBlind , setIsBlind] = useState(false)
 
     if(loading){
         return(
@@ -378,10 +392,10 @@ export default function Page(){
 
 <div className="space-y-3">
   <div className="flex items-center justify-between">
-    <small className="text-gray-500 text-xs font-medium uppercase tracking-wider">Support Chari-T</small>
+    <small className="text-gray-500 text-xs font-medium uppercase tracking-wider">Optional tip (supports Chari-T)</small>
     {platFormFee > 0 && (
       <span className="text-xs text-emerald-600 font-medium">
-        Campaign gets ₦{amount == "custom" ? Number(customAmount) : Number(amount) }
+        Campaign gets {currency == "NG" ? "₦" : currency == "USD" ? "$" : "£"}{baseDonation.toLocaleString()}
       </span>
     )}
   </div>
@@ -424,30 +438,43 @@ export default function Page(){
   
   <p className="text-xs text-gray-400">
     {platFormFee > 0 
-      ? `₦${platFormFee.toLocaleString()} helps us maintain the platform. Campaign receives ₦${(amount == "custom" ? Number(customAmount) : Number(amount) ).toLocaleString()}.`
-      : "Optional — 100% of your donation goes to the campaign."
+      ? `Tip of ₦${platFormFee.toLocaleString()} supports Chari-T. Campaign still receives ₦${baseDonation.toLocaleString()} (100% of the gift).`
+      : "No tip selected — 100% of your gift goes to the campaign. Payment processor fees may apply."
     }
   </p>
 </div>}
 
-
-               
-    
-             
                  <PaystackPopup 
       email={session?.user.email || formData.email}
       publicKey={process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
-      subaccount={campaign.bank_details.subAccountCode}
-      onSuccess={()=>{console.log("success popup opened")}}
-      onCancel={()=>{console.log("popup canceled")}}
-      amount={amount == "custom" ? Number(customAmount) + platformFee : Number(amount) + platFormFee}
+      subaccount={campaign.bank_details?.subAccountCode}
+      onSuccess={()=>{}}
+      onCancel={()=>{}}
+      amount={totalCharge}
       metadata={{
-    custom_fields: [{
-      display_name: 'Order ID',
-      variable_name: 'order_id',
-      value: '12345'
-    }]
-  }}
+        campaign_id: campaign.id,
+        center_id: campaign.center_id || undefined,
+        platform_fee: platFormFee,
+        isBlind: isBlind,
+        donor_name: formData.name || undefined,
+        custom_fields: [
+          {
+            display_name: 'Campaign ID',
+            variable_name: 'campaign_id',
+            value: String(campaign.id),
+          },
+          {
+            display_name: 'Platform Fee',
+            variable_name: 'platform_fee',
+            value: String(platFormFee),
+          },
+          {
+            display_name: 'Blind',
+            variable_name: 'is_blind',
+            value: String(isBlind),
+          },
+        ],
+      }}
   platform_fee={platFormFee}
   name={isBlind ? null : status == "authenticated" ? session.user.name : formData.name}
   isBlind={isBlind}
@@ -459,7 +486,6 @@ export default function Page(){
   donor_name={formData.name}
   message={formData.message}
   center_id={campaign.center_id ? campaign.center_id : null}
-  
       />
 
 

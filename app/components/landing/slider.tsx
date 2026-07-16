@@ -90,7 +90,7 @@ export default function HeroSlider() {
                                 fill
                                 className="object-cover"
                                 priority={current === 0}
-                                sizes="100vw"
+                                sizes="(max-width: 640px) 100vw, 50vw"
                             />
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                         </motion.div>
@@ -159,8 +159,12 @@ export default function HeroSlider() {
                                     Donate Now
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
-                                <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-semibold text-sm">
-                                    Learn More
+                                <button
+                                    type="button"
+                                    onClick={() => window.location.href = "/how-it-works"}
+                                    className="flex-1 flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-5 py-3 rounded-xl font-semibold text-sm"
+                                >
+                                    How it works
                                 </button>
                             </motion.div>
                         </motion.div>

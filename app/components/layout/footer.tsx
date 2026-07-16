@@ -15,10 +15,10 @@ const footerLinks = {
     ],
     resources: [
         { name: 'Blog', href: '/blog' },
-        { name: 'Reports', href: '/reports' },
+        { name: 'Safety ratings', href: '/how-it-works#ratings' },
         { name: 'FAQ', href: '/faq' },
         { name: 'Contact', href: '/contact' },
-            { name: 'How it works', href: '/how-it-works' }
+        { name: 'How it works', href: '/how-it-works' }
     ],
     legal: [
         { name: 'Privacy Policy', href: '/privacy-policy' },
@@ -52,10 +52,10 @@ export default function Footer() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gray-800 rounded-full -translate-y-1/2 translate-x-1/2 opacity-50" />
                     <div className="relative z-10">
                         <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Ready to make an impact?</h3>
-                        <p className="text-gray-400">Join thousands of donors changing lives every day.</p>
+                        <p className="text-gray-400">Browse safety-rated causes and verified charity centers.</p>
                     </div>
-                    <button onClick={()=>redirect("/causes/get")} className="relative z-10 px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
-                        Start Giving Today
+                    <button type="button" onClick={()=>redirect("/causes/get")} className="relative z-10 px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
+                        Start giving today
                     </button>
                 </div>
             </div>

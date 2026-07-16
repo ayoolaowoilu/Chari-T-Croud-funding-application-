@@ -228,12 +228,12 @@ export default function Mission() {
                 >
                     <p className="text-gray-500 text-sm uppercase tracking-wider mb-4">Join the movement</p>
                     <motion.a 
-                        href="#donate" 
+                        href="/how-it-works" 
                         className="inline-flex items-center text-blue-600 font-semibold"
                         whileHover={{ x: 4 }}
                         transition={{ duration: 0.2 }}
                     >
-                        See our impact reports
+                        See how Chari-T works
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>

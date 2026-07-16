@@ -39,13 +39,16 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
+    const textToCopy = text.startsWith("/") && typeof window !== "undefined" 
+      ? `${window.location.origin}${text}` 
+      : text;
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const textarea = document.createElement("textarea");
-      textarea.value = text;
+      textarea.value = textToCopy;
       textarea.style.position = "fixed";
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
@@ -206,7 +209,7 @@ export default function Flier() {
       if (baseData.center_handle) sp.set("center_handle", baseData.center_handle);
       if (baseData.center_logo_url) sp.set("center_logo_url", baseData.center_logo_url);
       sp.set("_type", baseData._type);
-      return `${window.origin}/api/flier?${sp.toString()}`;
+      return `/api/flier?${sp.toString()}`;
     },
     [baseData]
   );

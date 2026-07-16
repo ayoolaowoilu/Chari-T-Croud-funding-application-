@@ -32,14 +32,13 @@ declare module "next-auth" {
   }
 
   interface Session {
-  
     user: {
-      id?: string           // Changed from userId to id (standard)
+      id?: string
       email?: string | null
-      name?: string 
+      name?: string
       image?: string | Blob | any
       provider?: string
-      // Remove customData if not using, or define it properly
+      role?: string
     }
   }
 }
@@ -51,7 +50,7 @@ declare module "next-auth/jwt" {
     picture?: string | null
     provider?: string
     userId?: string
-   
+    role?: string
   }
 }
 

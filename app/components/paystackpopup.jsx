@@ -91,11 +91,28 @@ export default function PaystackPopup({
         subaccount: subaccount,
         bearer: bearer,
         metadata: metadata || {
-          custom_fields: [{
-            display_name: 'Campaign ID',
-            variable_name: 'campaign_id',
-            value: String(id),
-          }]
+          campaign_id: id,
+          center_id: center_id || undefined,
+          platform_fee: safePlatformFee,
+          isBlind: Boolean(isBlind),
+          donor_name: donor_name || name || undefined,
+          custom_fields: [
+            {
+              display_name: 'Campaign ID',
+              variable_name: 'campaign_id',
+              value: String(id ?? ''),
+            },
+            {
+              display_name: 'Platform Fee',
+              variable_name: 'platform_fee',
+              value: String(safePlatformFee),
+            },
+            {
+              display_name: 'Blind',
+              variable_name: 'is_blind',
+              value: String(Boolean(isBlind)),
+            },
+          ],
         },
         onSuccess: async (trx) => {
           try {
@@ -117,19 +134,26 @@ export default function PaystackPopup({
 
             const resp = await updateDonate(payload);
 
-            if (resp.error) {
-              setError("Payment successful, but donation was not recorded");
-              localStorage.setItem("pending_donations", JSON.stringify({
-                reference: trx.reference,
-                id: id,
-                payload: payload
-              }));
-            }
-
             setTransaction(trx);
             setStatus('success');
-            localStorage.removeItem("pending_donations");
             setLoading(false);
+
+            if (resp?.error) {
+              setError(
+                resp.error ||
+                  "Payment went through, but we could not record the donation. Keep your reference for support."
+              );
+              localStorage.setItem(
+                "pending_donations",
+                JSON.stringify({
+                  reference: trx.reference,
+                  id: id,
+                  payload: payload,
+                })
+              );
+            } else {
+              localStorage.removeItem("pending_donations");
+            }
 
             if (onSuccess) onSuccess(trx);
           } catch (error) {

@@ -23,7 +23,7 @@ export default function Page() {
                                 Sign in to your account
                             </h1>
                             <p className="text-gray-500">
-                                Join thousands making an impact every day
+                                Donate, start a cause, or manage a verified charity center.
                             </p>
                         </div>
 
@@ -31,7 +31,7 @@ export default function Page() {
 
                         <div className="mt-6 pt-6 border-t border-gray-100">
                             <p className="text-sm text-gray-500 text-center">
-                                Read our <a href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">Terms of Use</a> & <a href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</a>
+                                Read our <a href="/t&c" className="text-blue-600 hover:text-blue-700 font-medium">Terms of Use</a> & <a href="/privacy-policy" className="text-blue-600 hover:text-blue-700 font-medium">Privacy Policy</a>
                             </p>
                         </div>
                     </div>
@@ -72,24 +72,24 @@ export default function Page() {
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">About Chari-T</h3>
                                 <p className="text-gray-600 text-sm leading-relaxed">
-                                    We connect compassionate donors with verified causes worldwide. 
-                                    Every contribution creates real change in communities that need it most.
+                                    Trust-first crowdfunding: KYC fundraisers, safety-rated campaigns,
+                                    optional tips only — your gift goes to the cause.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                        <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-500">
                             <div className="flex items-center gap-1.5">
                                 <Users className="w-4 h-4 text-blue-600" />
-                                <span>12k+ Donors</span>
+                                <span>Donors & centers</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Shield className="w-4 h-4 text-blue-600" />
-                                <span>Verified Causes</span>
+                                <span>Safety ratings</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Heart className="w-4 h-4 text-blue-600" />
-                                <span>100% Transparent</span>
+                                <span>0% platform cut</span>
                             </div>
                         </div>
 

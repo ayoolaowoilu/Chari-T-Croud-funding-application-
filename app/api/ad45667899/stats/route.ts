@@ -1,7 +1,11 @@
 import db from "@/app/lib/DBschema";
-import { NextResponse } from "next/server";
+import { requireAdmin } from "@/app/lib/adminAuth";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return auth.response;
+
   try {
 
     const [row]: any = await db.query("SELECT COUNT(*) as count FROM users");

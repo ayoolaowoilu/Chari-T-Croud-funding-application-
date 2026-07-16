@@ -3,22 +3,23 @@
 import { motion } from 'framer-motion';
 import { EyeOff, Shield, Heart, ArrowRight } from 'lucide-react';
 import Button from '../ui/button';
+import { useRouter } from 'next/navigation';
 
 const benefits = [
     {
         icon: EyeOff,
-        title: "Complete Anonymity",
-        desc: "Your identity remains hidden. No names, no recognition—just pure generosity."
+        title: "Hidden from fundraisers",
+        desc: "Your name is not shown on the campaign donor list. Give quietly when you prefer privacy."
     },
     {
         icon: Shield,
-        title: "Maximum Security",
-        desc: "Encrypted transactions with zero data retention. Your privacy is absolute."
+        title: "Secure checkout",
+        desc: "Payments run through Paystack. You stay in control of what the fundraiser sees."
     },
     {
         icon: Heart,
-        title: "True Altruism",
-        desc: "Give without expectation of reward or acknowledgment. Help for help's sake."
+        title: "True altruism",
+        desc: "Give without seeking recognition. Help because it matters—not for the shout-out."
     }
 ];
 
@@ -40,6 +41,8 @@ const itemVariants = {
 };
 
 export default function BlindDonations() {
+    const router = useRouter();
+
     return (
         <section className="py-20 md:py-28 bg-slate-900 text-white overflow-hidden">
             <div className="max-w-6xl mx-auto px-6 md:px-8">
@@ -61,14 +64,13 @@ export default function BlindDonations() {
                         <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-6">
                             Blind Donations
                             <span className="block text-slate-400 text-2xl md:text-3xl font-normal mt-2">
-                                Give without being seen
+                                Give without being named
                             </span>
                         </h2>
                         
                         <p className="text-slate-400 text-lg leading-relaxed mb-8">
-                            Sometimes the most profound acts of kindness are those done in silence. 
-                            Our blind donation channel ensures 100% anonymity while delivering 
-                            your support to those who need it most.
+                            Prefer to help without a public name on the campaign? Toggle blind donation
+                            at checkout — fundraisers see &quot;Unknown&quot; while your payment still reaches the cause.
                         </p>
 
                         <motion.div
@@ -79,12 +81,17 @@ export default function BlindDonations() {
                             className="flex flex-wrap gap-4"
                         >
                             <Button 
-                                details="Donate Anonymously" 
+                                details="Browse causes" 
                                 variant="primary"
                                 size="lg"
                                 className="bg-white text-slate-900 hover:bg-slate-100"
+                                onClick={() => router.push("/causes/get")}
                             />
-                            <button className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                            <button
+                              type="button"
+                              onClick={() => router.push("/how-it-works")}
+                              className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group"
+                            >
                                 Learn more
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </button>
@@ -131,7 +138,7 @@ export default function BlindDonations() {
                                     <div key={i} className="w-8 h-8 bg-slate-700 rounded-full border-2 border-slate-800" />
                                 ))}
                             </div>
-                            <span>2,847 anonymous donors this month</span>
+                            <span>Toggle &quot;Donate anonymously&quot; on any campaign checkout</span>
                         </motion.div>
                     </motion.div>
 

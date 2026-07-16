@@ -22,16 +22,24 @@ const containerVariants = {
 
 export default function FeaturedCauses() {
     const [causes,setcauses] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
   
     useEffect(()=>{
         const fetchdata = async() =>{
            try {
                   const resp = await getFeatured();
-                  setcauses(resp)
-                  
-
+                  if (Array.isArray(resp)) {
+                    setcauses(resp);
+                  } else if (resp && Array.isArray((resp as { data?: unknown }).data)) {
+                    setcauses((resp as { data: unknown[] }).data as any[]);
+                  } else {
+                    setcauses([]);
+                  }
            } catch (error) {
                console.log(error)
+               setcauses([])
+           } finally {
+               setLoading(false)
            }
 
         }
@@ -85,7 +93,10 @@ export default function FeaturedCauses() {
                 </motion.div>
 
                 {/* Causes grid */}
-                {causes?.length > 0 ?  <motion.div 
+                {loading ? (
+                  <LoadingCards />
+                ) : causes?.length > 0 ? (
+                  <motion.div 
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     variants={containerVariants}
                     initial="hidden"
@@ -93,13 +104,14 @@ export default function FeaturedCauses() {
                     viewport={{ once: true, margin: "-50px" }}
                 >
                     {causes.map((cause, index) => {
-                        
-                        
+                        const mainImg =
+                          typeof cause.main_img === "string"
+                            ? (() => { try { return JSON.parse(cause.main_img)?.url } catch { return cause.main_img } })()
+                            : cause.main_img?.url;
                         return (
                              <Card 
-                             
-                             key={index}
-                             img={cause.main_img.url} 
+                             key={cause.id || index}
+                             img={mainImg} 
                              desc={cause.details}
                              donors={cause.donation_count || 0 }
                              goal={cause.goal}
@@ -117,7 +129,23 @@ export default function FeaturedCauses() {
                              />
                         );
                     })}
-                </motion.div> : <LoadingCards />}
+                </motion.div>
+                ) : (
+                  <div className="text-center py-16 px-6 rounded-2xl border border-dashed border-gray-200 bg-white">
+                    <p className="text-gray-900 font-semibold text-lg mb-2">No featured campaigns yet</p>
+                    <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
+                      Be the first to launch a verified cause, or browse all campaigns when they go live.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <a href="/startcauses" className="inline-flex items-center px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800">
+                        Start a cause
+                      </a>
+                      <a href="/causes/get" className="inline-flex items-center px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50">
+                        Browse all
+                      </a>
+                    </div>
+                  </div>
+                )}
 
                 {/* View all link */}
                 <motion.div 

@@ -1,17 +1,21 @@
 import db from "@/app/lib/DBschema";
+import { requireAdmin } from "@/app/lib/adminAuth";
 import { NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_TABLES = ["users", "centers", "campaigns", "transactions"] as const;
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLE_COLUMNS: Record<AllowedTable, string> = {
-  users: "full_name, email, is_verified, created_at, image, donations, recived, method , id",
-  centers: "name, registration_number, email,  phone, address, website, is_verified_status, about, logourl, geo_location , verification_documents",
+  users: "full_name, email, is_verified, created_at, image, donations, recieved, method, id, role",
+  centers: "name, registration_number, email, phone, address, website, is_verified_status, about, logourl, geo_location, verification_documents, id",
   campaigns: "id, name, details, story, main_img, goal, raised, _type, center_name, center_id, user_id, date_to_completion, created_at, currency, category, donation_count, safety_rating, reports",
-  transactions: "id, owner_id, ammount, payer_id ,  paid_to, refrence",
+  transactions: "id, owner_id, ammount, payer_id, paid_to, refrence",
 };
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return auth.response;
+
   const page = Number(request.nextUrl.searchParams.get("page")) || 0;
   const rawTable = request.nextUrl.searchParams.get("table") || "users";
   const _type = request.nextUrl.searchParams.get("_type");

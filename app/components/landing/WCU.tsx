@@ -16,8 +16,8 @@ const features = [
     },
     {
         icon: Globe,
-        title: "Global Reach, Local Focus",
-        desc: "Operating in 25+ countries with community-led solutions tailored to local needs and cultural contexts."
+        title: "Local Focus, Real Impact",
+        desc: "Built for community-led causes and verified local charity centers — so help reaches people who need it nearby."
     },
     {
         icon: Heart,
@@ -131,7 +131,7 @@ export default function WhyChooseUs() {
                     })}
                 </motion.div>
 
-                {/* Trust badges */}
+                {/* Trust pillars — honest product claims for demo */}
                 <motion.div 
                     className="mt-20 pt-12 border-t border-gray-100"
                     initial={{ opacity: 0 }}
@@ -140,20 +140,25 @@ export default function WhyChooseUs() {
                     transition={{ delay: 0.4, duration: 0.6 }}
                 >
                     <p className="text-center text-xs uppercase tracking-wider text-gray-400 mb-8 font-medium">
-                        Recognized By
+                        Built for trusted giving
                     </p>
-                    <div className="flex flex-wrap justify-center gap-10 md:gap-16 items-center">
-                        {['Forbes', 'UNICEF', 'Red Cross', 'UNDP', 'World Bank'].map((org, i) => (
+                    <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
+                        {[
+                          'KYC verified fundraisers',
+                          'Paystack secure checkout',
+                          'Safety-rated campaigns',
+                          'Optional tips only',
+                          'Verified charity centers',
+                        ].map((item, i) => (
                             <motion.span 
-                                key={org}
-                                className="text-lg md:text-xl font-bold text-gray-300 hover:text-gray-600 transition-colors duration-300 cursor-default"
+                                key={item}
+                                className="text-sm md:text-base font-semibold text-gray-400 hover:text-gray-700 transition-colors duration-300 cursor-default px-3 py-1 rounded-full border border-gray-100 bg-gray-50"
                                 initial={{ opacity: 0, y: 10 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.5 + (i * 0.08), duration: 0.4 }}
-                                whileHover={{ scale: 1.05 }}
                             >
-                                {org}
+                                {item}
                             </motion.span>
                         ))}
                     </div>
