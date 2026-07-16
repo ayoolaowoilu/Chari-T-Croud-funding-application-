@@ -34,6 +34,7 @@ interface Campaign {
     email:string,
     img_url:string
     identity_key:string
+    campaign_id:number
 }
 
 
@@ -44,7 +45,8 @@ interface Campaign {
     comment:string,
     created_at:string,
     img_url:string,
-    identity_key:string
+    identity_key:string,
+    campaign_id:number
 }
 interface Donor {
   name: string;
