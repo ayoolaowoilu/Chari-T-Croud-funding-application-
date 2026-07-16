@@ -1,5 +1,3 @@
-
-
 "use client"
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -8,7 +6,8 @@ import { useSession } from 'next-auth/react';
 import {
   XCircle, Flag, ChevronLeft, ChevronRight, Share2,
   Copy, X as Twitter, Heart, Clock, Users, Target,
-  TrendingUp, Shield, AlertTriangle
+  TrendingUp, Shield, AlertTriangle, MessageCircle,
+  Send, User
 } from 'lucide-react';
 import NavBar from '@/app/components/layout/NavBar';
 import { DualRingSpinner } from '@/app/components/ui/loading';
@@ -17,6 +16,7 @@ import { Campaign, Comments, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
 import Button from '@/app/components/ui/button';
+
 export const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('en-US').format(amount);
 };
@@ -222,10 +222,248 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
   );
 }
 
+function CommentSection({ campaignId }: { campaignId: number }) {
+  const { data: session } = useSession();
+  const [comments, setComments] = useState<Comments[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchComments = async (pageNum = 0, append = false) => {
+    setLoading(true);
+    setError(false);
+    try {
+      const resp = await Handle_comment("PUT", { campaign_id: campaignId }, pageNum);
+      if (resp.error) {
+        setError(true);
+      } else {
+        const fetched = resp.comments || resp.data || [];
+        setTotalCount(resp.total_count || resp.count || fetched.length);
+        if (append) {
+          setComments(prev => [...prev, ...fetched]);
+        } else {
+          setComments(fetched);
+        }
+        setHasMore(fetched.length >= 10);
+        setPage(pageNum);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!newComment.trim()) return;
+    setSubmitting(true);
+    setError(false);
+    try {
+      const commentData: Comments = {
+        comment: newComment.trim(),
+        campaign_id: campaignId,
+        name: session?.user?.name || 'Anonymous',
+        email: session?.user?.email || '',
+        user_id: session?.user?.id || undefined,
+      };
+      const resp = await Handle_comment("POST", commentData);
+      if (resp.error) {
+        setError(true);
+      } else {
+        setNewComment('');
+        fetchComments(0, false);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    fetchComments(page + 1, true);
+  };
+
+  useEffect(() => {
+    fetchComments(0, false);
+  }, [campaignId]);
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Just now';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
+      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-blue-600" />
+            Comments
+          </h2>
+          <span className="text-xs lg:text-sm text-gray-500">{totalCount} total</span>
+        </div>
+
+        {/* Comment Input */}
+        <div className="mb-6">
+          <div className="flex gap-3">
+            <div className="shrink-0">
+              {session?.user?.image ? (
+                <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <textarea
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                placeholder={session ? "Write a comment..." : "Sign in to comment"}
+                rows={2}
+                disabled={!session || submitting}
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+              />
+              <div className="flex items-center justify-between mt-2">
+                {!session && (
+                  <span className="text-xs text-gray-400">Sign in to leave a comment</span>
+                )}
+                <div className="flex-1" />
+                <button
+                  onClick={handleSubmit}
+                  disabled={!newComment.trim() || !session || submitting}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  {submitting ? (
+                    <DualRingSpinner size="sm" />
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Post
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Error State */}
+        {error && comments.length === 0 && (
+          <div className="text-center py-8">
+            <XCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+            <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
+            <button
+              onClick={() => fetchComments(0, false)}
+              className="text-sm text-blue-600 font-medium hover:text-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Comments List */}
+        <div className="space-y-4">
+          <AnimatePresence>
+            {comments.map((comment, idx) => (
+              <motion.div
+                key={comment.identity_key || `${comment.user_id}-${idx}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="flex gap-3"
+              >
+                <div className="shrink-0">
+                  {comment.img_url ? (
+                    <img src={comment.img_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+                      <span className="text-xs font-bold text-gray-500">
+                        {(comment.name || 'A').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {comment.name || 'Anonymous'}
+                      </span>
+                      <span className="text-xs text-gray-400">·</span>
+                      <span className="text-xs text-gray-400">
+                        {formatDate(comment.created_at)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                      {comment.comment}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {/* Loading State */}
+        {loading && comments.length === 0 && (
+          <div className="py-8 flex justify-center">
+            <DualRingSpinner />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && comments.length === 0 && (
+          <div className="text-center py-10">
+            <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500">No comments yet</p>
+            <p className="text-xs text-gray-400 mt-1">Be the first to share your thoughts</p>
+          </div>
+        )}
+
+        {/* Load More */}
+        {hasMore && comments.length > 0 && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition-colors"
+            >
+              {loading ? 'Loading...' : 'Load more comments'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const router = useRouter();
- 
-  
+
+
   const [displayedMainImg, setDisplayedMainImg] = useState(campaign.main_img?.url || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -234,41 +472,6 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
 
 
   const isCenter = campaign?._type === 'center';
-  const [comment_data , setComment_data] = useState<Comments>()
-  const [comment_error , setComment_error] = useState(false)
-  const [comment_loading , setComment_loading] = useState(false)
-  const [comment_success,setComment_success] = useState(false)
-
-  const handle_comment = async()=>{
-    setComment_error(false)
-    setComment_loading(true)
-    setComment_success(false)
-    
-      const resp = await Handle_comment("GET",comment_data)
-      .finally(()=>{return setComment_loading(false)})
-      .catch(()=>{return setComment_error(true)});
-
-      if(resp.error){
-            setComment_error(true)
-      }
-      else{
-         setComment_success(true)
-      }
-      
-  }
-
-  const fetch_comments = async(page = 0)=>{
-     const resp = await Handle_comment("PUT" , {campaign_id:campaign.id} , page )
-       .finally(()=>{return setComment_loading(false)})
-      .catch(()=>{return setComment_error(true)});
-
-     if(resp.error){
-       setComment_error(true)
-     }else{
-          setComment_success(true)
-     }
-  }
-
 
   useEffect(() => {
     if (isCenter && campaign?.center_id && !centerCache[Number(campaign.center_id)]) {
@@ -533,6 +736,14 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     <p className="text-[10px] lg:text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Days Left</p>
                     <p className="text-base lg:text-lg font-bold text-gray-900">{daysLeft > 0 ? daysLeft : 'Ended'}</p>
                   </div>
+                  <div>
+                    <p className="text-[10px] lg:text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Subscribers</p>
+                    <p className="text-base lg:text-lg font-bold text-gray-900">{campaign.subscribed_count ?? 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] lg:text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Comments</p>
+                    <p className="text-base lg:text-lg font-bold text-gray-900">{campaign.comments_count ?? 0}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -565,6 +776,9 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 </div>
               </div>
             </div>
+
+            {/* Comments Section */}
+            <CommentSection campaignId={Number(campaign.id)} />
 
             {/* Mobile share & report */}
             <div className="lg:hidden px-4 py-6 bg-white border-t border-gray-100">
@@ -634,6 +848,16 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Days Left</p>
                   </div>
                 </div>
+                <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{campaign.subscribed_count ?? 0}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Subscribers</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{campaign.comments_count ?? 0}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Comments</p>
+                  </div>
+                </div>
               </div>
 
               {/* Info card */}
@@ -646,6 +870,8 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     { label: 'Currency', value: campaign.currency },
                     { label: 'Type', value: campaign._type },
                     { label: 'Ends', value: `in ${daysLeft > 0 ? daysLeft : 0} days` },
+                    { label: 'Subscribers', value: campaign.subscribed_count ?? 0 },
+                    { label: 'Comments', value: campaign.comments_count ?? 0 },
                   ].map(item => (
                     <div key={item.label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
                       <span className="text-gray-500">{item.label}</span>
