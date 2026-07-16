@@ -17,7 +17,6 @@ import { Campaign, Comments, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
 import Button from '@/app/components/ui/button';
-
 export const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('en-US').format(amount);
 };
