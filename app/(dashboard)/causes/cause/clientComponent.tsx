@@ -270,7 +270,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
         email: session?.user?.email || '',
         user_id: session?.user?.id || undefined,
       };
-      const resp = await Handle_comment("POST", commentData);
+      const resp = await Handle_comment("PUT", commentData);
       if (resp.error) {
         setError(true);
       } else {
@@ -357,7 +357,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
                   className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitting ? (
-                    <DualRingSpinner size="sm" />
+                    <DualRingSpinner />
                   ) : (
                     <>
                       <Send className="w-3.5 h-3.5" />
