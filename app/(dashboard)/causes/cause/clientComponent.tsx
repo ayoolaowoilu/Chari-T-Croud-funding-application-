@@ -237,7 +237,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
     setLoading(true);
     setError(false);
     try {
-      const resp = await Handle_comment("PUT", { campaign_id: campaignId }, pageNum);
+      const resp = await Handle_comment("GET", { campaign_id: campaignId }, pageNum);
       if (resp.error) {
         setError(true);
       } else {
@@ -268,7 +268,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
         campaign_id: campaignId,
         name: session?.user?.name || 'Anonymous',
         email: session?.user?.email || '',
-        user_id: session?.user?.id || undefined,
+        user_id: "1",
         img_url:session?.user.image,
         identity_key:session?.user.id
       };
@@ -340,7 +340,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
                 placeholder={session ? "Write a comment..." : "Sign in to comment"}
                 rows={2}
                 disabled={!session || submitting}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
+                className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
