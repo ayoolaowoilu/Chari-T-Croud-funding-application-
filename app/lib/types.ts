@@ -24,19 +24,18 @@ interface Campaign {
     'uncertain' |
     'likely_risky' |
     'unsafe'; 
-    subscribed: Subscribed[] | null;
-    comments:Comments[] | null;
-
+ subscribed_count:any,
+ comments_count:any
 }
 
-interface Subscribed {
+export interface Subscribed {
     user_id:string,
     name:string,
     email:string,
     img_url:string
 }
 
-interface Comments {
+ export interface Comments {
     user_id:string,
     name:string,
     email:string,
