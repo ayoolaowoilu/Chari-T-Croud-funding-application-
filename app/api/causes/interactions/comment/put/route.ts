@@ -9,6 +9,8 @@ export async function POST(request: NextRequest) {
     try {
         // Generate identity_key if not provided
         const identityKey = data.identity_key || randomUUID();
+        const [user]:any = await db.query("SELECT id FROM users WHERE email = ?",[data.email])
+        const user_id = user[0].id
 
         await db.query(
             "INSERT INTO comments(name, email, comment, identity_key, img_url, user_id, campaign_id) VALUES(?, ?, ?, ?, ?, ?, ?)",
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
                 data.comment,
                 identityKey,
                 data.img_url || null,
-                data.user_id || null,
+                user_id,
                 data.campaign_id
             ]
         );

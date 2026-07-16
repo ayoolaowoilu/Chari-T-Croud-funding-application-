@@ -360,7 +360,7 @@ export default function NavBar() {
                   variant="secondary"
                   details="Sign in"
                   className="bg-gray-900 hover:bg-gray-800 text-white text-xs px-2.5 py-1.5"
-                  onClick={() => (window.location.href = `/auth/signin?redir=${pathname}`)}
+                  onClick={() => (window.location.href = `/auth/signin?redir=${window.location.href}`)}
                 />
               )}
 
