@@ -269,6 +269,8 @@ function CommentSection({ campaignId }: { campaignId: number }) {
         name: session?.user?.name || 'Anonymous',
         email: session?.user?.email || '',
         user_id: session?.user?.id || undefined,
+        img_url:session?.user.image,
+        identity_key:session?.user.id
       };
       const resp = await Handle_comment("PUT", commentData);
       if (resp.error) {
