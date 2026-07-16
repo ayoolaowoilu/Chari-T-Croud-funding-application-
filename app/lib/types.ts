@@ -23,9 +23,27 @@ interface Campaign {
     'likely_safe' |
     'uncertain' |
     'likely_risky' |
-    'unsafe';
+    'unsafe'; 
+    subscribed: Subscribed[] | null;
+    comments:Comments[] | null;
+
 }
 
+interface Subscribed {
+    user_id:string,
+    name:string,
+    email:string,
+    img_url:string
+}
+
+interface Comments {
+    user_id:string,
+    name:string,
+    email:string,
+    comment:string,
+    created_at:string,
+    img_url:string
+}
 interface Donor {
   name: string;
   amount: number;
