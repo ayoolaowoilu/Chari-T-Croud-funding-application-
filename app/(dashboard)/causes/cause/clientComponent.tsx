@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import NavBar from '@/app/components/layout/NavBar';
 import { DualRingSpinner } from '@/app/components/ui/loading';
-import { GetUserDetailsDyId, ReportCampaign } from '@/app/lib/fetchRequests';
-import { Campaign, Donor } from '@/app/lib/types';
+import { GetUserDetailsDyId, Handle_comment, ReportCampaign } from '@/app/lib/fetchRequests';
+import { Campaign, Comments, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
 import Button from '@/app/components/ui/button';
@@ -226,7 +226,7 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
 export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const router = useRouter();
  
-
+  
   const [displayedMainImg, setDisplayedMainImg] = useState(campaign.main_img?.url || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -235,6 +235,40 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
 
 
   const isCenter = campaign?._type === 'center';
+  const [comment_data , setComment_data] = useState<Comments>()
+  const [comment_error , setComment_error] = useState(false)
+  const [comment_loading , setComment_loading] = useState(false)
+  const [comment_success,setComment_success] = useState(false)
+
+  const handle_comment = async()=>{
+    setComment_error(false)
+    setComment_loading(true)
+    setComment_success(false)
+    
+      const resp = await Handle_comment("GET",comment_data)
+      .finally(()=>{return setComment_loading(false)})
+      .catch(()=>{return setComment_error(true)});
+
+      if(resp.error){
+            setComment_error(true)
+      }
+      else{
+         setComment_success(true)
+      }
+      
+  }
+
+  const fetch_comments = async(page = 0)=>{
+     const resp = await Handle_comment("PUT" , {campaign_id:campaign.id} , page )
+       .finally(()=>{return setComment_loading(false)})
+      .catch(()=>{return setComment_error(true)});
+
+     if(resp.error){
+       setComment_error(true)
+     }else{
+          setComment_success(true)
+     }
+  }
 
 
   useEffect(() => {

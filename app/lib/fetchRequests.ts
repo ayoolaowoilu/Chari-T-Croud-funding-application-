@@ -400,7 +400,7 @@ type CommentResponse = {
         error?:string,
         message?:string
 }
-const Comment = async(type:"GET" | "PUT" , data?:Comments , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
+const Handle_comment = async(type:"GET" | "PUT" | "DELETE" , data?:Comments , page?:number) =>{
         let fetch_fn;
         let path = "/api/causes/interactions/comment"
   try {
@@ -423,7 +423,7 @@ const Comment = async(type:"GET" | "PUT" , data?:Comments , page?:number):Promis
   }
 }
 
-const SubScribe = async(type:"GET" | "PUT" , data?:Subscribed , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
+const Handle_subscribe = async(type:"GET" | "PUT" | "UN_SUB", data?:Subscribed , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
         let fetch_fn;
         let path = "/api/causes/interactions/subscribe"
   try {
@@ -470,6 +470,6 @@ export {
     UploadCenter,
     GetCenter,GetCenterViews,
     FetchUserPublicProfileById,
-    Comment,
-    SubScribe 
+   Handle_comment,
+   Handle_subscribe
 }
