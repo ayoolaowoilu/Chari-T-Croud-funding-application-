@@ -33,7 +33,9 @@ export interface Subscribed {
     name:string,
     email:string,
     img_url:string
+    identity_key:string
 }
+
 
  export interface Comments {
     user_id:string,
@@ -41,7 +43,8 @@ export interface Subscribed {
     email:string,
     comment:string,
     created_at:string,
-    img_url:string
+    img_url:string,
+    identity_key:string
 }
 interface Donor {
   name: string;
