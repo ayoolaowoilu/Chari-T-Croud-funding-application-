@@ -1,10 +1,10 @@
-// auth.ts
+
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import db from "@/app/lib/DBschema"
 import Twitter from "next-auth/providers/twitter"
 
-// Extend the JWT type
+
 declare module "next-auth/jwt" {
   interface JWT {
     userId?: string

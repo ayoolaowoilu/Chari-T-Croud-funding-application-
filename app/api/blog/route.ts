@@ -16,7 +16,7 @@ type BlogCard = {
 };
 
 const BLOG_DATA: BlogCard[] = [
-  // ─── 1. New Years Eve with Chari-T ──────────────────────────────
+ 
   {
     topic: "New Years Eve with Chari-T",
     description: "Join us for a spectacular evening of giving and celebration as we ring in the new year together with our amazing community of donors and volunteers.",
