@@ -28,7 +28,7 @@ interface Campaign {
  comments_count:any
 }
 
-export interface Subscribed {
+ interface Subscribed {
     user_id:string,
     name:string,
     email:string,
@@ -37,7 +37,7 @@ export interface Subscribed {
 }
 
 
- export interface Comments {
+  interface Comments {
     user_id:string,
     name:string,
     email:string,
@@ -143,4 +143,10 @@ interface CenterRegistrationPayload {
   verification_documents: VerificationDocument[]
 }
 
-export type { Campaign, Donor, UserData , CloudinaryImage , bankDetails, PaystackBank , KycFormData , CenterRegistrationPayload}
+export type { 
+  
+  Campaign, Donor, UserData , CloudinaryImage , bankDetails, PaystackBank , KycFormData , CenterRegistrationPayload,
+  Subscribed,
+  Comments
+  
+} 

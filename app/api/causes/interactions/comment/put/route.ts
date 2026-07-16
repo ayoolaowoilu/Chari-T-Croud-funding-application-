@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 export async function  POST(request:NextRequest){
-       const data:Comments = await request.json();
+       const data: Comments  = await request.json();
 
        try {
              await db.query("INSERT INTO comments(name,email,comment,identity_key,img_url,user_id) VALUES(?,?,?,?,?,?) " ,
