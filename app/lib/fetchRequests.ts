@@ -1,7 +1,7 @@
 "use server"
 
 import { getSubAccountCode} from "./paystack";
-import { Campaign, CenterRegistrationPayload, KycFormData, UserData } from "./types"
+import { Campaign, CenterRegistrationPayload, Comments, KycFormData, Subscribed, UserData } from "./types"
 import { addRedisData, getRedisData, deleteRedisData } from "./redis"
 
 
@@ -373,7 +373,7 @@ const DeleteCause = async(id:number) =>{
         try {
 
             const resp = await fetch(`${API_URL}/api/centers/view?page=${page}&type=${type}${query ? `&query=${query}` : ""}`)
-            const data = resp.json()
+            const data = await resp.json()
             return data;
 
         } catch (error) {
@@ -394,6 +394,56 @@ const FetchUserPublicProfileById  =async (id:number) =>{
                 causes:userCauses
         }
 }, TTL.PUBLIC_PROFILE)
+}
+
+type CommentResponse = {
+        error?:string,
+        message?:string
+}
+const Comment = async(type:"GET" | "PUT" , data?:Comments , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
+        let fetch_fn;
+        let path = "/api/causes/interactions/comment"
+  try {
+       if(type == "GET"){
+         fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`)   
+       }else {
+           fetch_fn = await fetch(`${API_URL}${path}/put` , { 
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(data)   
+           })
+       }
+
+       const resp = await fetch_fn.json();
+       
+       return resp;
+  } catch (error) {
+       console.log(error)
+        return {error:"Network Error"}
+  }
+}
+
+const SubScribe = async(type:"GET" | "PUT" , data?:Subscribed , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
+        let fetch_fn;
+        let path = "/api/causes/interactions/subscribe"
+  try {
+       if(type == "GET"){
+         fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`)   
+       }else {
+           fetch_fn = await fetch(`${API_URL}${path}/put` , { 
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(data)   
+           })
+       }
+
+       const resp = await fetch_fn.json();
+       
+       return resp;
+  } catch (error) {
+       console.log(error)
+        return {error:"Network Error"}
+  }
 }
 
 
@@ -419,5 +469,7 @@ export {
     updateDonate,
     UploadCenter,
     GetCenter,GetCenterViews,
-    FetchUserPublicProfileById
+    FetchUserPublicProfileById,
+    Comment,
+    SubScribe 
 }

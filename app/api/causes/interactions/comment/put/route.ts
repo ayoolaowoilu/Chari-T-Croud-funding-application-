@@ -9,8 +9,8 @@ export async function  POST(request:NextRequest){
        const data: Comments  = await request.json();
 
        try {
-             await db.query("INSERT INTO comments(name,email,comment,identity_key,img_url,user_id) VALUES(?,?,?,?,?,?) " ,
-                 [data.name , data.email , data.comment , data.identity_key , data.img_url , data.user_id ]
+             await db.query("INSERT INTO comments(name,email,comment,identity_key,img_url,user_id , campaign_id) VALUES(?,?,?,?,?,? ,?) " ,
+                 [data.name , data.email , data.comment , data.identity_key , data.img_url , data.user_id ,data.campaign_id ]
              )
 
              return NextResponse.json(
