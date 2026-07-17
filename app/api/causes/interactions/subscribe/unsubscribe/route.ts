@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
             identity_key
         );
 
-          await db.query(
-            "UPDATE campaigns SET subscribed_count = COALESCE(subscribed_count, 0) - 1 WHERE id = ?",
+        await db.query(
+            "UPDATE campaigns SET subscribed_count = GREATEST(COALESCE(subscribed_count, 0) - 1, 0) WHERE id = ?",
             [body.campaign_id]
         );
 
