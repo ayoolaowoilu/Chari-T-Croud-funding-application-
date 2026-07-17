@@ -423,29 +423,66 @@ const Handle_comment = async(type:"GET" | "PUT" | "DELETE" , data?:Comments , pa
   }
 }
 
-const Handle_subscribe = async(type:"GET" | "PUT" | "UN_SUB", data?:Subscribed , page?:number):Promise<Comments[] | null | undefined | CommentResponse> =>{
-        let fetch_fn;
-        let path = "/api/causes/interactions/subscribe"
+const Handle_subscribe = async (
+  type: "GET" | "PUT" | "UN_SUB" | "CHECK",
+  data?: Subscribed,
+  page?: number
+) => {
+  const path = "/api/causes/interactions/subscribe";
+
   try {
-       if(type == "GET"){
-         fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`)   
-       }else {
-           fetch_fn = await fetch(`${API_URL}${path}/put` , { 
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify(data)   
-           })
-       }
+    let res: Response;
 
-       const resp = await fetch_fn.json();
-       
-       return resp;
+    switch (type) {
+      case "GET": {
+        // List subscribers for a campaign
+        res = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`);
+        break;
+      }
+
+      case "PUT": {
+        // Subscribe a user to a campaign
+        res = await fetch(`${API_URL}${path}/put`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        break;
+      }
+
+      case "UN_SUB": {
+        // Unsubscribe a user
+        res = await fetch(`${API_URL}${path}/unsubscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identity_key: data?.identity_key }),
+        });
+        break;
+      }
+
+      case "CHECK": {
+        // Check whether a user is subscribed to a campaign
+        res = await fetch(
+          `${API_URL}${path}/check?identity_key=${data?.identity_key}&campaign_id=${data?.campaign_id}`
+        );
+        break;
+      }
+
+      default: {
+        return { error: "Invalid subscribe action" };
+      }
+    }
+
+    if (!res.ok) {
+      return { error: `Request failed with status ${res.status}` };
+    }
+
+    return await res.json();
   } catch (error) {
-       console.log(error)
-        return {error:"Network Error"}
+    console.log(error);
+    return { error: "Network Error" };
   }
-}
-
+};
 
 
 export {

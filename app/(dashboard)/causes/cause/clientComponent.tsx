@@ -7,15 +7,24 @@ import {
   XCircle, Flag, ChevronLeft, ChevronRight, Share2,
   Copy, X as Twitter, Heart, Clock, Users, Target,
   TrendingUp, Shield, AlertTriangle, MessageCircle,
-  Send, User
+  Send, User, Bell, BellOff
 } from 'lucide-react';
 import NavBar from '@/app/components/layout/NavBar';
 import { DualRingSpinner } from '@/app/components/ui/loading';
-import { GetUserDetailsDyId, Handle_comment, ReportCampaign } from '@/app/lib/fetchRequests';
+import { GetUserDetailsDyId, Handle_comment, Handle_subscribe, ReportCampaign } from '@/app/lib/fetchRequests';
 import { Campaign, Comments, Donor } from '@/app/lib/types';
 import Footer from '@/app/components/layout/footer';
 import Explain from '@/app/components/layout/explain';
 import Button from '@/app/components/ui/button';
+
+interface Subscribed {
+  user_id?: string;
+  name?: string;
+  email?: string;
+  img_url?: string;
+  identity_key?: string;
+  campaign_id?: number;
+}
 
 export const formatAmount = (amount: number) => {
   return new Intl.NumberFormat('en-US').format(amount);
@@ -462,6 +471,77 @@ function CommentSection({ campaignId }: { campaignId: number }) {
   );
 }
 
+function SubscribersSection({ campaignId, subscribers, subscribersCount, subscribersLoading, subscribersHasMore, onLoadMore }: {
+  campaignId: number;
+  subscribers: Subscribed[];
+  subscribersCount: number;
+  subscribersLoading: boolean;
+  subscribersHasMore: boolean;
+  onLoadMore: () => void;
+}) {
+  return (
+    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
+      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Bell className="w-5 h-5 text-blue-600" />
+            Subscribers
+          </h2>
+          <span className="text-xs lg:text-sm text-gray-500">{subscribersCount} total</span>
+        </div>
+
+        {subscribersLoading && subscribers.length === 0 && (
+          <div className="py-8 flex justify-center">
+            <DualRingSpinner />
+          </div>
+        )}
+
+        {!subscribersLoading && subscribers.length === 0 && (
+          <div className="text-center py-8">
+            <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">No subscribers yet</p>
+            <p className="text-xs text-gray-400 mt-1">Subscribe to get updates on this campaign</p>
+          </div>
+        )}
+
+        {subscribers.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3">
+            {subscribers.map((sub, idx) => (
+              <div
+                key={sub.identity_key || `${sub.user_id}-${idx}`}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+              >
+                {sub.img_url ? (
+                  <img src={sub.img_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-blue-600">
+                      {(sub.name || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-800 truncate">{sub.name || 'Anonymous'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {subscribersHasMore && subscribers.length > 0 && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={onLoadMore}
+              disabled={subscribersLoading}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition-colors"
+            >
+              {subscribersLoading ? 'Loading...' : 'Load more subscribers'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const router = useRouter();
 
@@ -472,7 +552,17 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const [userCache, setUserCache] = useState<Record<number, { full_name: string; image: string }>>({});
   const [centerCache, setCenterCache] = useState<Record<number, { full_name: string; image: string }>>({});
 
+  // Subscription state
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
+  const [subscribeLoading, setSubscribeLoading] = useState(false);
+  const [subscribers, setSubscribers] = useState<Subscribed[]>([]);
+  const [subscribersCount, setSubscribersCount] = useState<number>(campaign.subscribed_count ?? 0);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [subscribersPage, setSubscribersPage] = useState(0);
+  const [subscribersHasMore, setSubscribersHasMore] = useState(false);
 
+  const { data : session } = useSession();
   const isCenter = campaign?._type === 'center';
 
   useEffect(() => {
@@ -494,6 +584,98 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   useEffect(() => {
     if (campaign?.main_img?.url) setDisplayedMainImg(campaign.main_img.url);
   }, [campaign?.main_img]);
+
+  const fetchSubscribers = async (pageNum = 0, append = false) => {
+    setSubscribersLoading(true);
+    try {
+      const resp = await Handle_subscribe("GET", { campaign_id: campaign.id }, pageNum);
+      if (!resp.error) {
+        const fetched: Subscribed[] = resp.subscribed || [];
+        setSubscribersCount(resp.total_count ?? fetched.length);
+        setSubscribers(prev => (append ? [...prev, ...fetched] : fetched));
+        setSubscribersHasMore(!!resp.has_more);
+        setSubscribersPage(pageNum);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubscribersLoading(false);
+    }
+  };
+
+  const checkSubscription = async () => {
+    if (!session?.user?.id) {
+      setIsSubscribed(false);
+      setCheckingSubscription(false);
+      return;
+    }
+    setCheckingSubscription(true);
+    try {
+      const resp = await Handle_subscribe("CHECK", { identity_key: session.user.id, campaign_id: campaign.id });
+      setIsSubscribed(!resp.error);
+    } catch {
+      setIsSubscribed(false);
+    } finally {
+      setCheckingSubscription(false);
+    }
+  };
+
+  const handle_subscribe = async () => {
+    if (!session) return;
+    setSubscribeLoading(true);
+    try {
+      const resp = await Handle_subscribe("PUT", {
+        name: session?.user.name,
+        email: session?.user.email as string,
+        identity_key: session?.user.id,
+        campaign_id: campaign.id,
+        img_url: session?.user.image,
+      });
+      if (!resp.error) {
+        setIsSubscribed(true);
+        setSubscribersCount(prev => prev + 1);
+        fetchSubscribers(0, false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubscribeLoading(false);
+    }
+  };
+
+  const handle_unsubscribe = async () => {
+    if (!session) return;
+    setSubscribeLoading(true);
+    try {
+      const resp = await Handle_subscribe("UN_SUB", { identity_key: session?.user.id });
+      if (!resp.error) {
+        setIsSubscribed(false);
+        setSubscribersCount(prev => Math.max(prev - 1, 0));
+        fetchSubscribers(0, false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubscribeLoading(false);
+    }
+  };
+
+  const toggleSubscribe = () => {
+    if (!session || subscribeLoading || checkingSubscription) return;
+    isSubscribed ? handle_unsubscribe() : handle_subscribe();
+  };
+
+  const handleLoadMoreSubscribers = () => {
+    fetchSubscribers(subscribersPage + 1, true);
+  };
+
+  useEffect(() => {
+    checkSubscription();
+  }, [session?.user?.id, campaign.id]);
+
+  useEffect(() => {
+    fetchSubscribers(0, false);
+  }, [campaign.id]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -616,7 +798,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
           <div className="lg:col-span-7 space-y-0 lg:space-y-6">
             {/* Desktop hero */}
             <div className="hidden lg:block rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm">
-              <img src={displayedMainImg || undefined} alt={campaign.name} className="w-full h-[420px] object-cover" />
+              <img src={displayedMainImg || undefined} alt={campaign.name} className="w-full h-105 object-cover" />
             </div>
 
             {/* Gallery */}
@@ -655,17 +837,33 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 </div>
               )}
 
-              <button
-                onClick={() => router.push(`/makedonations?topic=${campaign.name}&id=${campaign.id}&currency=${campaign.currency}`)}
-                className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3.5 rounded-xl text-base transition-colors"
-              >
-                Donate Now
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => router.push(`/makedonations?topic=${campaign.name}&id=${campaign.id}&currency=${campaign.currency}`)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3.5 rounded-xl text-base transition-colors"
+                >
+                  Donate Now
+                </button>
+                <button
+                  onClick={toggleSubscribe}
+                  disabled={!session || subscribeLoading || checkingSubscription}
+                  className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}
+                >
+                  {subscribeLoading ? (
+                    <DualRingSpinner />
+                  ) : isSubscribed ? (
+                    <BellOff className="w-4 h-4" />
+                  ) : (
+                    <Bell className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
 
               <div className="flex items-center justify-center gap-6 mt-4 text-xs text-gray-500">
                 <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {totalDonors} donors</span>
                 {!isCenter && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {daysLeft > 0 ? daysLeft : 0} days left</span>}
                 <span className="flex items-center gap-1"><Target className="w-3.5 h-3.5" /> {campaign.donation_count} donations</span>
+                <span className="flex items-center gap-1"><Bell className="w-3.5 h-3.5" /> {subscribersCount} subscribers</span>
               </div>
             </div>
 
@@ -701,7 +899,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     {isCenter ? campaign.details : campaign.story}
                   </p>
                   {!isExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent" />
                   )}
                 </div>
                 {(isCenter ? campaign.details : campaign.story)?.length > 200 && (
@@ -740,7 +938,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                   </div>
                   <div>
                     <p className="text-[10px] lg:text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Subscribers</p>
-                    <p className="text-base lg:text-lg font-bold text-gray-900">{campaign.subscribed_count ?? 0}</p>
+                    <p className="text-base lg:text-lg font-bold text-gray-900">{subscribersCount}</p>
                   </div>
                   <div>
                     <p className="text-[10px] lg:text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Comments</p>
@@ -778,6 +976,16 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 </div>
               </div>
             </div>
+
+            {/* Subscribers */}
+            <SubscribersSection
+              campaignId={Number(campaign.id)}
+              subscribers={subscribers}
+              subscribersCount={subscribersCount}
+              subscribersLoading={subscribersLoading}
+              subscribersHasMore={subscribersHasMore}
+              onLoadMore={handleLoadMoreSubscribers}
+            />
 
             {/* Comments Section */}
             <CommentSection campaignId={Number(campaign.id)} />
@@ -838,6 +1046,24 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                   Donate Now
                 </button>
 
+                <button
+                  onClick={toggleSubscribe}
+                  disabled={!session || subscribeLoading || checkingSubscription}
+                  className={`w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}
+                >
+                  {subscribeLoading ? (
+                    <DualRingSpinner />
+                  ) : isSubscribed ? (
+                    <>
+                      <BellOff className="w-4 h-4" /> Subscribed
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="w-4 h-4" /> Subscribe for updates
+                    </>
+                  )}
+                </button>
+
                 <p className="text-center text-xs text-gray-400 mt-3">Secure payment processing</p>
 
                 <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
@@ -852,7 +1078,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{campaign.subscribed_count ?? 0}</p>
+                    <p className="text-2xl font-bold text-gray-900">{subscribersCount}</p>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Subscribers</p>
                   </div>
                   <div>
@@ -872,7 +1098,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     { label: 'Currency', value: campaign.currency },
                     { label: 'Type', value: campaign._type },
                     { label: 'Ends', value: `in ${daysLeft > 0 ? daysLeft : 0} days` },
-                    { label: 'Subscribers', value: campaign.subscribed_count ?? 0 },
+                    { label: 'Subscribers', value: subscribersCount },
                     { label: 'Comments', value: campaign.comments_count ?? 0 },
                   ].map(item => (
                     <div key={item.label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">

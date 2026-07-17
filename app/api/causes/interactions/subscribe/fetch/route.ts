@@ -6,8 +6,15 @@ export async function GET(request: NextRequest) {
     const page = parseInt(request.nextUrl.searchParams.get("page") || "0");
     const limit = parseInt(request.nextUrl.searchParams.get("limit") || "10");
 
+    if (!campaign_id) {
+        return NextResponse.json(
+            { error: "campaign id is required" },
+            { status: 400 }
+        );
+    }
+
     try {
-    
+
         const [countResult]: any = await db.query(
             "SELECT COUNT(*) as total FROM subscribed_campaign WHERE campaign_id = ?",
             campaign_id
@@ -16,19 +23,19 @@ export async function GET(request: NextRequest) {
 
         const offset = page * limit;
         const [rows]: any = await db.query(
-            "SELECT * FROM subscribed_campaign WHERE campaign_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            "SELECT * FROM subscribed_campaign WHERE campaign_id = ? ORDER BY id DESC LIMIT ? OFFSET ?",
             [campaign_id, limit, offset]
         );
 
-      
+        const subscribed = rows || [];
 
         return NextResponse.json(
             {
-                subscribed: rows || [],
-                total_count: total_count,
-                page: page,
-                limit: limit,
-                has_more: offset + rows.length < total_count
+                subscribed,
+                total_count,
+                page,
+                limit,
+                has_more: offset + subscribed.length < total_count
             },
             { status: 200 }
         );
