@@ -169,16 +169,27 @@ const FetchALLUserData = async(email:string)=>{
 }
 
 
-const FetchUserCauses = async(email:string) => {
-         return withCache(`user:causes:${email}`, async () => {
-         try{
-                const resp = await fetch(`${API_URL}/api/dashboard/yourcam?email=${email}`)
-                return await resp.json()
-         }catch(error){
-            return {error:"Unable to fetch data"}
-         }
-}, TTL.USER_CAUSES)
-}
+const FetchUserCauses = async (email: string, cursor?: string | number, limit = 12) => {
+  const cacheKey = `user:causes:${email}:${cursor ?? "start"}:${limit}`;
+  return withCache(cacheKey, async () => {
+    try {
+      const params = new URLSearchParams({ email, limit: String(limit) });
+      if (cursor !== undefined) params.set("cursor", String(cursor));
+
+      const resp = await fetch(`${API_URL}/api/dashboard/yourcam?${params.toString()}`);
+      if (!resp.ok) return { error: "Unable to fetch data" };
+
+      const json = await resp.json();
+      return {
+        data: json.data ?? [],
+        hasMore: json.hasMore ?? false,
+        nextCursor: json.nextCursor,
+      };
+    } catch (error) {
+      return { error: "Unable to fetch data" };
+    }
+  }, TTL.USER_CAUSES);
+};
 
 const fetchRandom5Causes = async (query:string,category:string , page:number):Promise<any>=>{
     return withCache(`random5:q:${query}:c:${category}:p:${page}`, async () => {
@@ -396,10 +407,6 @@ const FetchUserPublicProfileById  =async (id:number) =>{
 }, TTL.PUBLIC_PROFILE)
 }
 
-type CommentResponse = {
-        error?:string,
-        message?:string
-}
 const Handle_comment = async(type:"GET" | "PUT" | "DELETE" , data?:Comments , page?:number) =>{
         let fetch_fn;
         let path = "/api/causes/interactions/comment"

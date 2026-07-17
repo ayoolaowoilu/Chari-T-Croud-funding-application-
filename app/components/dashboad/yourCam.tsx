@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, Trash2, Edit3, X, Check, AlertCircle, Clock, 
-  Building2, User, Filter, LayoutGrid, List, Users, 
+import {
+  Search, Trash2, Edit3, X, Check, AlertCircle, Clock,
+  Building2, User, Filter, LayoutGrid, List, Users,
   ImageIcon, MessageCircle, Bell, ChevronLeft, ChevronRight,
-  Send, Calendar, Target
+  Send, Calendar, Target, ArrowLeft
 } from "lucide-react";
 import LoadingCards from "../layout/loadingCards";
 import { DotsWave, DualRingSpinner } from "../ui/loading";
@@ -40,6 +40,7 @@ interface Subscribed {
 }
 
 const DONOR_PAGE_SIZE = 5;
+const CAMPAIGN_PAGE_SIZE = 12;
 
 function DetailPagination({ page, hasMore, onPrev, onNext, loading }: {
   page: number;
@@ -69,7 +70,7 @@ function DetailPagination({ page, hasMore, onPrev, onNext, loading }: {
   );
 }
 
-function CampaignDetailsModal({ campaign, onClose }: { campaign: Don; onClose: () => void }) {
+function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: () => void }) {
   const { data: session } = useSession();
   const [tab, setTab] = useState<DetailTab>("details");
 
@@ -83,7 +84,7 @@ function CampaignDetailsModal({ campaign, onClose }: { campaign: Don; onClose: (
   const donorPageCount = Math.max(Math.ceil(sortedDonors.length / DONOR_PAGE_SIZE), 1);
   const pagedDonors = sortedDonors.slice(donorPage * DONOR_PAGE_SIZE, donorPage * DONOR_PAGE_SIZE + DONOR_PAGE_SIZE);
 
-  // Subscribers — fetched from server on demand
+  // Subscribers — fetched from server on demand (works the same for normal + center campaigns)
   const [subscribers, setSubscribers] = useState<Subscribed[]>([]);
   const [subscribersPage, setSubscribersPage] = useState(0);
   const [subscribersTotal, setSubscribersTotal] = useState(0);
@@ -178,6 +179,13 @@ function CampaignDetailsModal({ campaign, onClose }: { campaign: Don; onClose: (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
+  // lock background scroll while the fullscreen panel is open
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = original; };
+  }, []);
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "Just now";
     const date = new Date(dateStr);
@@ -202,42 +210,38 @@ function CampaignDetailsModal({ campaign, onClose }: { campaign: Don; onClose: (
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      onClick={onClose}
+      initial={{ x: "100%" }}
+      animate={{ x: 0 }}
+      exit={{ x: "100%" }}
+      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden"
     >
-      <motion.div
-        initial={{ y: "100%", opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: "100%", opacity: 0 }}
-        transition={{ type: "spring", damping: 28, stiffness: 300 }}
-        className="bg-white w-full sm:max-w-2xl sm:rounded-2xl rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header image */}
-        <div className="relative w-full h-40 sm:h-48 bg-gray-100 shrink-0">
+      {/* Header */}
+      <div className="shrink-0 relative">
+        <div className="relative w-full h-48 sm:h-64 bg-gray-100">
           {campaign.main_img ? (
             <img src={campaign.main_img.url} alt={campaign.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Image</div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-          <button onClick={onClose} className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur rounded-full hover:bg-white transition-colors">
-            <X className="w-4 h-4 text-gray-700" />
+          <button
+            onClick={onClose}
+            className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-white/90 backdrop-blur rounded-full hover:bg-white transition-colors text-sm font-medium text-gray-700"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
           </button>
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-1.5 ${isCenter ? "bg-emerald-600" : "bg-blue-600"}`}>
               {isCenter ? <Building2 className="w-3 h-3" /> : <User className="w-3 h-3" />}
               {isCenter ? "Center" : "Personal"}
             </span>
-            <h2 className="text-lg font-bold leading-tight truncate">{campaign.name}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold leading-tight">{campaign.name}</h2>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 px-3 sm:px-6 pt-3 border-b border-gray-100 overflow-x-auto shrink-0">
+        <div className="flex items-center gap-1 px-4 sm:px-8 pt-3 border-b border-gray-100 overflow-x-auto">
           {tabs.map((t) => (
             <button
               key={t.key}
@@ -253,218 +257,220 @@ function CampaignDetailsModal({ campaign, onClose }: { campaign: Don; onClose: (
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <AnimatePresence mode="wait">
-            {tab === "details" && (
-              <motion.div key="details" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{campaign.details}</p>
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 max-w-4xl w-full mx-auto">
+        <AnimatePresence mode="wait">
+          {tab === "details" && (
+            <motion.div key="details" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{campaign.details}</p>
 
-                {!isCenter && (
-                  <div className="mt-5">
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="font-bold text-gray-900">{campaign.currency} {campaign.raised?.toLocaleString()}</span>
-                      <span className="text-gray-500">of {campaign.currency} {campaign.goal?.toLocaleString()}</span>
+              {!isCenter && (
+                <div className="mt-5">
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span className="font-bold text-gray-900">{campaign.currency} {campaign.raised?.toLocaleString()}</span>
+                    <span className="text-gray-500">of {campaign.currency} {campaign.goal?.toLocaleString()}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <motion.div className="bg-blue-600 h-full rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6 }} />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1.5">{progress.toFixed(1)}% funded</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Category</p>
+                  <p className="text-sm font-semibold text-gray-900">{campaign.category}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" /> Due
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {new Date(Number(campaign.date_to_completion)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Donors</p>
+                  <p className="text-sm font-semibold text-gray-900">{sortedDonors.length}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Currency</p>
+                  <p className="text-sm font-semibold text-gray-900">{campaign.currency}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {tab === "donors" && (
+            <motion.div key="donors" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+              {sortedDonors.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">No donors yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {pagedDonors.map((donor, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                            {donor.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900">{donor.name}</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900">{campaign.currency} {donor.amount.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* always show pagination controls when there's more than one page — applies to both normal and center campaigns */}
+                  {donorPageCount > 1 && (
+                    <DetailPagination
+                      page={donorPage}
+                      hasMore={donorPage < donorPageCount - 1}
+                      onPrev={() => setDonorPage((p) => Math.max(p - 1, 0))}
+                      onNext={() => setDonorPage((p) => Math.min(p + 1, donorPageCount - 1))}
+                      loading={false}
+                    />
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {tab === "subscribers" && (
+            <motion.div key="subscribers" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+              {subscribersLoading && subscribers.length === 0 ? (
+                <div className="py-12 flex justify-center"><DualRingSpinner /></div>
+              ) : subscribersError && subscribers.length === 0 ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 mb-3">Failed to load subscribers</p>
+                  <button onClick={() => fetchSubscribers(0)} className="text-sm text-blue-600 font-medium hover:text-blue-700">Try Again</button>
+                </div>
+              ) : subscribers.length === 0 ? (
+                <div className="text-center py-12">
+                  <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">No subscribers yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {subscribers.map((sub, idx) => (
+                      <div key={sub.identity_key || idx} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-100">
+                        {sub.img_url ? (
+                          <img src={sub.img_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-blue-600">{(sub.name || "A").charAt(0).toUpperCase()}</span>
+                          </div>
+                        )}
+                        <span className="text-sm font-medium text-gray-800 truncate">{sub.name || "Anonymous"}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* server-driven pagination — shows for both normal and center campaigns since it's keyed off campaign_id, not type */}
+                  <DetailPagination
+                    page={subscribersPage}
+                    hasMore={subscribersHasMore}
+                    onPrev={() => fetchSubscribers(Math.max(subscribersPage - 1, 0))}
+                    onNext={() => fetchSubscribers(subscribersPage + 1)}
+                    loading={subscribersLoading}
+                  />
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {tab === "comments" && (
+            <motion.div key="comments" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
+              <div className="flex gap-3 mb-5">
+                <div className="shrink-0">
+                  {session?.user?.image ? (
+                    <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                      <User className="w-4 h-4 text-blue-600" />
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2.5">
-                      <motion.div className="bg-blue-600 h-full rounded-full" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6 }} />
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1.5">{progress.toFixed(1)}% funded</p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Category</p>
-                    <p className="text-sm font-semibold text-gray-900">{campaign.category}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> Due
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {new Date(Number(campaign.date_to_completion)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Donors</p>
-                    <p className="text-sm font-semibold text-gray-900">{sortedDonors.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Currency</p>
-                    <p className="text-sm font-semibold text-gray-900">{campaign.currency}</p>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder={session ? "Write a comment..." : "Sign in to comment"}
+                    rows={2}
+                    disabled={!session || postingComment}
+                    className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
+                  />
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={handlePostComment}
+                      disabled={!newComment.trim() || !session || postingComment}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {postingComment ? <DualRingSpinner /> : (<><Send className="w-3.5 h-3.5" /> Post</>)}
+                    </button>
                   </div>
                 </div>
-              </motion.div>
-            )}
+              </div>
 
-            {tab === "donors" && (
-              <motion.div key="donors" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                {sortedDonors.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">No donors yet</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      {pagedDonors.map((donor, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50/50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                              {donor.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                            </div>
-                            <span className="text-sm font-semibold text-gray-900">{donor.name}</span>
-                          </div>
-                          <span className="text-sm font-bold text-gray-900">{campaign.currency} {donor.amount.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {donorPageCount > 1 && (
-                      <DetailPagination
-                        page={donorPage}
-                        hasMore={donorPage < donorPageCount - 1}
-                        onPrev={() => setDonorPage((p) => Math.max(p - 1, 0))}
-                        onNext={() => setDonorPage((p) => Math.min(p + 1, donorPageCount - 1))}
-                        loading={false}
-                      />
-                    )}
-                  </>
-                )}
-              </motion.div>
-            )}
-
-            {tab === "subscribers" && (
-              <motion.div key="subscribers" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                {subscribersLoading && subscribers.length === 0 ? (
-                  <div className="py-12 flex justify-center"><DualRingSpinner /></div>
-                ) : subscribersError && subscribers.length === 0 ? (
-                  <div className="text-center py-12">
-                    <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500 mb-3">Failed to load subscribers</p>
-                    <button onClick={() => fetchSubscribers(0)} className="text-sm text-blue-600 font-medium hover:text-blue-700">Try Again</button>
-                  </div>
-                ) : subscribers.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Bell className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">No subscribers yet</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      {subscribers.map((sub, idx) => (
-                        <div key={sub.identity_key || idx} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-100">
-                          {sub.img_url ? (
-                            <img src={sub.img_url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+              {commentsLoading && comments.length === 0 ? (
+                <div className="py-12 flex justify-center"><DualRingSpinner /></div>
+              ) : commentsError && comments.length === 0 ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
+                  <button onClick={() => fetchComments(0)} className="text-sm text-blue-600 font-medium hover:text-blue-700">Try Again</button>
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">No comments yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {comments.map((comment, idx) => (
+                      <div key={comment.identity_key || `${comment.user_id}-${idx}`} className="flex gap-3">
+                        <div className="shrink-0">
+                          {comment.img_url ? (
+                            <img src={comment.img_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                              <span className="text-xs font-bold text-blue-600">{(sub.name || "A").charAt(0).toUpperCase()}</span>
+                            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+                              <span className="text-xs font-bold text-gray-500">{(comment.name || "A").charAt(0).toUpperCase()}</span>
                             </div>
                           )}
-                          <span className="text-sm font-medium text-gray-800 truncate">{sub.name || "Anonymous"}</span>
                         </div>
-                      ))}
-                    </div>
-                    <DetailPagination
-                      page={subscribersPage}
-                      hasMore={subscribersHasMore}
-                      onPrev={() => fetchSubscribers(Math.max(subscribersPage - 1, 0))}
-                      onNext={() => fetchSubscribers(subscribersPage + 1)}
-                      loading={subscribersLoading}
-                    />
-                  </>
-                )}
-              </motion.div>
-            )}
-
-            {tab === "comments" && (
-              <motion.div key="comments" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}>
-                <div className="flex gap-3 mb-5">
-                  <div className="shrink-0">
-                    {session?.user?.image ? (
-                      <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-                        <User className="w-4 h-4 text-blue-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={session ? "Write a comment..." : "Sign in to comment"}
-                      rows={2}
-                      disabled={!session || postingComment}
-                      className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
-                    />
-                    <div className="flex justify-end mt-2">
-                      <button
-                        onClick={handlePostComment}
-                        disabled={!newComment.trim() || !session || postingComment}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {postingComment ? <DualRingSpinner /> : (<><Send className="w-3.5 h-3.5" /> Post</>)}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {commentsLoading && comments.length === 0 ? (
-                  <div className="py-12 flex justify-center"><DualRingSpinner /></div>
-                ) : commentsError && comments.length === 0 ? (
-                  <div className="text-center py-12">
-                    <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
-                    <button onClick={() => fetchComments(0)} className="text-sm text-blue-600 font-medium hover:text-blue-700">Try Again</button>
-                  </div>
-                ) : comments.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">No comments yet</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-4">
-                      {comments.map((comment, idx) => (
-                        <div key={comment.identity_key || `${comment.user_id}-${idx}`} className="flex gap-3">
-                          <div className="shrink-0">
-                            {comment.img_url ? (
-                              <img src={comment.img_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
-                                <span className="text-xs font-bold text-gray-500">{(comment.name || "A").charAt(0).toUpperCase()}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-semibold text-gray-900">{comment.name || "Anonymous"}</span>
-                                <span className="text-xs text-gray-400">·</span>
-                                <span className="text-xs text-gray-400">{formatDate(comment.created_at)}</span>
-                              </div>
-                              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{comment.comment}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-semibold text-gray-900">{comment.name || "Anonymous"}</span>
+                              <span className="text-xs text-gray-400">·</span>
+                              <span className="text-xs text-gray-400">{formatDate(comment.created_at)}</span>
                             </div>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{comment.comment}</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                    <DetailPagination
-                      page={commentsPage}
-                      hasMore={commentsHasMore}
-                      onPrev={() => fetchComments(Math.max(commentsPage - 1, 0))}
-                      onNext={() => fetchComments(commentsPage + 1)}
-                      loading={commentsLoading}
-                    />
-                  </>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
+                      </div>
+                    ))}
+                  </div>
+                  <DetailPagination
+                    page={commentsPage}
+                    hasMore={commentsHasMore}
+                    onPrev={() => fetchComments(Math.max(commentsPage - 1, 0))}
+                    onNext={() => fetchComments(commentsPage + 1)}
+                    loading={commentsLoading}
+                  />
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
@@ -483,7 +489,6 @@ export default function YourCam() {
   const [activeType, setActiveType] = useState<CampaignType>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("block");
 
-  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [cursor, setCursor] = useState<string | number | undefined>(undefined);
 
@@ -496,7 +501,7 @@ export default function YourCam() {
   const [selectedDonors, setSelectedDonors] = useState<Donor[] | null>(null);
   const [selectedCampaignName, setSelectedCampaignName] = useState<string>("");
 
-  // Campaign details modal state
+  // Campaign details panel state
   const [selectedCampaign, setSelectedCampaign] = useState<Don | null>(null);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -530,8 +535,6 @@ export default function YourCam() {
     return days;
   };
 
-
-
   const fetchData = useCallback(async (isLoadMore = false, currentCursor?: string | number) => {
     if (!session?.user?.email) return;
 
@@ -542,31 +545,29 @@ export default function YourCam() {
     }
 
     try {
-      const resp: FetchResponse = await FetchUserCauses(
-        session.user.email as string
+      // pass the cursor through — previously this always requested page 1
+      const resp:any = await FetchUserCauses(
+        session.user.email as string,
+        isLoadMore ? currentCursor : undefined,
+        CAMPAIGN_PAGE_SIZE
       );
-
 
       if (resp.error) {
         setHasMore(false);
         return;
       }
 
-      const newItems: any = resp || [];
+      // backend returns { data, hasMore, nextCursor } — previously this read `resp` itself
+      const newItems: Don[] = resp.data || [];
 
       setData((prev) => {
         const existingIds = new Set(prev.map((item) => item.id));
-        const uniqueNewItems = newItems.filter((item: Don) => !existingIds.has(item.id));
-        const updated = isLoadMore ? [...prev, ...uniqueNewItems] : newItems;
-        return updated;
+        const uniqueNewItems = newItems.filter((item) => !existingIds.has(item.id));
+        return isLoadMore ? [...prev, ...uniqueNewItems] : newItems;
       });
 
-      setHasMore(resp.hasMore ?? newItems.length === 12);
+      setHasMore(resp.hasMore ?? newItems.length === CAMPAIGN_PAGE_SIZE);
       setCursor(resp.nextCursor);
-
-      if (!isLoadMore) {
-        setPage(1);
-      }
     } catch (err) {
       console.error("Fetch error:", err);
       setHasMore(false);
@@ -591,7 +592,7 @@ export default function YourCam() {
 
     if (centerSearchQuery.trim() && (activeType === "center" || activeType === "all")) {
       const query = centerSearchQuery.toLowerCase();
-      result = result.filter((item) => 
+      result = result.filter((item) =>
         item._type === "center" && item.center_name?.toLowerCase().includes(query)
       );
     }
@@ -613,6 +614,9 @@ export default function YourCam() {
     setFilteredData(result);
   }, [data, searchQuery, activeCategory, activeType, centerSearchQuery]);
 
+  // Trigger loading more whenever there IS more on the server, regardless of how many
+  // items match the current filter — e.g. filtering to "Center" shouldn't strand you
+  // just because the campaigns loaded so far happen to all be "Personal".
   useEffect(() => {
     if (loading || loadingMore || !hasMore) return;
 
@@ -623,7 +627,6 @@ export default function YourCam() {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          setPage((prev) => prev + 1);
           fetchData(true, cursor);
         }
       },
@@ -656,9 +659,8 @@ export default function YourCam() {
     if (!editingId) return;
     setIsSaving(true);
     try {
-      console.log("Saving changes for ID:", editingId, editForm);
       const resp = await UpdateCause(editForm);
-      if(resp.error){
+      if (resp.error) {
         console.error("Update error:", resp.error);
         return;
       }
@@ -729,10 +731,10 @@ export default function YourCam() {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center rounded-xl  p-1">
+          <div className="flex items-center rounded-xl p-1">
             <button
               onClick={() => setViewMode("list")}
-              className={`flex items-center  gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                 ${viewMode === "list" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"}`}
             >
               <List className="w-4 h-4" />
@@ -740,7 +742,7 @@ export default function YourCam() {
             </button>
             <button
               onClick={() => setViewMode("block")}
-              className={`flex items-center  gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
                 ${viewMode === "block" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"}`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -1105,7 +1107,7 @@ export default function YourCam() {
           </div>
         )}
 
-        {filteredData.length === 0 && (
+        {filteredData.length === 0 && !hasMore && (
           <div className="text-center py-20">
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="h-8 w-8 text-gray-400" />
@@ -1115,8 +1117,16 @@ export default function YourCam() {
           </div>
         )}
 
-        {/* Load More */}
-        {hasMore && filteredData.length > 0 && (
+        {filteredData.length === 0 && hasMore && (
+          <div className="text-center py-10">
+            <p className="text-sm text-gray-400">Loading more to check for matches…</p>
+          </div>
+        )}
+
+        {/* Load More — kept mounted whenever there's more on the server, independent of
+            whether the current filter has visible results yet, so filtering by e.g.
+            "Center" can keep paging until it finds matches or the server runs out. */}
+        {hasMore && (
           <div ref={loadMoreRef} className="flex justify-center items-center py-10">
             {loadingMore ? <DualRingSpinner /> : <div className="h-10" />}
           </div>
@@ -1126,10 +1136,10 @@ export default function YourCam() {
         )}
       </div>
 
-      {/* CAMPAIGN DETAILS MODAL */}
+      {/* CAMPAIGN DETAILS — fullscreen panel */}
       <AnimatePresence>
         {selectedCampaign && (
-          <CampaignDetailsModal campaign={selectedCampaign} onClose={() => setSelectedCampaign(null)} />
+          <CampaignDetailsPanel campaign={selectedCampaign} onClose={() => setSelectedCampaign(null)} />
         )}
       </AnimatePresence>
 
@@ -1262,7 +1272,6 @@ export default function YourCam() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Only show goal for normal campaigns */}
                   {editForm._type !== "center" && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Goal</label>
