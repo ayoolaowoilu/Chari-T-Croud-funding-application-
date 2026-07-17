@@ -87,30 +87,7 @@ export async function GET(request: NextRequest) {
       />
 
 
-      <div
-        style={{
-          position: 'absolute',
-          top: 40,
-          left: 20,
-          display: 'flex',
-          justifyContent: 'center',
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            padding: '12px 28px',
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            borderRadius: '100px',
-            backdropFilter: 'blur(4px)',
-          }}
-        >
-          <img src={logoSrc} alt="Chari-T" width={150}  />
-        </div>
-      </div>
-
-      {/* ---- Main Title (centered) ---- */}
+   
       <div
         style={{
           position: 'absolute',
