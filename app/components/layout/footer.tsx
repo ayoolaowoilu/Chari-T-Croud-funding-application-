@@ -1,4 +1,5 @@
 import { Heart, Mail, Phone, MapPin, ArrowUp, Leaf, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
 const footerLinks = {
@@ -28,13 +29,8 @@ const footerLinks = {
 };
 
  const Logo:React.FC<{nav?:boolean}> =({ nav })=> {
-    return (
-        <div className="flex items-center gap-3">
-            <div className={`${"w-10 h-10"} bg-gray-900 rounded-xl flex items-center justify-center shadow-sm`}>
-                <Leaf size={nav ? 15 : 20} className="text-white" strokeWidth={2.5} />
-            </div>
-            <span className={`${nav ? "text-xl" : "text-2xl"} font-bold text-gray-900 tracking-tight`}>Chari-T</span>
-        </div>
+    return (  
+        <Image src={"/ct_logo_texts.png"} alt="TEXT_LOGO" width={120} height={30}  />
     );
 }
 export { Logo }

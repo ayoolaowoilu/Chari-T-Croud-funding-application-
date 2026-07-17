@@ -23,7 +23,12 @@ export const metadata: Metadata = {
     template: '%s | Chari-T',
   },
   description: 'Support causes that matter.',
-};
+ icons: {
+    icon: [
+      { url: '/ct_logo2.png', sizes: '16x16', type: 'image/png' },
+    ],
+}
+}
 
 export default function RootLayout({
   children,
