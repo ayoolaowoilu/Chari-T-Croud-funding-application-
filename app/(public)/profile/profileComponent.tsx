@@ -39,7 +39,7 @@ interface Campaign {
 
 interface ProfileProp {
     userData: UserData;
-    campaigns: Campaign[];
+    campaigns: any[];
 }
 
 const EmptyState = () => (
