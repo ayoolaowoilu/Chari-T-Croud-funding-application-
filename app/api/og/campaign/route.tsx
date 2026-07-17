@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
         style={{
           position: 'absolute',
           top: 40,
-          right: 40,
+          left: 40,
           fontSize: 24,
           fontWeight: 'bold',
    
