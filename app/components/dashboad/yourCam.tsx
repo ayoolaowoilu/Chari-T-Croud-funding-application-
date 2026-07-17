@@ -452,7 +452,7 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                               <span className="text-xs text-gray-400">·</span>
                               <span className="text-xs text-gray-400">{formatDate(comment.created_at)}</span>
                             </div>
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{comment.comment}</p>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap wrap-break-words">{comment.comment}</p>
                           </div>
                         </div>
                       </div>
