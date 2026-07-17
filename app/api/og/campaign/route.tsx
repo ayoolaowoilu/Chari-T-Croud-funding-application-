@@ -6,7 +6,7 @@ import { fetchOneCauseById } from '@/app/lib/fetchRequests';
 export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
-  // 1. Validate ID
+  // ---------- Validation ----------
   const idParam = request.nextUrl.searchParams.get('id');
   const id = idParam ? Number(idParam) : null;
   if (!id || isNaN(id) || id <= 0) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 2. Fetch data with error handling
+  // ---------- Fetch Data ----------
   let data;
   try {
     data = await fetchOneCauseById(id, 1);
@@ -40,12 +40,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 3. Build absolute URLs for images
+  // ---------- Image URLs ----------
   const baseUrl = process.env.API_URL || 'http://localhost:3000';
-  const logoSrc = `${baseUrl}/ct_logo1.png`;
+  const logoSrc = `${baseUrl}/ct_logo_texts.png`;
   const bannerSrc = data.main_img?.url || `${baseUrl}/default-banner.png`;
 
-  // 4. Return OG image
+  // ---------- Render ----------
   return new ImageResponse(
     <div
       style={{
@@ -55,12 +55,14 @@ export async function GET(request: NextRequest) {
         position: 'relative',
         alignItems: 'center',
         justifyContent: 'center',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        backgroundColor: '#0a0a0a',
       }}
     >
-      {/* Background */}
+      {/* ---- Background Image ---- */}
       <img
         src={bannerSrc}
-        alt="Cause banner"
+        alt=""
         style={{
           position: 'absolute',
           top: 0,
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest) {
         }}
       />
 
-      {/* Overlay */}
+     
       <div
         style={{
           position: 'absolute',
@@ -79,40 +81,90 @@ export async function GET(request: NextRequest) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)',
         }}
       />
 
-      {/* Logo – whitespace removed + display:flex for safety */}
+
       <div
         style={{
           position: 'absolute',
           top: 40,
-          left: 40,
-          fontSize: 24,
-          fontWeight: 'bold',
-   
-          zIndex: 10,
+          left: 0,
+          right: 0,
           display: 'flex',
+          justifyContent: 'center',
+          zIndex: 10,
         }}
-      ><img src={logoSrc} width={200} alt="Chari-T Logo" /></div>
+      >
+        <div
+          style={{
+            display: 'flex',
+            padding: '12px 28px',
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            borderRadius: '100px',
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <img src={logoSrc} alt="Chari-T" width={160}  />
+        </div>
+      </div>
 
-      {/* Title – added display:flex to avoid whitespace error */}
+      {/* ---- Main Title (centered) ---- */}
       <div
         style={{
           position: 'absolute',
-          bottom: 60,
-          left: 40,
-          right: 40,
-          fontSize: 48,
-          fontWeight: 'bold',
-          color: '#ffffff',
-          zIndex: 10,
-          textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+          bottom: 80,
+          left: 60,
+          right: 60,
           display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          zIndex: 10,
         }}
       >
-        {data.title || data.name || 'Untitled Cause'}
+        <div
+          style={{
+            fontSize: 56,
+            fontWeight: 800,
+            color: '#ffffff',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            textShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            letterSpacing: '-0.02em',
+            maxWidth: '80%',
+          }}
+        >
+          {data.title || data.name || 'Untitled Cause'}
+        </div>
+        {/* Accent line – now blue (teal) instead of yellow */}
+        <div
+          style={{
+            marginTop: 20,
+            width: 80,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: '#0ea5e9', // clean blue (or use #10b981 for green)
+          }}
+        />
+      </div>
+
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          right: 40,
+          display: 'flex',
+          zIndex: 10,
+          fontSize: 16,
+          fontWeight: 500,
+          color: 'rgba(255,255,255,0.7)',
+          letterSpacing: '0.5px',
+        }}
+      >
+        Chari‑T · Giving Made Simple
       </div>
     </div>,
     {
