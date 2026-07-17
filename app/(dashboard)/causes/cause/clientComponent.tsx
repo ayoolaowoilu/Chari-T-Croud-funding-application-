@@ -428,7 +428,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
                         {formatDate(comment.created_at)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap wrap-break-words">
                       {comment.comment}
                     </p>
                   </div>
