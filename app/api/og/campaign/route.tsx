@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
   // ---------- Image URLs ----------
   const baseUrl = process.env.API_URL || 'http://localhost:3000';
-  const logoSrc = `${baseUrl}/ct_logo_texts.png`;
+  const logoSrc = `${baseUrl}/ct_logo1.png`;
   const bannerSrc = data.main_img?.url || `${baseUrl}/default-banner.png`;
 
   // ---------- Render ----------
@@ -91,8 +91,7 @@ export async function GET(request: NextRequest) {
         style={{
           position: 'absolute',
           top: 40,
-          left: 0,
-          right: 0,
+          left: 20,
           display: 'flex',
           justifyContent: 'center',
           zIndex: 10,
@@ -107,7 +106,7 @@ export async function GET(request: NextRequest) {
             backdropFilter: 'blur(4px)',
           }}
         >
-          <img src={logoSrc} alt="Chari-T" width={160}  />
+          <img src={logoSrc} alt="Chari-T" width={150}  />
         </div>
       </div>
 
