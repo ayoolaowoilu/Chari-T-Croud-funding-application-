@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
   // 3. Build absolute URLs for images
   const baseUrl = process.env.API_URL || 'http://localhost:3000';
-  const logoSrc = `${baseUrl}/ct_logo1.png`;
+  const logoSrc = `${baseUrl}/ct_logo2.png`;
   const bannerSrc = data.main_img?.url || `${baseUrl}/default-banner.png`;
 
   // 4. Return OG image
