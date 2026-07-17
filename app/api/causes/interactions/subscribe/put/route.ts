@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
             ]
         );
 
-        // Increment comments_count (handle NULL with COALESCE)
         await db.query(
             "UPDATE campaigns SET subscribed_count = COALESCE(subscribed_count, 0) + 1 WHERE id = ?",
             [data.campaign_id]

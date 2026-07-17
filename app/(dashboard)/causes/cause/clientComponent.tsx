@@ -647,7 +647,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
     if (!session) return;
     setSubscribeLoading(true);
     try {
-      const resp = await Handle_subscribe("UN_SUB", { identity_key: session?.user.id });
+      const resp = await Handle_subscribe("UN_SUB", { identity_key: session?.user.id , campaign_id:campaign.id});
       if (!resp.error) {
         setIsSubscribed(false);
         setSubscribersCount(prev => Math.max(prev - 1, 0));

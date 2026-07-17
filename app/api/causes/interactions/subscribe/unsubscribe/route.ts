@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
             identity_key
         );
 
+          await db.query(
+            "UPDATE campaigns SET subscribed_count = COALESCE(subscribed_count, 0) - 1 WHERE id = ?",
+            [campaign_id]
+        );
+
         if (result.affectedRows === 0) {
             return NextResponse.json(
                 { error: "Subscription not found" },

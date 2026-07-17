@@ -455,7 +455,8 @@ const Handle_subscribe = async (
         res = await fetch(`${API_URL}${path}/unsubscribe`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identity_key: data?.identity_key }),
+          body: JSON.stringify({ identity_key: data?.identity_key , campaign_id:data?.campaign_id
+           }),
         });
         break;
       }
