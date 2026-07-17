@@ -97,7 +97,7 @@ export default async function Page({ searchParams }: Props) {
                 donations: userData?.donations || 0,
                 is_verified:userData.is_verified
             }}
-            campaigns={campaigns}
+            campaigns={campaigns.data}
         />
     );
 }
