@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
           await db.query(
             "UPDATE campaigns SET subscribed_count = COALESCE(subscribed_count, 0) - 1 WHERE id = ?",
-            [campaign_id]
+            [body.campaign_id]
         );
 
         if (result.affectedRows === 0) {
