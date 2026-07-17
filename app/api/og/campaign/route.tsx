@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
             zIndex: 10,
           }}
         >
-          Chari-T Logo
+         <img src={"/ct_logo_texts.png"} />
         </div>
 
         <div
