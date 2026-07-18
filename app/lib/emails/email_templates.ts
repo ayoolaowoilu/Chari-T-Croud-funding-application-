@@ -1,10 +1,3 @@
-// ============================================
-// BLACK & WHITE HTML EMAIL TEMPLATES
-// ============================================
-
-/**
- * Welcome Email Template
- */
 export const welcomeEmail = (data: {
   name: string;
   companyName?: string;
@@ -16,12 +9,13 @@ export const welcomeEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome</title>
+  <title>Welcome to Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
@@ -35,16 +29,17 @@ export const welcomeEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ WELCOME</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Crowdfunding Platform</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Welcome, ${data.name}!</h1>
-      <p>We're thrilled to have you on board. Your journey with us starts now.</p>
+      <p>We're thrilled to have you on board at Chari-T. Your journey with us starts now.</p>
       ${data.companyName ? `<p>You've joined <strong>${data.companyName}</strong> as a valued member.</p>` : ''}
       <p>Here's what you can do next:</p>
       <ul style="padding-left: 20px; margin-bottom: 20px;">
         <li>Complete your profile</li>
-        <li>Explore our features</li>
+        <li>Explore campaigns to support</li>
         <li>Connect with the community</li>
       </ul>
       ${data.loginUrl ? `<a href="${data.loginUrl}" class="button">Get Started</a>` : ''}
@@ -52,8 +47,8 @@ export const welcomeEmail = (data: {
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
-      <p>You're receiving this because you signed up with us.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
+      <p>You're receiving this because you signed up with Chari-T.</p>
     </div>
   </div>
 </body>
@@ -61,9 +56,6 @@ export const welcomeEmail = (data: {
   `;
 };
 
-/**
- * Donation Successful Email Template
- */
 export const donationSuccessEmail = (data: {
   name: string;
   amount: string;
@@ -78,12 +70,13 @@ export const donationSuccessEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Donation Successful</title>
+  <title>Donation Successful - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .success-box { background: #f5f5f5; border: 2px solid #000000; padding: 20px; margin: 20px 0; text-align: center; }
@@ -98,11 +91,12 @@ export const donationSuccessEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ DONATION SUCCESSFUL</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Donation Confirmation</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Thank You, ${data.name}!</h1>
-      <p>Your generous donation has been successfully processed.</p>
+      <p>Your generous donation has been successfully processed on Chari-T.</p>
       <div class="success-box">
         <div style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Amount Donated</div>
         <div class="amount">${data.amount}</div>
@@ -116,7 +110,7 @@ export const donationSuccessEmail = (data: {
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is a confirmation of your donation.</p>
     </div>
   </div>
@@ -125,9 +119,6 @@ export const donationSuccessEmail = (data: {
   `;
 };
 
-/**
- * Update on Campaign Email Template
- */
 export const campaignUpdateEmail = (data: {
   name: string;
   campaignName: string;
@@ -144,12 +135,13 @@ export const campaignUpdateEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Update</title>
+  <title>Campaign Update - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .update-box { background: #f5f5f5; border-left: 4px solid #000000; padding: 16px 20px; margin: 20px 0; }
@@ -167,7 +159,8 @@ export const campaignUpdateEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ CAMPAIGN UPDATE</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Campaign Update</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Update: ${data.campaignName}</h1>
@@ -184,11 +177,11 @@ export const campaignUpdateEmail = (data: {
         </div>
       ` : ''}
       ${data.viewUrl ? `<a href="${data.viewUrl}" class="button">View Campaign</a>` : ''}
-      <p style="font-size: 14px; color: #555555;">Thank you for your continued support.</p>
+      <p style="font-size: 14px; color: #555555;">Thank you for your continued support on Chari-T.</p>
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>You're receiving this update because you're following this campaign.</p>
     </div>
   </div>
@@ -197,9 +190,6 @@ export const campaignUpdateEmail = (data: {
   `;
 };
 
-/**
- * Campaign Successful Email Template
- */
 export const campaignSuccessEmail = (data: {
   name: string;
   campaignName: string;
@@ -216,12 +206,13 @@ export const campaignSuccessEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Successful!</title>
+  <title>Campaign Successful - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .success-box { background: #f5f5f5; border: 2px solid #000000; padding: 30px 20px; margin: 20px 0; text-align: center; }
@@ -240,7 +231,8 @@ export const campaignSuccessEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ CAMPAIGN SUCCESSFUL</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Campaign Success</div>
     </div>
     <div class="content">
       <div class="success-box">
@@ -248,7 +240,7 @@ export const campaignSuccessEmail = (data: {
         <p style="font-size: 18px; margin: 8px 0;">${data.campaignName}</p>
       </div>
       <p>Dear ${data.name},</p>
-      <p><strong>Congratulations!</strong> Your campaign has successfully reached its funding goal.</p>
+      <p><strong>Congratulations!</strong> Your Chari-T campaign has successfully reached its funding goal.</p>
       <div class="stats">
         <div class="stat-item">
           <div class="stat-label">Raised</div>
@@ -263,11 +255,11 @@ export const campaignSuccessEmail = (data: {
       </div>
       ${data.nextSteps ? `<p><strong>Next Steps:</strong> ${data.nextSteps}</p>` : ''}
       ${data.viewUrl ? `<a href="${data.viewUrl}" class="button">View Campaign</a>` : ''}
-      <p style="font-size: 14px; color: #555555;">Thank you to everyone who supported this campaign.</p>
+      <p style="font-size: 14px; color: #555555;">Thank you to everyone who supported this campaign on Chari-T.</p>
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is a notification about your campaign.</p>
     </div>
   </div>
@@ -276,9 +268,6 @@ export const campaignSuccessEmail = (data: {
   `;
 };
 
-/**
- * KYC Submitted Email Template
- */
 export const kycSubmittedEmail = (data: {
   name: string;
   submissionId: string;
@@ -300,12 +289,13 @@ export const kycSubmittedEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYC Submitted</title>
+  <title>KYC Submitted - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .status-box { background: #f5f5f5; border: 2px solid #000000; padding: 20px; margin: 20px 0; }
@@ -322,7 +312,8 @@ export const kycSubmittedEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ KYC SUBMITTED</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">KYC Verification</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">KYC Documents Submitted</h1>
@@ -347,7 +338,7 @@ export const kycSubmittedEmail = (data: {
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is a confirmation of your KYC submission.</p>
     </div>
   </div>
@@ -356,9 +347,6 @@ export const kycSubmittedEmail = (data: {
   `;
 };
 
-/**
- * You Donated Email Template (receipt/confirmation for donor)
- */
 export const youDonatedEmail = (data: {
   name: string;
   amount: string;
@@ -375,12 +363,13 @@ export const youDonatedEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You Donated</title>
+  <title>You Donated - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .donation-box { background: #f5f5f5; border: 2px solid #000000; padding: 24px; margin: 20px 0; text-align: center; }
@@ -399,11 +388,12 @@ export const youDonatedEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ DONATION CONFIRMATION</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Donation Confirmation</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Thank You for Your Donation, ${data.name}!</h1>
-      <p>Your contribution has been successfully processed.</p>
+      <p>Your contribution has been successfully processed on Chari-T.</p>
       <div class="donation-box">
         <div style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Amount Donated</div>
         <div class="amount">${data.amount}</div>
@@ -420,11 +410,11 @@ export const youDonatedEmail = (data: {
         ${data.taxReceiptUrl ? `<a href="${data.taxReceiptUrl}" class="button">View Tax Receipt</a>` : ''}
         ${data.shareUrl ? `<a href="${data.shareUrl}" class="button-secondary">Share Your Impact</a>` : ''}
       </div>
-      <p style="font-size: 14px; color: #555555;">Your generosity makes a real difference. Thank you for being part of this mission.</p>
+      <p style="font-size: 14px; color: #555555;">Your generosity makes a real difference. Thank you for being part of the Chari-T community.</p>
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is your donation receipt.</p>
     </div>
   </div>
@@ -433,9 +423,6 @@ export const youDonatedEmail = (data: {
   `;
 };
 
-/**
- * Campaign Shutdown Email Template
- */
 export const campaignShutdownEmail = (data: {
   name: string;
   campaignName: string;
@@ -451,12 +438,13 @@ export const campaignShutdownEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Shutdown</title>
+  <title>Campaign Shutdown - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .shutdown-box { background: #f5f5f5; border: 2px solid #000000; padding: 20px; margin: 20px 0; }
@@ -471,12 +459,13 @@ export const campaignShutdownEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ CAMPAIGN SHUTDOWN</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Campaign Closure</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Campaign Closed</h1>
       <p>Dear ${data.name},</p>
-      <p>We regret to inform you that the campaign <strong>${data.campaignName}</strong> has been shut down.</p>
+      <p>We regret to inform you that the Chari-T campaign <strong>${data.campaignName}</strong> has been shut down.</p>
       <div class="shutdown-box">
         <p><strong>Shutdown Date:</strong> ${data.shutdownDate}</p>
         <div class="shutdown-reason">
@@ -486,12 +475,12 @@ export const campaignShutdownEmail = (data: {
         ${data.refundStatus ? `<p><strong>Refund Status:</strong> ${data.refundStatus}</p>` : ''}
         ${data.additionalInfo ? `<p><strong>Additional Information:</strong> ${data.additionalInfo}</p>` : ''}
       </div>
-      ${data.contactUrl ? `<a href="${data.contactUrl}" class="button">Contact Support</a>` : ''}
+      ${data.contactUrl ? `<a href="${data.contactUrl}" class="button">Contact Chari-T Support</a>` : ''}
       <p style="font-size: 14px; color: #555555;">We apologize for any inconvenience this may cause.</p>
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is a notification about your campaign.</p>
     </div>
   </div>
@@ -500,9 +489,6 @@ export const campaignShutdownEmail = (data: {
   `;
 };
 
-/**
- * User Banned Email Template
- */
 export const userBannedEmail = (data: {
   name: string;
   reason: string;
@@ -518,12 +504,13 @@ export const userBannedEmail = (data: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Suspended</title>
+  <title>Account Suspended - Chari-T</title>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
     .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; }
-    .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #000000; }
+    .header { border-bottom: 2px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+    .header-title { font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
     .content { line-height: 1.6; color: #000000; }
     .content p { margin-bottom: 16px; }
     .ban-box { background: #f5f5f5; border: 2px solid #000000; padding: 20px; margin: 20px 0; }
@@ -540,12 +527,13 @@ export const userBannedEmail = (data: {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">◼ ACCOUNT SUSPENDED</div>
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
+      <div class="header-title">Account Suspension</div>
     </div>
     <div class="content">
       <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Account Suspension Notice</h1>
       <p>Dear ${data.name},</p>
-      <p>We are writing to inform you that your account has been suspended.</p>
+      <p>We are writing to inform you that your Chari-T account has been suspended.</p>
       <div class="ban-box">
         <p><strong>Suspension Date:</strong> ${data.banDate}</p>
         ${data.duration ? `<p><strong>Duration:</strong> ${data.duration}</p>` : ''}
@@ -554,17 +542,17 @@ export const userBannedEmail = (data: {
           <p style="margin: 4px 0 0 0;">${data.reason}</p>
         </div>
       </div>
-      <p>This action has been taken in accordance with our Terms of Service.</p>
+      <p>This action has been taken in accordance with Chari-T's Terms of Service.</p>
       <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0;">
         ${data.appealUrl ? `<a href="${data.appealUrl}" class="button">Submit Appeal</a>` : ''}
-        ${data.contactUrl ? `<a href="${data.contactUrl}" class="button-secondary">Contact Support</a>` : ''}
+        ${data.contactUrl ? `<a href="${data.contactUrl}" class="button-secondary">Contact Chari-T Support</a>` : ''}
         ${data.termsUrl ? `<a href="${data.termsUrl}" style="color: #000000; font-size: 14px;">View Terms of Service</a>` : ''}
       </div>
       <p style="font-size: 14px; color: #555555;">If you believe this was done in error, please contact our support team.</p>
     </div>
     <div class="divider"></div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} All rights reserved.</p>
+      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
       <p>This is an important notice regarding your account.</p>
     </div>
   </div>
@@ -572,10 +560,6 @@ export const userBannedEmail = (data: {
 </html>
   `;
 };
-
-// ============================================
-// EXPORT ALL TEMPLATES
-// ============================================
 
 export const emailTemplates = {
   welcome: welcomeEmail,

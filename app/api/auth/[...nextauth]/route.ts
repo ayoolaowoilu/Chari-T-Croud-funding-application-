@@ -3,6 +3,8 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import db from "@/app/lib/DBschema"
 import Twitter from "next-auth/providers/twitter"
+import { sendSingleEmail } from "@/app/lib/emails/email"
+import { welcomeEmail } from "@/app/lib/emails/email_templates"
 
 
 declare module "next-auth/jwt" {
@@ -34,12 +36,16 @@ const handler  = NextAuth({
         "SELECT * FROM users WHERE email = ?",
         [profile?.email]
       )
-
+         await sendSingleEmail(profile?.email  as string,  { from : "Welcome Back <support@chari-t.live>" , 
+          subject : "Welcome Back" , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
+       
       if (rows.length === 0) {
         await db.query(
           "INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)",
           [profile?.name, profile?.image || profile?.picture, profile?.email, account?.provider]
         )
+        await sendSingleEmail(profile?.email  as string,  { from : "Welcome <support@chari-t.live>" , 
+          subject : "Welcome " , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
       }
 
       return true
