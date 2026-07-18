@@ -1,13 +1,4 @@
-/**
- * Chari-T Email Templates
- * ------------------------------------------------------------------
- * Design system: soft emerald accent, rounded cards, pill buttons.
- * Forced light color-scheme (meta tags) so the logo — which is black
- * text on a transparent background — never disappears when a phone
- * or mail client is in dark mode. The logo also always sits inside
- * an explicit white box as a second safety net.
- * ------------------------------------------------------------------
- */
+
 
 const COLORS = {
   bgPage: '#F3F6F5',
