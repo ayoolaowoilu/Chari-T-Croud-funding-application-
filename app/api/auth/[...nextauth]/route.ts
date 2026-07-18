@@ -37,7 +37,7 @@ const handler  = NextAuth({
         [profile?.email]
       )
          await sendSingleEmail(profile?.email  as string,  { from : "Welcome Back <support@chari-t.live>" , 
-          subject : "Welcome Back" , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
+          subject : `${profile?.name?.split(" ")[0]} - Welcome back` , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
        
       if (rows.length === 0) {
         await db.query(
@@ -45,7 +45,7 @@ const handler  = NextAuth({
           [profile?.name, profile?.image || profile?.picture, profile?.email, account?.provider]
         )
         await sendSingleEmail(profile?.email  as string,  { from : "Welcome <support@chari-t.live>" , 
-          subject : "Welcome " , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
+          subject : `${profile?.name?.split(" ")[0]} - Welcome` , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
       }
 
       return true
