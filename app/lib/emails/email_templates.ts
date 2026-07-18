@@ -1,61 +1,151 @@
+/**
+ * Chari-T Email Templates
+ * ------------------------------------------------------------------
+ * Design system: soft emerald accent, rounded cards, pill buttons.
+ * Forced light color-scheme (meta tags) so the logo — which is black
+ * text on a transparent background — never disappears when a phone
+ * or mail client is in dark mode. The logo also always sits inside
+ * an explicit white box as a second safety net.
+ * ------------------------------------------------------------------
+ */
+
+const COLORS = {
+  bgPage: '#F3F6F5',
+  bgCard: '#FFFFFF',
+  textPrimary: '#111827',
+  textSecondary: '#5B6570',
+  textMuted: '#8A939C',
+  accent: '#0E8E68',
+  accentDark: '#0B6F52',
+  accentLight: '#E6F4EF',
+  border: '#E6E9EC',
+  danger: '#C0392B',
+  dangerLight: '#FBEAE8',
+  warning: '#B4740E',
+  warningLight: '#FBF1DE',
+};
+
+const baseStyles = `
+  body { margin: 0; padding: 0; background: ${COLORS.bgPage}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  table { border-collapse: collapse; }
+  img { border: 0; display: block; }
+  .email-wrapper { width: 100%; background: ${COLORS.bgPage}; padding: 32px 12px; }
+  .container { max-width: 600px; margin: 0 auto; background: ${COLORS.bgCard}; border-radius: 16px; overflow: hidden; border: 1px solid ${COLORS.border}; }
+  .header { padding: 32px 40px 24px 40px; text-align: center; background: ${COLORS.bgCard}; }
+  .logo-box { display: inline-block; background: #ffffff; padding: 14px 24px; border-radius: 10px; border: 1px solid ${COLORS.border}; }
+  .logo { max-width: 160px; height: auto; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: ${COLORS.accent}; margin-top: 16px; }
+  .body-pad { padding: 8px 40px 40px 40px; }
+  h1 { font-size: 24px; font-weight: 700; color: ${COLORS.textPrimary}; margin: 0 0 16px 0; line-height: 1.3; }
+  p { font-size: 15px; line-height: 1.65; color: ${COLORS.textSecondary}; margin: 0 0 16px 0; }
+  .lead { font-size: 16px; color: ${COLORS.textPrimary}; }
+  .card { background: ${COLORS.accentLight}; border-radius: 12px; padding: 24px; margin: 24px 0; }
+  .card-neutral { background: #F8F9FA; border: 1px solid ${COLORS.border}; border-radius: 12px; padding: 24px; margin: 24px 0; }
+  .card-warning { background: ${COLORS.warningLight}; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+  .card-danger { background: ${COLORS.dangerLight}; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .row:last-child { border-bottom: none; }
+  .row-label { font-size: 13px; font-weight: 600; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.4px; }
+  .row-value { font-size: 14px; font-weight: 700; color: ${COLORS.textPrimary}; text-align: right; }
+  .amount { font-size: 38px; font-weight: 800; color: ${COLORS.accentDark}; letter-spacing: -0.5px; }
+  .badge { display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-success { background: ${COLORS.accent}; color: #ffffff; }
+  .badge-warning { background: ${COLORS.warning}; color: #ffffff; }
+  .badge-danger { background: ${COLORS.danger}; color: #ffffff; }
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; margin: 8px 8px 8px 0; }
+  .btn-primary { background: ${COLORS.accent}; color: #ffffff !important; }
+  .btn-secondary { background: #ffffff; color: ${COLORS.textPrimary} !important; border: 1px solid ${COLORS.border}; }
+  .divider { border-top: 1px solid ${COLORS.border}; margin: 8px 0 0 0; }
+  .footer { padding: 28px 40px; text-align: center; }
+  .footer p { font-size: 12px; color: ${COLORS.textMuted}; margin: 0 0 6px 0; }
+  .stats-grid { display: flex; justify-content: space-between; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 100px; text-align: center; background: #F8F9FA; border: 1px solid ${COLORS.border}; border-radius: 10px; padding: 14px 8px; }
+  .stat-value { font-size: 19px; font-weight: 800; color: ${COLORS.textPrimary}; }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: ${COLORS.textMuted}; margin-top: 2px; }
+  .quote { border-left: 3px solid ${COLORS.accent}; background: #F8F9FA; padding: 12px 18px; margin: 16px 0; font-style: italic; border-radius: 0 8px 8px 0; }
+  @media only screen and (max-width: 480px) {
+    .header { padding: 28px 24px 20px 24px; }
+    .body-pad { padding: 8px 24px 32px 24px; }
+    .footer { padding: 24px 24px; }
+    .stats-grid { flex-direction: column; }
+    .row { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .row-value { text-align: left; }
+  }
+`;
+
+const headHtml = (title: string) => `
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${title}</title>
+  <style>${baseStyles}</style>
+</head>
+`;
+
+const headerHtml = (eyebrow: string) => `
+  <div class="header">
+    <div class="logo-box">
+      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T" class="logo">
+    </div>
+    <div class="eyebrow">${eyebrow}</div>
+  </div>
+`;
+
+const footerHtml = (note: string) => `
+  <div class="divider"></div>
+  <div class="footer">
+    <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
+    <p>${note}</p>
+  </div>
+`;
+
+const shell = (title: string, eyebrow: string, bodyContent: string, footerNote: string) => `
+<!DOCTYPE html>
+<html lang="en">
+${headHtml(title)}
+<body>
+  <div class="email-wrapper">
+    <div class="container">
+      ${headerHtml(eyebrow)}
+      <div class="body-pad">
+        ${bodyContent}
+      </div>
+      ${footerHtml(footerNote)}
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+// ---------------------------------------------------------------------------
+// Welcome
+// ---------------------------------------------------------------------------
 export const welcomeEmail = (data: {
   name: string;
   companyName?: string;
   loginUrl?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    .footer a { color: #000000; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Crowdfunding Platform</div>
+  const body = `
+    <h1>Welcome, ${data.name} 👋</h1>
+    <p class="lead">We're thrilled to have you on board at Chari-T. Your journey starts now.</p>
+    ${data.companyName ? `<p>You've joined <strong>${data.companyName}</strong> as a valued member.</p>` : ''}
+    <div class="card">
+      <p style="margin:0 0 10px 0; font-weight:700; color:${COLORS.textPrimary};">Here's what you can do next:</p>
+      <div class="row"><span class="row-value" style="text-align:left; font-weight:500;">✓ Complete your profile</span></div>
+      <div class="row"><span class="row-value" style="text-align:left; font-weight:500;">✓ Explore campaigns to support</span></div>
+      <div class="row"><span class="row-value" style="text-align:left; font-weight:500;">✓ Connect with the community</span></div>
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Welcome, ${data.name}!</h1>
-      <p>We're thrilled to have you on board at Chari-T. Your journey with us starts now.</p>
-      ${data.companyName ? `<p>You've joined <strong>${data.companyName}</strong> as a valued member.</p>` : ''}
-      <p>Here's what you can do next:</p>
-      <ul style="padding-left: 20px; margin-bottom: 20px; color: #000000;">
-        <li>Complete your profile</li>
-        <li>Explore campaigns to support</li>
-        <li>Connect with the community</li>
-      </ul>
-      ${data.loginUrl ? `<a href="${data.loginUrl}" class="button">Get Started</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">If you have any questions, just reply to this email. We're here to help.</p>
-    </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>You're receiving this because you signed up with Chari-T.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ${data.loginUrl ? `<a href="${data.loginUrl}" class="btn btn-primary">Get Started</a>` : ''}
+    <p style="font-size:13px; margin-top:16px;">Questions? Just reply to this email — we're here to help.</p>
   `;
+  return shell('Welcome to Chari-T', 'Crowdfunding Platform', body, "You're receiving this because you signed up with Chari-T.");
 };
 
+// ---------------------------------------------------------------------------
+// Donation success (platform-side confirmation)
+// ---------------------------------------------------------------------------
 export const donationSuccessEmail = (data: {
   name: string;
   amount: string;
@@ -64,61 +154,28 @@ export const donationSuccessEmail = (data: {
   date?: string;
   receiptUrl?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Donation Successful - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .success-box { background: #f5f5f5; border: 1px solid #000000; padding: 20px; margin: 20px 0; text-align: center; }
-    .amount { font-size: 36px; font-weight: 700; color: #000000; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Donation Confirmation</div>
+  const body = `
+    <span class="badge badge-success">Payment Confirmed</span>
+    <h1 style="margin-top:12px;">Thank you, ${data.name}!</h1>
+    <p class="lead">Your generous donation has been successfully processed.</p>
+    <div class="card" style="text-align:center;">
+      <div class="stat-label">Amount Donated</div>
+      <div class="amount">${data.amount}</div>
+      <p style="margin-top:6px;">to <strong style="color:${COLORS.textPrimary};">${data.campaignName}</strong></p>
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Thank You, ${data.name}!</h1>
-      <p>Your generous donation has been successfully processed on Chari-T.</p>
-      <div class="success-box">
-        <div style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; color: #000000;">Amount Donated</div>
-        <div class="amount">${data.amount}</div>
-        <div style="font-size: 14px; margin-top: 8px; color: #000000;">to <strong>${data.campaignName}</strong></div>
-      </div>
-      <p><strong>Transaction ID:</strong> ${data.transactionId}</p>
-      ${data.date ? `<p><strong>Date:</strong> ${data.date}</p>` : ''}
-      <p>Your contribution makes a real difference. We're grateful for your support.</p>
-      ${data.receiptUrl ? `<a href="${data.receiptUrl}" class="button">View Receipt</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">A confirmation receipt has been sent to your email.</p>
+    <div class="card-neutral">
+      <div class="row"><span class="row-label">Transaction ID</span><span class="row-value">${data.transactionId}</span></div>
+      ${data.date ? `<div class="row"><span class="row-label">Date</span><span class="row-value">${data.date}</span></div>` : ''}
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is a confirmation of your donation.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ${data.receiptUrl ? `<a href="${data.receiptUrl}" class="btn btn-primary">View Receipt</a>` : ''}
+    <p style="font-size:13px;">Your contribution makes a real difference. We're grateful for your support.</p>
   `;
+  return shell('Donation Successful', 'Donation Confirmation', body, 'This is a confirmation of your donation.');
 };
 
+// ---------------------------------------------------------------------------
+// Campaign update
+// ---------------------------------------------------------------------------
 export const campaignUpdateEmail = (data: {
   name: string;
   campaignName: string;
@@ -129,67 +186,31 @@ export const campaignUpdateEmail = (data: {
   daysLeft?: number;
   viewUrl?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Update - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .update-box { background: #f5f5f5; border-left: 4px solid #000000; padding: 16px 20px; margin: 20px 0; }
-    .stats { display: flex; justify-content: space-between; background: #f5f5f5; padding: 16px; margin: 20px 0; border: 1px solid #000000; }
-    .stat-item { text-align: center; }
-    .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #000000; }
-    .stat-value { font-size: 20px; font-weight: 700; color: #000000; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } .stats { flex-direction: column; gap: 12px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Campaign Update</div>
+  const hasStats = data.raised || data.goal || data.progress || data.daysLeft;
+  const body = `
+    <div class="eyebrow" style="text-align:left; margin-bottom:8px;">Campaign Update</div>
+    <h1>${data.campaignName}</h1>
+    <p>Hi ${data.name},</p>
+    <div class="quote">
+      <p style="margin:0;">${data.updateMessage}</p>
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Update: ${data.campaignName}</h1>
-      <p>Hello ${data.name},</p>
-      <div class="update-box">
-        <p style="margin: 0; color: #000000;">${data.updateMessage}</p>
+    ${hasStats ? `
+      <div class="stats-grid">
+        ${data.raised ? `<div class="stat"><div class="stat-value">${data.raised}</div><div class="stat-label">Raised</div></div>` : ''}
+        ${data.goal ? `<div class="stat"><div class="stat-value">${data.goal}</div><div class="stat-label">Goal</div></div>` : ''}
+        ${data.progress ? `<div class="stat"><div class="stat-value">${data.progress}</div><div class="stat-label">Progress</div></div>` : ''}
+        ${data.daysLeft !== undefined ? `<div class="stat"><div class="stat-value">${data.daysLeft}</div><div class="stat-label">Days Left</div></div>` : ''}
       </div>
-      ${data.progress || data.raised ? `
-        <div class="stats">
-          ${data.raised ? `<div class="stat-item"><div class="stat-label">Raised</div><div class="stat-value">${data.raised}</div></div>` : ''}
-          ${data.goal ? `<div class="stat-item"><div class="stat-label">Goal</div><div class="stat-value">${data.goal}</div></div>` : ''}
-          ${data.progress ? `<div class="stat-item"><div class="stat-label">Progress</div><div class="stat-value">${data.progress}</div></div>` : ''}
-          ${data.daysLeft ? `<div class="stat-item"><div class="stat-label">Days Left</div><div class="stat-value">${data.daysLeft}</div></div>` : ''}
-        </div>
-      ` : ''}
-      ${data.viewUrl ? `<a href="${data.viewUrl}" class="button">View Campaign</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">Thank you for your continued support on Chari-T.</p>
-    </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>You're receiving this update because you're following this campaign.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ` : ''}
+    ${data.viewUrl ? `<a href="${data.viewUrl}" class="btn btn-primary">View Campaign</a>` : ''}
+    <p style="font-size:13px;">Thank you for your continued support on Chari-T.</p>
   `;
+  return shell('Campaign Update', 'Campaign Update', body, "You're receiving this because you're following this campaign.");
 };
 
+// ---------------------------------------------------------------------------
+// Campaign success (goal met)
+// ---------------------------------------------------------------------------
 export const campaignSuccessEmail = (data: {
   name: string;
   campaignName: string;
@@ -200,74 +221,30 @@ export const campaignSuccessEmail = (data: {
   viewUrl?: string;
   nextSteps?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Successful - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .success-box { background: #f5f5f5; border: 1px solid #000000; padding: 30px 20px; margin: 20px 0; text-align: center; }
-    .success-box h2 { font-size: 32px; font-weight: 700; margin: 0 0 8px 0; color: #000000; }
-    .stats { display: flex; justify-content: space-around; margin: 20px 0; }
-    .stat-item { text-align: center; }
-    .stat-value { font-size: 24px; font-weight: 700; color: #000000; }
-    .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #000000; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } .stats { flex-direction: column; gap: 12px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Campaign Success</div>
+  const body = `
+    <div class="card" style="text-align:center;">
+      <span class="badge badge-success">Goal Reached</span>
+      <h1 style="margin:14px 0 4px 0;">Campaign Goal Met! 🎉</h1>
+      <p style="margin:0; font-weight:600; color:${COLORS.textPrimary};">${data.campaignName}</p>
     </div>
-    <div class="content">
-      <div class="success-box">
-        <h2>Campaign Goal Met!</h2>
-        <p style="font-size: 18px; margin: 8px 0; color: #000000;">${data.campaignName}</p>
-      </div>
-      <p>Dear ${data.name},</p>
-      <p><strong>Congratulations!</strong> Your Chari-T campaign has successfully reached its funding goal.</p>
-      <div class="stats">
-        <div class="stat-item">
-          <div class="stat-label">Raised</div>
-          <div class="stat-value">${data.raised}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Goal</div>
-          <div class="stat-value">${data.goal}</div>
-        </div>
-        ${data.backers ? `<div class="stat-item"><div class="stat-label">Backers</div><div class="stat-value">${data.backers}</div></div>` : ''}
-        ${data.daysAhead ? `<div class="stat-item"><div class="stat-label">Days Ahead</div><div class="stat-value">${data.daysAhead}</div></div>` : ''}
-      </div>
-      ${data.nextSteps ? `<p><strong>Next Steps:</strong> ${data.nextSteps}</p>` : ''}
-      ${data.viewUrl ? `<a href="${data.viewUrl}" class="button">View Campaign</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">Thank you to everyone who supported this campaign on Chari-T.</p>
+    <p>Dear ${data.name},</p>
+    <p><strong>Congratulations!</strong> Your Chari-T campaign has successfully reached its funding goal.</p>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-value">${data.raised}</div><div class="stat-label">Raised</div></div>
+      <div class="stat"><div class="stat-value">${data.goal}</div><div class="stat-label">Goal</div></div>
+      ${data.backers !== undefined ? `<div class="stat"><div class="stat-value">${data.backers}</div><div class="stat-label">Backers</div></div>` : ''}
+      ${data.daysAhead ? `<div class="stat"><div class="stat-value">${data.daysAhead}</div><div class="stat-label">Days Ahead</div></div>` : ''}
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is a notification about your campaign.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ${data.nextSteps ? `<div class="card-neutral"><p style="margin:0;"><strong>Next Steps:</strong> ${data.nextSteps}</p></div>` : ''}
+    ${data.viewUrl ? `<a href="${data.viewUrl}" class="btn btn-primary">View Campaign</a>` : ''}
+    <p style="font-size:13px;">Thank you to everyone who supported this campaign on Chari-T.</p>
   `;
+  return shell('Campaign Successful', 'Campaign Success', body, 'This is a notification about your campaign.');
 };
 
+// ---------------------------------------------------------------------------
+// KYC submitted
+// ---------------------------------------------------------------------------
 export const kycSubmittedEmail = (data: {
   name: string;
   submissionId: string;
@@ -276,77 +253,40 @@ export const kycSubmittedEmail = (data: {
   estimatedTime?: string;
   supportUrl?: string;
 }): string => {
-  const statusMessages = {
-    'pending': 'Your documents have been received and are pending review.',
+  const statusMessages: Record<string, string> = {
+    pending: 'Your documents have been received and are pending review.',
     'in-review': 'Your documents are currently being reviewed by our team.',
-    'approved': 'Your KYC has been approved!',
-    'rejected': 'Please review your documents and resubmit.',
+    approved: 'Your KYC has been approved!',
+    rejected: 'Please review your documents and resubmit.',
   };
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYC Submitted - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .status-box { background: #f5f5f5; border: 1px solid #000000; padding: 20px; margin: 20px 0; }
-    .status-badge { display: inline-block; padding: 4px 16px; background: #000000; color: #ffffff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 2px; }
-    .doc-list { padding-left: 20px; margin: 12px 0; color: #000000; }
-    .doc-list li { margin-bottom: 6px; color: #000000; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">KYC Verification</div>
-    </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">KYC Documents Submitted</h1>
-      <p>Hello ${data.name},</p>
-      <div class="status-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <span style="font-weight: 500; color: #000000;">Submission Status:</span>
-          <span class="status-badge">${data.status.replace('-', ' ').toUpperCase()}</span>
-        </div>
-        <p style="margin-top: 12px; color: #000000;">${statusMessages[data.status]}</p>
-        <p><strong>Submission ID:</strong> ${data.submissionId}</p>
+  const badgeClass = data.status === 'approved' ? 'badge-success' : data.status === 'rejected' ? 'badge-danger' : 'badge-warning';
+  const body = `
+    <h1>KYC Documents Submitted</h1>
+    <p>Hello ${data.name},</p>
+    <div class="card-neutral">
+      <div class="row">
+        <span class="row-label">Submission Status</span>
+        <span class="badge ${badgeClass}">${data.status.replace('-', ' ')}</span>
       </div>
-      ${data.documents && data.documents.length > 0 ? `
-        <p><strong>Documents Submitted:</strong></p>
-        <ul class="doc-list">
-          ${data.documents.map(doc => `<li>${doc}</li>`).join('')}
-        </ul>
-      ` : ''}
-      ${data.estimatedTime ? `<p><strong>Estimated Processing Time:</strong> ${data.estimatedTime}</p>` : ''}
-      ${data.supportUrl ? `<a href="${data.supportUrl}" class="button">Contact Support</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">We'll notify you once the verification is complete.</p>
+      <div class="row"><span class="row-label">Submission ID</span><span class="row-value">${data.submissionId}</span></div>
+      ${data.estimatedTime ? `<div class="row"><span class="row-label">Est. Processing Time</span><span class="row-value">${data.estimatedTime}</span></div>` : ''}
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is a confirmation of your KYC submission.</p>
-    </div>
-  </div>
-</body>
-</html>
+    <p>${statusMessages[data.status]}</p>
+    ${data.documents && data.documents.length > 0 ? `
+      <div class="card">
+        <p style="margin:0 0 10px 0; font-weight:700; color:${COLORS.textPrimary};">Documents Submitted</p>
+        ${data.documents.map(doc => `<div class="row"><span class="row-value" style="text-align:left; font-weight:500;">📄 ${doc}</span></div>`).join('')}
+      </div>
+    ` : ''}
+    ${data.supportUrl ? `<a href="${data.supportUrl}" class="btn btn-secondary">Contact Support</a>` : ''}
+    <p style="font-size:13px;">We'll notify you once the verification is complete.</p>
   `;
+  return shell('KYC Submitted', 'KYC Verification', body, 'This is a confirmation of your KYC submission.');
 };
 
+// ---------------------------------------------------------------------------
+// You donated (donor-side receipt)
+// ---------------------------------------------------------------------------
 export const youDonatedEmail = (data: {
   name: string;
   amount: string;
@@ -357,72 +297,29 @@ export const youDonatedEmail = (data: {
   taxReceiptUrl?: string;
   shareUrl?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You Donated - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .donation-box { background: #f5f5f5; border: 1px solid #000000; padding: 24px; margin: 20px 0; text-align: center; }
-    .amount { font-size: 40px; font-weight: 700; color: #000000; }
-    .campaign-name { font-size: 18px; font-weight: 500; margin: 8px 0; color: #000000; }
-    .message-box { background: #f5f5f5; border-left: 4px solid #000000; padding: 12px 16px; margin: 16px 0; font-style: italic; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .button-secondary { display: inline-block; padding: 12px 32px; background: #ffffff; color: #000000 !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button-secondary:hover { background: #f5f5f5; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Donation Confirmation</div>
+  const body = `
+    <h1>Thank you for your donation, ${data.name}! 💚</h1>
+    <p class="lead">Your contribution has been successfully processed on Chari-T.</p>
+    <div class="card" style="text-align:center;">
+      <div class="stat-label">Amount Donated</div>
+      <div class="amount">${data.amount}</div>
+      <p style="margin-top:6px;">to <strong style="color:${COLORS.textPrimary};">${data.campaignName}</strong></p>
+      ${data.date ? `<p style="font-size:13px; margin-top:2px;">${data.date}</p>` : ''}
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Thank You for Your Donation, ${data.name}!</h1>
-      <p>Your contribution has been successfully processed on Chari-T.</p>
-      <div class="donation-box">
-        <div style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; color: #000000;">Amount Donated</div>
-        <div class="amount">${data.amount}</div>
-        <div class="campaign-name">to <strong>${data.campaignName}</strong></div>
-        ${data.date ? `<div style="font-size: 14px; margin-top: 8px; color: #000000;">${data.date}</div>` : ''}
-      </div>
-      <p><strong>Transaction ID:</strong> ${data.transactionId}</p>
-      ${data.message ? `
-        <div class="message-box">
-          <p style="margin: 0; color: #000000;">"${data.message}"</p>
-        </div>
-      ` : ''}
-      <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0;">
-        ${data.taxReceiptUrl ? `<a href="${data.taxReceiptUrl}" class="button">View Tax Receipt</a>` : ''}
-        ${data.shareUrl ? `<a href="${data.shareUrl}" class="button-secondary">Share Your Impact</a>` : ''}
-      </div>
-      <p style="font-size: 14px; color: #000000;">Your generosity makes a real difference. Thank you for being part of the Chari-T community.</p>
+    <div class="card-neutral">
+      <div class="row"><span class="row-label">Transaction ID</span><span class="row-value">${data.transactionId}</span></div>
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is your donation receipt.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ${data.message ? `<div class="quote"><p style="margin:0;">"${data.message}"</p></div>` : ''}
+    ${data.taxReceiptUrl ? `<a href="${data.taxReceiptUrl}" class="btn btn-primary">View Tax Receipt</a>` : ''}
+    ${data.shareUrl ? `<a href="${data.shareUrl}" class="btn btn-secondary">Share Your Impact</a>` : ''}
+    <p style="font-size:13px;">Your generosity makes a real difference. Thank you for being part of the Chari-T community.</p>
   `;
+  return shell('You Donated', 'Donation Confirmation', body, 'This is your donation receipt.');
 };
 
+// ---------------------------------------------------------------------------
+// Campaign shutdown
+// ---------------------------------------------------------------------------
 export const campaignShutdownEmail = (data: {
   name: string;
   campaignName: string;
@@ -432,63 +329,29 @@ export const campaignShutdownEmail = (data: {
   contactUrl?: string;
   additionalInfo?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campaign Shutdown - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .shutdown-box { background: #f5f5f5; border: 1px solid #000000; padding: 20px; margin: 20px 0; }
-    .shutdown-reason { background: #f5f5f5; border-left: 4px solid #000000; padding: 12px 16px; margin: 12px 0; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Campaign Closure</div>
+  const body = `
+    <span class="badge badge-danger">Campaign Closed</span>
+    <h1 style="margin-top:12px;">${data.campaignName}</h1>
+    <p>Dear ${data.name},</p>
+    <p>We regret to inform you that this Chari-T campaign has been shut down.</p>
+    <div class="card-neutral">
+      <div class="row"><span class="row-label">Shutdown Date</span><span class="row-value">${data.shutdownDate}</span></div>
+      ${data.refundStatus ? `<div class="row"><span class="row-label">Refund Status</span><span class="row-value">${data.refundStatus}</span></div>` : ''}
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Campaign Closed</h1>
-      <p>Dear ${data.name},</p>
-      <p>We regret to inform you that the Chari-T campaign <strong>${data.campaignName}</strong> has been shut down.</p>
-      <div class="shutdown-box">
-        <p><strong>Shutdown Date:</strong> ${data.shutdownDate}</p>
-        <div class="shutdown-reason">
-          <p style="margin: 0; font-weight: 500; color: #000000;">Reason:</p>
-          <p style="margin: 4px 0 0 0; color: #000000;">${data.reason}</p>
-        </div>
-        ${data.refundStatus ? `<p><strong>Refund Status:</strong> ${data.refundStatus}</p>` : ''}
-        ${data.additionalInfo ? `<p><strong>Additional Information:</strong> ${data.additionalInfo}</p>` : ''}
-      </div>
-      ${data.contactUrl ? `<a href="${data.contactUrl}" class="button">Contact Chari-T Support</a>` : ''}
-      <p style="font-size: 14px; color: #000000;">We apologize for any inconvenience this may cause.</p>
+    <div class="card-danger">
+      <p style="margin:0 0 4px 0; font-weight:700; color:${COLORS.textPrimary};">Reason</p>
+      <p style="margin:0;">${data.reason}</p>
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is a notification about your campaign.</p>
-    </div>
-  </div>
-</body>
-</html>
+    ${data.additionalInfo ? `<p>${data.additionalInfo}</p>` : ''}
+    ${data.contactUrl ? `<a href="${data.contactUrl}" class="btn btn-primary">Contact Chari-T Support</a>` : ''}
+    <p style="font-size:13px;">We apologize for any inconvenience this may cause.</p>
   `;
+  return shell('Campaign Closed', 'Campaign Closure', body, 'This is a notification about your campaign.');
 };
 
+// ---------------------------------------------------------------------------
+// User banned
+// ---------------------------------------------------------------------------
 export const userBannedEmail = (data: {
   name: string;
   reason: string;
@@ -498,69 +361,60 @@ export const userBannedEmail = (data: {
   contactUrl?: string;
   termsUrl?: string;
 }): string => {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Suspended - Chari-T</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #ffffff; color: #000000; }
-    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #ffffff; }
-    .header { border-bottom: 1px solid #000000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-    .header-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #000000; margin-top: 8px; }
-    .content { line-height: 1.6; color: #000000; }
-    .content p { margin-bottom: 16px; }
-    .ban-box { background: #f5f5f5; border: 1px solid #000000; padding: 20px; margin: 20px 0; }
-    .ban-reason { background: #f5f5f5; border-left: 4px solid #000000; padding: 12px 16px; margin: 12px 0; }
-    .button { display: inline-block; padding: 12px 32px; background: #000000; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button:hover { background: #333333; }
-    .button-secondary { display: inline-block; padding: 12px 32px; background: #ffffff; color: #000000 !important; text-decoration: none; border-radius: 4px; font-weight: 500; margin: 20px 0; border: 1px solid #000000; }
-    .button-secondary:hover { background: #f5f5f5; }
-    .divider { border-top: 1px solid #000000; margin: 30px 0; }
-    .footer { font-size: 12px; color: #000000; text-align: center; margin-top: 30px; }
-    @media only screen and (max-width: 480px) { .container { padding: 20px 16px; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="https://chari-t.live/ct_logo_texts.png" alt="Chari-T Logo" class="logo">
-      <div class="header-title">Account Suspension</div>
+  const body = `
+    <span class="badge badge-danger">Account Suspended</span>
+    <h1 style="margin-top:12px;">Account Suspension Notice</h1>
+    <p>Dear ${data.name},</p>
+    <p>We are writing to inform you that your Chari-T account has been suspended.</p>
+    <div class="card-neutral">
+      <div class="row"><span class="row-label">Suspension Date</span><span class="row-value">${data.banDate}</span></div>
+      ${data.duration ? `<div class="row"><span class="row-label">Duration</span><span class="row-value">${data.duration}</span></div>` : ''}
     </div>
-    <div class="content">
-      <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #000000;">Account Suspension Notice</h1>
-      <p>Dear ${data.name},</p>
-      <p>We are writing to inform you that your Chari-T account has been suspended.</p>
-      <div class="ban-box">
-        <p><strong>Suspension Date:</strong> ${data.banDate}</p>
-        ${data.duration ? `<p><strong>Duration:</strong> ${data.duration}</p>` : ''}
-        <div class="ban-reason">
-          <p style="margin: 0; font-weight: 500; color: #000000;">Reason for Suspension:</p>
-          <p style="margin: 4px 0 0 0; color: #000000;">${data.reason}</p>
-        </div>
-      </div>
-      <p>This action has been taken in accordance with Chari-T's Terms of Service.</p>
-      <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0;">
-        ${data.appealUrl ? `<a href="${data.appealUrl}" class="button">Submit Appeal</a>` : ''}
-        ${data.contactUrl ? `<a href="${data.contactUrl}" class="button-secondary">Contact Chari-T Support</a>` : ''}
-        ${data.termsUrl ? `<a href="${data.termsUrl}" style="color: #000000; font-size: 14px;">View Terms of Service</a>` : ''}
-      </div>
-      <p style="font-size: 14px; color: #000000;">If you believe this was done in error, please contact our support team.</p>
+    <div class="card-danger">
+      <p style="margin:0 0 4px 0; font-weight:700; color:${COLORS.textPrimary};">Reason for Suspension</p>
+      <p style="margin:0;">${data.reason}</p>
     </div>
-    <div class="divider"></div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} Chari-T. All rights reserved.</p>
-      <p>This is an important notice regarding your account.</p>
-    </div>
-  </div>
-</body>
-</html>
+    <p style="font-size:13px;">This action has been taken in accordance with Chari-T's Terms of Service.</p>
+    ${data.appealUrl ? `<a href="${data.appealUrl}" class="btn btn-primary">Submit Appeal</a>` : ''}
+    ${data.contactUrl ? `<a href="${data.contactUrl}" class="btn btn-secondary">Contact Support</a>` : ''}
+    ${data.termsUrl ? `<p style="margin-top:12px;"><a href="${data.termsUrl}" style="color:${COLORS.accent}; font-size:13px;">View Terms of Service</a></p>` : ''}
   `;
+  return shell('Account Suspended', 'Account Suspension', body, 'This is an important notice regarding your account.');
 };
 
+// ---------------------------------------------------------------------------
+// Bank details added
+// ---------------------------------------------------------------------------
+export const bankDetailsAddedEmail = (data: {
+  name: string;
+  bankName: string;
+  accountHolderName: string;
+  accountNumberLast4: string;
+  dateAdded?: string;
+  manageUrl?: string;
+  supportUrl?: string;
+}): string => {
+  const body = `
+    <span class="badge badge-success">Bank Details Added</span>
+    <h1 style="margin-top:12px;">Hi ${data.name}, your bank details have been added</h1>
+    <p class="lead">Your bank account has been successfully linked to your Chari-T account and will be used to receive payouts from your campaigns.</p>
+    <div class="card-neutral">
+      <div class="row"><span class="row-label">Bank Name</span><span class="row-value">${data.bankName}</span></div>
+      <div class="row"><span class="row-label">Account Holder</span><span class="row-value">${data.accountHolderName}</span></div>
+      <div class="row"><span class="row-label">Account Number</span><span class="row-value">•••• ${data.accountNumberLast4}</span></div>
+      ${data.dateAdded ? `<div class="row"><span class="row-label">Date Added</span><span class="row-value">${data.dateAdded}</span></div>` : ''}
+    </div>
+    <div class="card-warning">
+      <p style="margin:0;">If you did not make this change, please contact our support team immediately to secure your account.</p>
+    </div>
+    ${data.manageUrl ? `<a href="${data.manageUrl}" class="btn btn-primary">Manage Payout Settings</a>` : ''}
+    ${data.supportUrl ? `<a href="${data.supportUrl}" class="btn btn-secondary">Contact Support</a>` : ''}
+    <p style="font-size:13px;">Thank you for keeping your Chari-T account up to date.</p>
+  `;
+  return shell('Bank Details Added', 'Payout Settings', body, 'This is a security notification regarding your payout account.');
+};
+
+// ---------------------------------------------------------------------------
 export const emailTemplates = {
   welcome: welcomeEmail,
   donationSuccess: donationSuccessEmail,
@@ -570,4 +424,5 @@ export const emailTemplates = {
   youDonated: youDonatedEmail,
   campaignShutdown: campaignShutdownEmail,
   userBanned: userBannedEmail,
+  bankDetailsAdded: bankDetailsAddedEmail,
 };
