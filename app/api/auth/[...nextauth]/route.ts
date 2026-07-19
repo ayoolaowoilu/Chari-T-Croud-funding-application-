@@ -36,7 +36,7 @@ const handler  = NextAuth({
         "SELECT * FROM users WHERE email = ?",
         [profile?.email]
       )
-         await sendSingleEmail(profile?.email  as string,  { from : "Welcome Back <support@chari-t.live>" , 
+         await sendSingleEmail(profile?.email  as string,  { from : "Login detected  <support@chari-t.live>" , 
           subject : `${profile?.name?.split(" ")[0]} - Welcome back` , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
        
       if (rows.length === 0) {
@@ -44,7 +44,7 @@ const handler  = NextAuth({
           "INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)",
           [profile?.name, profile?.image || profile?.picture, profile?.email, account?.provider]
         )
-        await sendSingleEmail(profile?.email  as string,  { from : "Welcome <support@chari-t.live>" , 
+        await sendSingleEmail(profile?.email  as string,  { from : "Chari-T Welcomes you <support@chari-t.live>" , 
           subject : `${profile?.name?.split(" ")[0]} - Welcome` , html:welcomeEmail({name:profile?.name as string , companyName:"Chari-T" , loginUrl:`${process.env.API_URL}/causes/get`})})
       }
 
