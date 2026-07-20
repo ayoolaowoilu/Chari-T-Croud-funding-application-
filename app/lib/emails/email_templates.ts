@@ -1,3 +1,5 @@
+
+
 export const welcomeEmail = (data: {
   name: string;
   companyName?: string;
@@ -38,7 +40,7 @@ export const welcomeEmail = (data: {
       ${data.companyName ? `<p>You've joined <strong>${data.companyName}</strong> as a valued member.</p>` : ''}
       <p>Here's what you can do next:</p>
       <ul style="padding-left: 20px; margin-bottom: 20px; color: #000000;">
-        <li>Complete your profile</li>
+        <li>Create a cause</li>
         <li>Explore campaigns to support</li>
         <li>Connect with the community</li>
       </ul>
