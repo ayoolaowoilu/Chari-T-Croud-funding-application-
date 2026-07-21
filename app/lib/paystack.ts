@@ -1,4 +1,4 @@
-import { PaystackBank } from "./types";
+import { PaystackBank } from './types';
 
 export interface SubAccountPayload {
   business_name: string;
@@ -28,48 +28,45 @@ export interface PaystackVerifyData {
   gateway_response?: string;
 }
 
-const BASE_URL = process.env.PAYSTACK_APP_URL || "https://api.paystack.co";
+const BASE_URL = process.env.PAYSTACK_APP_URL || 'https://api.paystack.co';
 
 /** Secret must never be NEXT_PUBLIC_ — support both for existing .env demos */
 function getPaystackSecret(): string {
-  const key =
-    process.env.PAYSTACK_SECRET_KEY ||
-    process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY ||
-    "";
+  const key = process.env.PAYSTACK_SECRET_KEY || process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY || '';
   if (!key) {
-    throw new Error("Paystack secret key is not configured");
+    throw new Error('Paystack secret key is not configured');
   }
   return key;
 }
 
 const getHeaders = () => ({
   Authorization: `Bearer ${getPaystackSecret()}`,
-  "Content-Type": "application/json",
+  'Content-Type': 'application/json',
 });
 
 const getSubAccountCode = async (
-  data: SubAccountPayload
-): Promise<SubAccountResponse["subaccount_code"]> => {
+  data: SubAccountPayload,
+): Promise<SubAccountResponse['subaccount_code']> => {
   try {
     const resp = await fetch(`${BASE_URL}/subaccount`, {
-      method: "POST",
+      method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
     const dat = await resp.json();
     if (!dat.status) {
-      throw new Error(dat.message || "Error Creating SubAccount");
+      throw new Error(dat.message || 'Error Creating SubAccount');
     }
     const dataa: SubAccountResponse = dat.data;
     return dataa.subaccount_code;
   } catch {
-    throw new Error("Error Creating SubAccount");
+    throw new Error('Error Creating SubAccount');
   }
 };
 
 const VerifyBankDetails = async (
   accountNumber: string,
-  bankCode: string
+  bankCode: string,
 ): Promise<{
   status: boolean;
   data: { account_name: string; account_number: string; bank_id?: number };
@@ -79,8 +76,9 @@ const VerifyBankDetails = async (
     `${BASE_URL}/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
     {
       headers: getHeaders(),
-    }
+    },
   );
+  console.log(`${BASE_URL}/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`);
   return await resp.json();
 };
 
@@ -93,9 +91,9 @@ const FetchBanks = async (): Promise<{
       headers: getHeaders(),
     });
     return await resp.json();
-  } catch (error) {
-    console.error("Failed to fetch banks:", error);
-    throw error;
+  } catch (_error) {
+    console.error('Failed to fetch banks:', _error);
+    throw _error;
   }
 };
 
@@ -103,39 +101,27 @@ const FetchBanks = async (): Promise<{
  * Server-side verification of a Paystack charge.
  * Always call this before recording a donation.
  */
-const verifyTransaction = async (
-  reference: string
-): Promise<PaystackVerifyData> => {
-  if (!reference || typeof reference !== "string") {
-    throw new Error("Missing payment reference");
+const verifyTransaction = async (reference: string): Promise<PaystackVerifyData> => {
+  if (!reference || typeof reference !== 'string') {
+    throw new Error('Missing payment reference');
   }
 
-  const resp = await fetch(
-    `${BASE_URL}/transaction/verify/${encodeURIComponent(reference)}`,
-    {
-      headers: getHeaders(),
-      cache: "no-store",
-    }
-  );
+  const resp = await fetch(`${BASE_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
+    headers: getHeaders(),
+    cache: 'no-store',
+  });
 
   const body = await resp.json();
 
   if (!body?.status || !body?.data) {
-    throw new Error(body?.message || "Unable to verify payment");
+    throw new Error(body?.message || 'Unable to verify payment');
   }
 
-  if (body.data.status !== "success") {
-    throw new Error(
-      `Payment not successful (${body.data.status || body.data.gateway_response})`
-    );
+  if (body.data.status !== 'success') {
+    throw new Error(`Payment not successful (${body.data.status || body.data.gateway_response})`);
   }
 
   return body.data as PaystackVerifyData;
 };
 
-export {
-  FetchBanks,
-  VerifyBankDetails,
-  getSubAccountCode,
-  verifyTransaction,
-};
+export { FetchBanks, VerifyBankDetails, getSubAccountCode, verifyTransaction };

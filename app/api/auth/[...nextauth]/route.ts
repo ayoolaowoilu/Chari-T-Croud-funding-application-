@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Twitter from "next-auth/providers/twitter";
-import db from "@/app/lib/DBschema";
+import NextAuth from 'next-auth';
+import Google from 'next-auth/providers/google';
+import Twitter from 'next-auth/providers/twitter';
+import db from '@/app/lib/DBschema';
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     userId?: string;
     provider?: string;
@@ -16,6 +16,9 @@ const handler = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      httpOptions: {
+        timeout: 15000,
+      },
     }),
     Twitter({
       clientId: process.env.X_CONSUMER_KEY!,
@@ -23,42 +26,40 @@ const handler = NextAuth({
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 60 * 60 * 24 * 30,
   },
   pages: {
-    signIn: "/auth/signin",
+    signIn: '/auth/signin',
+    error: '/auth/signin',
   },
   callbacks: {
     async signIn({ account, profile }) {
+      console.log('[AUTH] signIn callback', { account, profile });
       if (!profile?.email) return false;
+      try {
+        const [rows]: any = await db.query('SELECT id FROM users WHERE email = ?', [profile.email]);
 
-      const [rows]: any = await db.query(
-        "SELECT id FROM users WHERE email = ?",
-        [profile.email]
-      );
-
-      if (rows.length === 0) {
-        await db.query(
-          "INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)",
-          [
-            profile.name || "User",
+        if (rows.length === 0) {
+          await db.query('INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)', [
+            profile.name || 'User',
             profile.image || (profile as { picture?: string }).picture || null,
             profile.email,
-            account?.provider || "oauth",
-          ]
-        );
+            account?.provider || 'oauth',
+          ]);
+        }
+        return true;
+      } catch (error) {
+        console.error('SignIn error:', error);
+        return false;
       }
-
-      return true;
     },
 
     async jwt({ token, account, profile }) {
       if (account && profile) {
         token.email = profile.email;
         token.name = profile.name;
-        token.picture =
-          profile.image || (profile as { picture?: string }).picture;
+        token.picture = profile.image || (profile as { picture?: string }).picture;
         token.provider = account.provider;
       }
 
@@ -67,17 +68,17 @@ const handler = NextAuth({
       if (email) {
         try {
           const [rows]: any = await db.query(
-            "SELECT id, role, full_name, image FROM users WHERE email = ?",
-            [email]
+            'SELECT id, role, full_name, image FROM users WHERE email = ?',
+            [email],
           );
           if (rows?.length) {
             token.userId = String(rows[0].id);
-            token.role = rows[0].role || "donor";
+            token.role = rows[0].role || 'donor';
             if (rows[0].full_name) token.name = rows[0].full_name;
             if (rows[0].image) token.picture = rows[0].image;
           }
-        } catch (e) {
-          console.error("jwt user lookup failed", e);
+        } catch (_e) {
+          console.error('jwt user lookup failed', _e);
         }
       }
 

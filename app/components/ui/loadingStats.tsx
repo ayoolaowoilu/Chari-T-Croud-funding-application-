@@ -1,27 +1,20 @@
-export default function LS(){
-       return(
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10 mx-2">
-            {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-2xl shadow-lg  overflow-hidden animate-pulse">
-                 
-                    <div className="p-6 space-y-4">
-                     
-                                      <div className="h-6 bg-gray-200 rounded w-3/4" />
-                        
-        
-         
-                        <div className="pt-2">
-                            <div className="flex justify-between mb-2">
-                                
-                                <div className="w-16 h-4 bg-gray-200 rounded" />
-                            </div>
-                            
-                        </div>
-                        
-                       
-                    </div>
-                </div>
-            ))}
+export default function LS() {
+  return (
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
+      role="status"
+      aria-label="Loading stats"
+    >
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-[var(--shadow-sm)]"
+        >
+          <div className="h-3 w-20 rounded ct-shimmer mb-3" />
+          <div className="h-8 w-28 rounded-lg ct-shimmer mb-2" />
+          <div className="h-3 w-16 rounded ct-shimmer" />
         </div>
-       )
+      ))}
+    </div>
+  );
 }

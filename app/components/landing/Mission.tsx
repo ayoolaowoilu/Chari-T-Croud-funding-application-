@@ -1,246 +1,240 @@
+'use client';
+
 import { motion } from 'framer-motion';
+import { Check, Heart, Shield, Zap, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.15,
-            delayChildren: 0.1
-        }
-    }
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.06 },
+  },
 };
 
 export default function Mission() {
-    return (
-        <section className="py-20 md:py-32 bg-white overflow-hidden">
-            <div className="max-w-5xl mx-auto px-6 md:px-8">
-                
-                {/* Section header */}
-                <motion.div 
-                    className="text-center mb-16 md:mb-20"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
-                >
-                    <motion.span 
-                        className="text-blue-600 font-semibold text-sm uppercase tracking-[0.2em] block"
-                        variants={fadeInUp}
-                    >
-                        What Drives Us
-                    </motion.span>
-                    <motion.h2 
-                        className="mt-4 text-4xl md:text-5xl font-bold text-gray-900 tracking-tight"
-                        variants={fadeInUp}
-                    >
-                        Our Mission
-                    </motion.h2>
-                    <motion.div 
-                        className="mt-6 w-12 h-1 bg-gray-900 mx-auto"
-                        variants={fadeInUp}
-                    />
-                </motion.div>
+  return (
+    <section className="relative py-16 md:py-24 overflow-hidden">
+      {/* Soft section shell so content is not floating on bare white */}
+      <div className="absolute inset-0 bg-slate-50/90" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-                {/* Mission statement */}
-                <motion.div 
-                    className="text-center mb-16 md:mb-20"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
-                >
-                    <motion.p 
-                        className="text-2xl md:text-3xl text-gray-900 leading-relaxed font-medium max-w-3xl mx-auto"
-                        variants={fadeInUp}
-                    >
-                        We believe every person deserves access to food, education, and a safe place to call home. Our mission is to bridge the gap between compassion and action.
-                    </motion.p>
-                </motion.div>
+      <div className="relative mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+        {/* Header card — composed, not naked type on canvas */}
+        <motion.div
+          className="relative rounded-3xl border border-slate-200/90 bg-white px-6 py-10 sm:px-10 sm:py-12 md:px-14 md:py-14 shadow-[0_16px_48px_rgba(15,23,42,0.05)] text-center overflow-hidden"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={staggerContainer}
+        >
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[var(--brand-soft)]/50 blur-3xl pointer-events-none" />
 
-                {/* Zero-fee promise */}
-                <motion.div 
-                    className="bg-gray-900 text-white p-10 md:p-14 mb-20 text-center"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                >
-                    <div className="max-w-2xl mx-auto">
-                        <motion.div 
-                            className="w-12 h-12 bg-white/10 flex items-center justify-center mb-6 mx-auto"
-                            initial={{ scale: 0 }}
-                            whileInView={{ scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                        >
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </motion.div>
-                        <motion.h3 
-                            className="text-2xl md:text-3xl font-bold mb-4"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            100% of Your Donation Goes to the Cause
-                        </motion.h3>
-                        <motion.p 
-                            className="text-gray-300 leading-relaxed mb-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            We do not deduct any fees from donations. Every dollar you give reaches those who need it. Our operations are funded entirely by optional contributions from donors who choose to support our platform directly.
-                        </motion.p>
-                        <motion.span 
-                            className="inline-block text-xs uppercase tracking-wider text-gray-400 border border-gray-700 px-4 py-2"
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.5 }}
-                        >
-                            Zero Platform Fees
-                        </motion.span>
-                    </div>
-                </motion.div>
+          <motion.div
+            variants={fadeInUp}
+            className="relative inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 mb-6"
+          >
+            <Heart size={13} className="text-[var(--brand)]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">
+              What drives us
+            </span>
+          </motion.div>
 
-                {/* Story & transparency */}
-                <motion.div 
-                    className="grid md:grid-cols-2 gap-12 md:gap-16 items-start mb-20"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
-                >
-                    <motion.div className="space-y-6" variants={fadeInUp}>
-                        <h3 className="text-xl font-bold text-gray-900">Built on Trust</h3>
-                        <p className="text-gray-600 leading-relaxed">
-                            Chari-T was founded on a simple conviction: charity should be transparent, efficient, and deeply human. We partner directly with local communities to ensure aid reaches those who need it most , quickly and without bureaucracy.
-                        </p>
-                        <p className="text-gray-600 leading-relaxed">
-                            From emergency food relief to long-term education programs, we measure success not by dollars raised, but by lives meaningfully changed.
-                        </p>
-                    </motion.div>
-                    
-                    <motion.div 
-                        className="bg-gray-50 p-8 md:p-10 border border-gray-100"
-                        variants={fadeInUp}
-                    >
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">How We're Funded</h3>
-                        <div className="space-y-4">
-                            <motion.div 
-                                className="flex items-start gap-4"
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.2 }}
-                            >
-                                <div className="w-8 h-8 bg-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-sm">Donations Go Directly to Charities</p>
-                                    <p className="text-gray-500 text-sm mt-1">We never touch the donation amount. It passes straight through to the cause you choose.</p>
-                                </div>
-                            </motion.div>
-                            <motion.div 
-                                className="flex items-start gap-4"
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.4 }}
-                            >
-                                <div className="w-8 h-8 bg-gray-200 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-sm">Optional Tips Keep Us Running</p>
-                                    <p className="text-gray-500 text-sm mt-1">If you value our service, you can add a voluntary tip at checkout. This is entirely your choice.</p>
-                                </div>
-                            </motion.div>
-                        </div>
-                    </motion.div>
-                </motion.div>
+          <motion.h2
+            variants={fadeInUp}
+            className="relative ct-display text-slate-900 max-w-2xl mx-auto"
+          >
+            Our mission
+          </motion.h2>
 
-                {/* Values grid */}
-                <motion.div 
-                    className="grid sm:grid-cols-3 gap-8 md:gap-12"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    variants={staggerContainer}
-                >
-                    {[
-                        {
-                            icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
-                            title: "Compassion First",
-                            desc: "We lead with empathy. Every program is designed with dignity, respecting the agency and voices of the communities we serve."
-                        },
-                        {
-                            icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-                            title: "Radical Transparency",
-                            desc: "No hidden fees. No vague promises. Real-time tracking and open reporting so you see the direct impact of every dollar donated."
-                        },
-                        {
-                            icon: "M13 10V3L4 14h7v7l9-11h-7z",
-                            title: "Sustainable Impact",
-                            desc: "We don't just provide aid—we build capacity. Our programs create lasting infrastructure that empowers communities long after our direct involvement ends."
-                        }
-                    ].map((value, index) => (
-                        <motion.div 
-                            key={index}
-                            className="text-center md:text-left"
-                            variants={fadeInUp}
-                            whileHover={{ y: -4 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <div className="w-12 h-12 bg-blue-50 flex items-center justify-center mb-5 mx-auto md:mx-0">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={value.icon} />
-                                </svg>
-                            </div>
-                            <h4 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h4>
-                            <p className="text-gray-600 text-sm leading-relaxed">{value.desc}</p>
-                        </motion.div>
-                    ))}
-                </motion.div>
-
-                {/* Closing CTA */}
-                <motion.div 
-                    className="mt-20 text-center"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                >
-                    <p className="text-gray-500 text-sm uppercase tracking-wider mb-4">Join the movement</p>
-                    <motion.a 
-                        href="/how-it-works" 
-                        className="inline-flex items-center text-blue-600 font-semibold"
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        See how Chari-T works
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </motion.a>
-                </motion.div>
-
+          <motion.div variants={fadeInUp} className="relative mt-5 mx-auto max-w-2xl">
+            <div className="absolute -left-1 sm:-left-3 top-0 text-5xl sm:text-6xl leading-none text-[var(--brand)]/15 font-serif select-none">
+              “
             </div>
-        </section>
-    );
+            <p className="relative text-lg sm:text-xl md:text-[1.35rem] text-slate-600 leading-[1.6] font-medium tracking-tight px-2 sm:px-4">
+              We believe every person deserves access to food, education, and a safe place to call
+              home. Our mission is to bridge the gap between compassion and action.
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Zero-fee promise — framed panel */}
+        <motion.div
+          className="mt-8 md:mt-10 rounded-3xl bg-slate-900 text-white p-8 sm:p-10 md:p-12 relative overflow-hidden"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--brand)]/20 rounded-full blur-3xl -translate-y-1/3 translate-x-1/4" />
+          <div className="relative max-w-2xl mx-auto text-center">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand)]/30 ring-1 ring-white/10">
+              <svg
+                className="w-6 h-6 text-teal-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mb-3">
+              100% of your donation goes to the cause
+            </h3>
+            <p className="text-slate-300 leading-relaxed text-sm sm:text-base mb-6 max-w-xl mx-auto">
+              We do not deduct platform fees from gifts. Every amount you give reaches the campaign.
+              Operations run on optional tips — entirely your choice.
+            </p>
+            <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+              Zero platform cut
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Two composed panels */}
+        <motion.div
+          className="mt-8 md:mt-10 grid md:grid-cols-2 gap-5 md:gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={staggerContainer}
+        >
+          <motion.div
+            variants={fadeInUp}
+            className="rounded-3xl border border-slate-200 bg-white p-7 sm:p-8 shadow-[0_8px_30px_rgba(15,23,42,0.04)]"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)] mb-5">
+              <Shield size={18} strokeWidth={1.75} />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-3">
+              Built on trust
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              Charity should be transparent, efficient, and human. We connect donors to verified
+              centers and safety-rated campaigns so help reaches people quickly — without
+              unnecessary bureaucracy.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              From emergency relief to education programs, we measure success by lives changed, not
+              only dollars raised.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={fadeInUp}
+            className="rounded-3xl border border-slate-200 bg-white p-7 sm:p-8 shadow-[0_8px_30px_rgba(15,23,42,0.04)]"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 mb-5">
+              <Zap size={18} strokeWidth={1.75} />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight mb-5">
+              How we&apos;re funded
+            </h3>
+            <ul className="space-y-4">
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--brand)] text-white">
+                  <Check size={14} strokeWidth={2.5} />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-slate-900">
+                    Gifts go to the cause
+                  </span>
+                  <span className="block text-sm text-slate-500 mt-0.5 leading-relaxed">
+                    The donation amount passes through to the campaign you choose.
+                  </span>
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                  <Check size={14} strokeWidth={2.5} />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-slate-900">
+                    Optional tips keep us running
+                  </span>
+                  <span className="block text-sm text-slate-500 mt-0.5 leading-relaxed">
+                    Add a voluntary tip at checkout if you want to support the platform. Never
+                    required.
+                  </span>
+                </span>
+              </li>
+            </ul>
+          </motion.div>
+        </motion.div>
+
+        {/* Values — three framed tiles */}
+        <motion.div
+          className="mt-8 md:mt-10 grid sm:grid-cols-3 gap-4 md:gap-5"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={staggerContainer}
+        >
+          {[
+            {
+              icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+              title: 'Compassion first',
+              desc: 'Programs designed with dignity, respecting the agency of the communities we serve.',
+            },
+            {
+              icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+              title: 'Radical transparency',
+              desc: 'No hidden fees. Safety ratings and clear campaign details so you give with confidence.',
+            },
+            {
+              icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+              title: 'Sustainable impact',
+              desc: 'We aim for lasting capacity — not only one-off aid that disappears after the headline.',
+            },
+          ].map((value) => (
+            <motion.div
+              key={value.title}
+              variants={fadeInUp}
+              className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:border-slate-300/80 hover:shadow-[0_8px_28px_rgba(15,23,42,0.06)] transition-all"
+            >
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.75}
+                    d={value.icon}
+                  />
+                </svg>
+              </div>
+              <h4 className="text-base font-semibold text-slate-900 mb-2 tracking-tight">
+                {value.title}
+              </h4>
+              <p className="text-sm text-slate-500 leading-relaxed">{value.desc}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="mt-10 md:mt-12 text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <Link
+            href="/how-it-works"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand)] hover:text-[var(--brand-hover)] transition-colors"
+          >
+            See how Chari-T works
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
 }

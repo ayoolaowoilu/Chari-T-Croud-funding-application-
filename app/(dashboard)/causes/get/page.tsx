@@ -1,22 +1,36 @@
-"use client"
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { fetchRandom5Causes } from "@/app/lib/fetchRequests";
-import { CAMPAIGN_CATEGORIES, categoryLabel } from "@/app/lib/categories";
-import { DotsWave, DualRingSpinner } from "@/app/components/ui/loading";
-import LoadingCards from "@/app/components/layout/loadingCards";
-import NavBar from "@/app/components/layout/NavBar";
-import Card from "@/app/components/layout/card";
-import { Campaign } from "@/app/lib/types";
-import Footer from "@/app/components/layout/footer";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { fetchRandom5Causes } from '@/app/lib/fetchRequests';
+import { CAMPAIGN_CATEGORIES, categoryLabel } from '@/app/lib/categories';
+import LoadingCards from '@/app/components/layout/loadingCards';
+import { DualRingSpinner } from '@/app/components/ui/loading';
+import NavBar from '@/app/components/layout/NavBar';
+import Card from '@/app/components/layout/card';
+import { Campaign } from '@/app/lib/types';
+import Footer from '@/app/components/layout/footer';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-type Don = Pick<Campaign, "id" | "name" | "details" | "main_img" | "goal" | "raised" | "category" | "currency" | "center_name" | "donation_count" | "date_to_completion" | "center_id"> & {
-  location: string,
+type Don = Pick<
+  Campaign,
+  | 'id'
+  | 'name'
+  | 'details'
+  | 'main_img'
+  | 'goal'
+  | 'raised'
+  | 'category'
+  | 'currency'
+  | 'center_name'
+  | 'donation_count'
+  | 'date_to_completion'
+  | 'center_id'
+> & {
+  location: string;
   safety_rating: string;
 };
 
@@ -26,11 +40,11 @@ interface FetchResponse {
   hasMore?: boolean;
 }
 
-const categories = ["All", ...CAMPAIGN_CATEGORIES] as const;
+const categories = ['All', ...CAMPAIGN_CATEGORIES] as const;
 
 function resolveMainImg(main_img: unknown): string {
-  if (!main_img) return "/slider1/hands.jpg";
-  if (typeof main_img === "string") {
+  if (!main_img) return '/slider1/hands.jpg';
+  if (typeof main_img === 'string') {
     try {
       const parsed = JSON.parse(main_img);
       return parsed?.url || main_img;
@@ -38,103 +52,108 @@ function resolveMainImg(main_img: unknown): string {
       return main_img;
     }
   }
-  if (typeof main_img === "object" && main_img !== null && "url" in main_img) {
+  if (typeof main_img === 'object' && main_img !== null && 'url' in main_img) {
     return String((main_img as { url: string }).url);
   }
-  return "/slider1/hands.jpg";
+  return '/slider1/hands.jpg';
 }
-
 
 export default function Explore() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const categoryy = searchParams.get("category") || "All";
-  const pageParam = searchParams.get("page");
+  const categoryy = searchParams.get('category') || 'All';
+  const pageParam = searchParams.get('page');
   const initialPage = pageParam ? Math.max(0, parseInt(pageParam, 10)) : 0;
 
   useEffect(() => {
-    document.title = "Explore Causes | Chari-T";
+    document.title = 'Explore Causes | Chari-T';
   }, []);
   const [data, setData] = useState<Don[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [_loadingMore, setLoadingMore] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>(categoryy);
   const [page, setPage] = useState<number>(initialPage);
   const [hasMore, setHasMore] = useState<boolean>(false);
 
-
-  const fetchData = useCallback(async (targetPage: number, isLoadMore: boolean) => {
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
-    }
-
-    try {
-      const resp: FetchResponse = await fetchRandom5Causes(searchQuery, activeCategory, targetPage);
-
-      if (resp.error) {
-        return;
+  const fetchData = useCallback(
+    async (targetPage: number, isLoadMore: boolean) => {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
       }
 
-      const newItems: Don[] = resp.data || [];
-      setHasMore(resp.hasMore ?? false);
+      try {
+        const resp: FetchResponse = await fetchRandom5Causes(
+          searchQuery,
+          activeCategory,
+          targetPage,
+        );
 
-      setData(prev => {
-        if (!isLoadMore) return newItems;
+        if (resp.error) {
+          return;
+        }
 
-        const existingIds = new Set(prev.map(item => item.id));
-        const uniqueNewItems = newItems.filter(item => !existingIds.has(item.id));
-        return [...prev, ...uniqueNewItems];
-      });
+        const newItems: Don[] = resp.data || [];
+        setHasMore(resp.hasMore ?? false);
 
-    } catch (err) {
-      console.error("Fetch error:", err);
+        setData((prev) => {
+          if (!isLoadMore) return newItems;
 
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [activeCategory, searchQuery]);
-
+          const existingIds = new Set(prev.map((item) => item.id));
+          const uniqueNewItems = newItems.filter((item) => !existingIds.has(item.id));
+          return [...prev, ...uniqueNewItems];
+        });
+      } catch (_err) {
+        console.error('Fetch error:', _err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [activeCategory, searchQuery],
+  );
 
   // Sync URL params when page/category/search changes
-  const updateUrl = useCallback((newPage: number, newCategory: string, newQuery: string) => {
-    const params = new URLSearchParams();
-    if (newCategory !== "All") params.set("category", newCategory);
-    if (newQuery) params.set("query", newQuery);
-    if (newPage > 0) params.set("page", newPage.toString());
+  const updateUrl = useCallback(
+    (newPage: number, newCategory: string, newQuery: string) => {
+      const params = new URLSearchParams();
+      if (newCategory !== 'All') params.set('category', newCategory);
+      if (newQuery) params.set('query', newQuery);
+      if (newPage > 0) params.set('page', newPage.toString());
 
-    const newUrl = params.toString() ? `?${params.toString()}` : "";
-    router.replace(`/causes/get${newUrl}`, { scroll: false });
-  }, [router]);
-
+      const newUrl = params.toString() ? `?${params.toString()}` : '';
+      router.replace(`/causes/get${newUrl}`, { scroll: false });
+    },
+    [router],
+  );
 
   // Handle page navigation
-  const goToPage = useCallback((newPage: number) => {
-    if (newPage < 0) return;
-    setPage(newPage);
-    updateUrl(newPage, activeCategory, searchQuery);
-    fetchData(newPage, false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [activeCategory, searchQuery, updateUrl, fetchData]);
-
+  const goToPage = useCallback(
+    (newPage: number) => {
+      if (newPage < 0) return;
+      setPage(newPage);
+      updateUrl(newPage, activeCategory, searchQuery);
+      fetchData(newPage, false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [activeCategory, searchQuery, updateUrl, fetchData],
+  );
 
   // Initial load and when filters change
   useEffect(() => {
     setPage(0);
     updateUrl(0, activeCategory, searchQuery);
     fetchData(0, false);
-  }, [activeCategory, searchQuery]);
-
+  }, [activeCategory, fetchData, searchQuery, updateUrl]);
 
   // Sync from URL on mount
   useEffect(() => {
-    const urlPage = searchParams.get("page");
-    const urlCategory = searchParams.get("category") || "All";
-    const urlQuery = searchParams.get("query") || "";
+    const urlPage = searchParams.get('page');
+    const urlCategory = searchParams.get('category') || 'All';
+    const urlQuery = searchParams.get('query') || '';
 
     const parsedPage = urlPage ? Math.max(0, parseInt(urlPage, 10)) : 0;
 
@@ -142,97 +161,74 @@ export default function Explore() {
     setSearchQuery(urlQuery);
     setPage(parsedPage);
     fetchData(parsedPage, false);
-  }, []);
-
+  }, [fetchData, searchParams]);
 
   // Category change handler
-  const handleCategoryChange = useCallback((cat: string) => {
-    setActiveCategory(cat);
-    setPage(0);
-    updateUrl(0, cat, searchQuery);
-    fetchData(0, false);
-  }, [searchQuery, updateUrl, fetchData]);
-
+  const handleCategoryChange = useCallback(
+    (cat: string) => {
+      setActiveCategory(cat);
+      setPage(0);
+      updateUrl(0, cat, searchQuery);
+      fetchData(0, false);
+    },
+    [searchQuery, updateUrl, fetchData],
+  );
 
   // Search handler
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    setPage(0);
-    updateUrl(0, activeCategory, value);
-    fetchData(0, false);
-  }, [activeCategory, updateUrl, fetchData]);
-
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      setPage(0);
+      updateUrl(0, activeCategory, value);
+      fetchData(0, false);
+    },
+    [activeCategory, updateUrl, fetchData],
+  );
 
   if (loading && data.length === 0) {
     return (
-      <div className="w-full min-h-screen bg-white">
+      <div className="w-full min-h-screen bg-[var(--background)]">
         <NavBar />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="text-center mb-10">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              Explore Causes
+            <p className="text-[var(--brand)] text-xs font-semibold uppercase tracking-[0.18em] mb-3">
+              Browse
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+              Explore causes
             </h1>
-            <p className="text-gray-500 text-base sm:text-lg max-w-2xl mx-auto">
-              Discover and support meaningful campaigns in your community
+            <p className="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto">
+              Loading safety-rated campaigns and verified centers…
             </p>
           </div>
-
           <div className="w-full max-w-3xl mx-auto mb-8">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400 group-focus-within:text-gray-600 transition-colors" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search causes by name, description, or center..."
-                className="w-full h-14 pl-14 pr-14 bg-gray-50 border-2 border-gray-200 rounded-2xl 
-                           text-gray-900 placeholder-gray-400 text-base
-                           focus:outline-none focus:border-gray-400 focus:bg-white
-                           transition-all duration-200 shadow-sm hover:shadow-md"
-              />
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                <button className="p-2 hover:bg-gray-200 rounded-xl transition-colors">
-                  <SlidersHorizontal className="h-5 w-5 text-gray-400" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap mt-10 justify-center gap-2 mb-10">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200
-                    ${activeCategory === cat
-                      ? "bg-gray-900 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                >
-                  {cat === "All" ? "All" : categoryLabel(cat)}
-                </button>
+            <div className="h-14 rounded-2xl ct-shimmer" />
+            <div className="flex flex-wrap mt-8 justify-center gap-2">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-10 w-24 rounded-full ct-shimmer" />
               ))}
             </div>
           </div>
-          <DotsWave />
-          <LoadingCards />
+          <LoadingCards count={6} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen bg-[var(--background)]">
       <NavBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-            Explore Causes
+          <p className="text-[var(--brand)] text-xs font-semibold uppercase tracking-[0.18em] mb-3">
+            Browse
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 tracking-tight">
+            Explore causes
           </h1>
-          <p className="text-gray-500 text-base sm:text-lg max-w-2xl mx-auto">
-            Discover and support meaningful campaigns in your community
+          <p className="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto">
+            Discover safety-rated campaigns and verified centers in your community
           </p>
         </div>
 
@@ -247,9 +243,9 @@ export default function Explore() {
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search causes by name, description, or center..."
-              className="w-full h-14 pl-14 pr-14 bg-gray-50 border-2 border-gray-200 rounded-2xl 
-                         text-gray-900 placeholder-gray-400 text-base
-                         focus:outline-none focus:border-gray-400 focus:bg-white
+              className="w-full h-14 pl-14 pr-14 bg-white border border-slate-200 rounded-2xl 
+                         text-slate-900 placeholder-slate-400 text-base
+                         focus:outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/15 focus:bg-white
                          transition-all duration-200 shadow-sm hover:shadow-md"
             />
             <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
@@ -267,28 +263,29 @@ export default function Explore() {
               key={cat}
               onClick={() => handleCategoryChange(cat)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200
-                ${activeCategory === cat
-                  ? "bg-gray-900 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ${
+                  activeCategory === cat
+                    ? 'bg-[var(--brand)] text-white shadow-md shadow-teal-900/10'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
             >
-              {cat === "All" ? "All" : categoryLabel(cat)}
+              {cat === 'All' ? 'All' : categoryLabel(cat)}
             </button>
           ))}
         </div>
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6 px-1">
-          <p className="text-sm text-gray-500">
-            {data.length} {data.length === 1 ? "cause" : "causes"} found
+          <p className="text-sm text-slate-500">
+            {data.length} {data.length === 1 ? 'cause' : 'causes'} found
           </p>
-          {(searchQuery || activeCategory !== "All") && (
+          {(searchQuery || activeCategory !== 'All') && (
             <button
               onClick={() => {
-                setSearchQuery("");
-                setActiveCategory("All");
+                setSearchQuery('');
+                setActiveCategory('All');
                 setPage(0);
-                updateUrl(0, "All", "");
+                updateUrl(0, 'All', '');
                 fetchData(0, false);
               }}
               className="text-sm text-gray-600 hover:text-gray-900 underline"
@@ -305,13 +302,13 @@ export default function Explore() {
               {data.map((item, index) => (
                 <motion.div
                   key={item.id}
-                
+
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, delay: index % 4 * 0.05 }}
+                  transition={{ duration: 0.3, delay: (index % 4) * 0.05 }}
                   layout
-                   className="min-w-0" 
+                  className="min-w-0"
                 >
                   <Card
                     title={item.name}
@@ -326,7 +323,7 @@ export default function Explore() {
                     location={item.location}
                     daysLeft={item.date_to_completion}
                     safety_level={item.safety_rating}
-                    center_id={item.center_id as string || null}
+                    center_id={(item.center_id as string) || null}
                     center_name={item.center_name || null}
                     centerName={item.center_name as string}
                   />
@@ -340,13 +337,11 @@ export default function Explore() {
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              No causes found
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">No causes found</h3>
             <p className="text-gray-500 max-w-md mx-auto mb-6">
-              {searchQuery || activeCategory !== "All"
-                ? "Try adjusting your search or filters."
-                : "Be the first to launch a campaign, or check back after demo seed data is loaded."}
+              {searchQuery || activeCategory !== 'All'
+                ? 'Try adjusting your search or filters.'
+                : 'Be the first to launch a campaign, or check back after demo seed data is loaded.'}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
@@ -392,9 +387,7 @@ export default function Explore() {
                   >
                     1
                   </button>
-                  {page > 2 && (
-                    <span className="px-1 text-gray-400 text-sm">...</span>
-                  )}
+                  {page > 2 && <span className="px-1 text-gray-400 text-sm">...</span>}
                 </>
               )}
 
@@ -446,8 +439,8 @@ export default function Explore() {
 
         {/* Loading indicator for page transitions */}
         {loading && data.length > 0 && (
-          <div className="flex justify-center items-center py-8">
-            <DualRingSpinner />
+          <div className="flex justify-center items-center py-5">
+            <DualRingSpinner label="Updating results…" compact />
           </div>
         )}
       </div>

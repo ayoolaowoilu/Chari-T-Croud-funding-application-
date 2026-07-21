@@ -43,6 +43,7 @@ npm install
 ### Enviroment variables
 
 ### .env(ill drop the testKeys if ur intrested)
+
 ```bash
 
 GOOGLE_CLIENT_ID = ""
@@ -52,6 +53,11 @@ DB_USER = root
 DB_PASSWORD = "khaleed"
 DB_PORT = "3306"
 DB_DATABASE = "charit"
+# Remote MySQL (Aiven etc.) — longer timeouts / smaller pool help avoid ETIMEDOUT
+# DB_CONNECT_TIMEOUT=20000
+# DB_POOL_SIZE=5
+# DB_SSL=true
+# DB_SSL_REJECT_UNAUTHORIZED=false
 CLOUDINARY_CLOUD_NAME = ""
 CLOUDINARY_API_KEY = ""
 CLOUDINARY_API_SECRET = ""
@@ -62,15 +68,18 @@ NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY = "pk_test_..."
 PAYSTACK_APP_URL ="https://api.paystack.co"
 
 ```
+
 ### .env.local
+
 ```bash
 NEXTAUTH_URL = http://localhost:3000
 NEXTAUTH_SECRET = "jijsijijejijje jijjfjjjefeeff"
- ```
-
+```
 
 ### Database Setup
+
 Run the following SQL to create the required tables(MySql):
+
 ```bash
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,7 +92,7 @@ CREATE TABLE users (
     method varchar(255),
     donations INT DEFAULT 0,
     recieved INT DEFAULT 0,
-    bank_details JSON 
+    bank_details JSON
 );
 
 CREATE TABLE kyc (
@@ -182,22 +191,24 @@ CREATE TABLE reports (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
-### Running 
- ```bash
- pnpm install
- pnpm dev
+
+### Running
+
+```bash
+pnpm install
+pnpm dev
 ```
 
 ### Demo walkthrough (for presentations)
 
-1. **Landing** — `/` — mission, featured causes, blind-donation pitch, zero-fee story  
-2. **How it works** — `/how-it-works` — safety tiers + start-a-cause steps  
-3. **Browse** — `/causes/get` — filter by category  
-4. **Sign in** — Google / X  
-5. **Bank + KYC** — required before publishing a cause  
-6. **Start a cause** — `/startcauses` — multi-step wizard with drafts  
-7. **Donate** — open a cause → Donate → optional tip → Paystack test card  
-8. **Local centers** — `/dashboard/centers/local-centers`  
+1. **Landing** — `/` — mission, featured causes, blind-donation pitch, zero-fee story
+2. **How it works** — `/how-it-works` — safety tiers + start-a-cause steps
+3. **Browse** — `/causes/get` — filter by category
+4. **Sign in** — Google / X
+5. **Bank + KYC** — required before publishing a cause
+6. **Start a cause** — `/startcauses` — multi-step wizard with drafts
+7. **Donate** — open a cause → Donate → optional tip → Paystack test card
+8. **Local centers** — `/dashboard/centers/local-centers`
 9. **Admin** — `/admin` (user `role` must be `admin` in MySQL)
 
 ### Schema upgrades (existing DBs)
@@ -226,4 +237,3 @@ In Paystack Dashboard → Settings → Webhooks:
 `https://<your-domain>/api/webhooks/paystack`
 
 Events: `charge.success`. Uses HMAC `x-paystack-signature` + the same verified recording path as the client callback.
-

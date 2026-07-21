@@ -1,15 +1,10 @@
-import db from "@/app/lib/DBschema";
-import { Campaign } from "@/app/lib/types";
-import { clientIp, rateLimit } from "@/app/lib/rateLimit";
-import { deleteRedisData } from "@/app/lib/redis";
-import { NextRequest, NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { Campaign } from '@/app/lib/types';
+import { clientIp, rateLimit } from '@/app/lib/rateLimit';
+import { deleteRedisData } from '@/app/lib/redis';
+import { NextRequest, NextResponse } from 'next/server';
 
-const VALID_TYPES = new Set([
-  "fraud",
-  "misrepresentation",
-  "exploitative",
-  "spam",
-]);
+const VALID_TYPES = new Set(['fraud', 'misrepresentation', 'exploitative', 'spam']);
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,16 +18,13 @@ export async function POST(request: NextRequest) {
 
     if (!campaign_id || !_type) {
       return NextResponse.json(
-        { error: "campaign_id and report type are required" },
-        { status: 400 }
+        { error: 'campaign_id and report type are required' },
+        { status: 400 },
       );
     }
 
     if (!VALID_TYPES.has(_type)) {
-      return NextResponse.json(
-        { error: "Invalid report type" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid report type' }, { status: 400 });
     }
 
     const ip = clientIp(request);
@@ -44,10 +36,10 @@ export async function POST(request: NextRequest) {
     if (!rl.allowed) {
       return NextResponse.json(
         {
-          error: "Too many reports. Please try again later.",
-          message: "Rate limit exceeded",
+          error: 'Too many reports. Please try again later.',
+          message: 'Rate limit exceeded',
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -57,39 +49,33 @@ export async function POST(request: NextRequest) {
       windowSeconds: 60 * 60,
     });
     if (!globalRl.allowed) {
-      return NextResponse.json(
-        { error: "Too many reports from this network." },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: 'Too many reports from this network.' }, { status: 429 });
     }
 
     const [campaign]: any = await db.query(
-      "SELECT raised, id, donation_count, donors, goal, center_id, safety_rating FROM campaigns WHERE id = ?",
-      [campaign_id]
+      'SELECT raised, id, donation_count, donors, goal, center_id, safety_rating FROM campaigns WHERE id = ?',
+      [campaign_id],
     );
 
     if (!campaign || campaign.length === 0) {
-      return NextResponse.json(
-        { message: "Campaign not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'Campaign not found' }, { status: 404 });
     }
 
     await db.query(
-      "INSERT INTO reports (report_type, campaign_id, meaasge, reporter_name) VALUES (?, ?, ?, ?)",
+      'INSERT INTO reports (report_type, campaign_id, meaasge, reporter_name) VALUES (?, ?, ?, ?)',
       [
         _type,
         campaign_id,
-        (message || "").slice(0, 2000),
-        (reporter_name || "anonymous").slice(0, 255),
-      ]
+        (message || '').slice(0, 2000),
+        (reporter_name || 'anonymous').slice(0, 255),
+      ],
     );
 
     // Keep reports count in sync when column exists
     try {
       await db.query(
-        "UPDATE campaigns SET reports = COALESCE(reports, 0) + 1, reported = 1 WHERE id = ?",
-        [campaign_id]
+        'UPDATE campaigns SET reports = COALESCE(reports, 0) + 1, reported = 1 WHERE id = ?',
+        [campaign_id],
       );
     } catch {
       /* optional column */
@@ -104,61 +90,58 @@ export async function POST(request: NextRequest) {
         COUNT(*) as total_reports
       FROM reports 
       WHERE campaign_id = ?`,
-      [campaign_id]
+      [campaign_id],
     );
 
     const counts = reportCounts[0];
-    const currentRating = campaign[0].safety_rating as Campaign["safety_rating"];
+    const currentRating = campaign[0].safety_rating as Campaign['safety_rating'];
     const total = Number(counts.total_reports);
     const fraud = Number(counts.fraud_count);
     const misrepresentation = Number(counts.misrepresentation_count);
     const exploitative = Number(counts.exploitative_count);
 
-    let newRating: Campaign["safety_rating"] = currentRating;
+    let newRating: Campaign['safety_rating'] = currentRating;
 
     if (fraud >= 3 || (fraud >= 1 && misrepresentation >= 2)) {
-      newRating = "unsafe";
-    } else if (
-      fraud >= 1 ||
-      misrepresentation >= 3 ||
-      (exploitative >= 2 && total >= 4)
-    ) {
-      newRating = "likely_risky";
+      newRating = 'unsafe';
+    } else if (fraud >= 1 || misrepresentation >= 3 || (exploitative >= 2 && total >= 4)) {
+      newRating = 'likely_risky';
     } else if (
       total >= 5 &&
-      (currentRating === "likely_safe" || currentRating === "verified_safe")
+      (currentRating === 'likely_safe' || currentRating === 'verified_safe')
     ) {
-      newRating = "uncertain";
-    } else if (total >= 3 && currentRating === "uncertain") {
-      newRating = "likely_risky";
+      newRating = 'uncertain';
+    } else if (total >= 3 && currentRating === 'uncertain') {
+      newRating = 'likely_risky';
     } else if (
       total >= 1 &&
-      (currentRating === "likely_safe" || currentRating === "verified_safe")
+      (currentRating === 'likely_safe' || currentRating === 'verified_safe')
     ) {
-      newRating = "uncertain";
+      newRating = 'uncertain';
     }
 
     if (newRating !== currentRating) {
-      await db.query(
-        "UPDATE campaigns SET safety_rating = ?, reported = ? WHERE id = ?",
-        [newRating, true, campaign_id]
-      );
+      await db.query('UPDATE campaigns SET safety_rating = ?, reported = ? WHERE id = ?', [
+        newRating,
+        true,
+        campaign_id,
+      ]);
     }
 
     deleteRedisData(`cause:${campaign_id}:type:1`);
     deleteRedisData(`cause:${campaign_id}:type:0`);
-    deleteRedisData("featured");
+    deleteRedisData('featured');
 
     return NextResponse.json(
       {
-        message: "Report successful",
+        message: 'Report successful',
         safety_rating: newRating,
         rating_changed: newRating !== currentRating,
       },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Failed to report" }, { status: 500 });
+  } catch (_error) {
+    console.error(_error);
+    return NextResponse.json({ error: 'Failed to report' }, { status: 500 });
   }
 }

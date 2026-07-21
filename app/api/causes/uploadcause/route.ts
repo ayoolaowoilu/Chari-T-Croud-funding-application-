@@ -1,7 +1,7 @@
-import db from "@/app/lib/DBschema";
-import { normalizeCategory } from "@/app/lib/categories";
-import { deleteRedisData } from "@/app/lib/redis";
-import { NextRequest, NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { normalizeCategory } from '@/app/lib/categories';
+import { deleteRedisData } from '@/app/lib/redis';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,24 +25,18 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || !details || !deadline || !mainImage || !user_email) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const [userid]: any = await db.query(
-      "SELECT id FROM users WHERE email = ?",
-      [user_email]
-    );
+    const [userid]: any = await db.query('SELECT id FROM users WHERE email = ?', [user_email]);
 
     if (!userid?.length) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const userId = userid[0].id;
     const safeCategory = normalizeCategory(category);
-    const apiBase = process.env.API_URL || process.env.NEXTAUTH_URL || "";
+    const apiBase = process.env.API_URL || process.env.NEXTAUTH_URL || '';
 
     if (!_type) {
       const [res]: any = await db.query(
@@ -53,29 +47,29 @@ export async function POST(request: NextRequest) {
         [
           name,
           details,
-          story || "",
+          story || '',
           JSON.stringify(mainImage),
           JSON.stringify(images || []),
           goal || 0,
           userId,
           deadline,
-          currency || "NG",
+          currency || 'NG',
           safeCategory,
-          location || "",
+          location || '',
           JSON.stringify(bank_details || {}),
-        ]
+        ],
       );
 
-      deleteRedisData("featured");
-      deleteRedisData("featured:random");
+      deleteRedisData('featured');
+      deleteRedisData('featured:random');
 
       return NextResponse.json(
         {
-          msg: "Successfully Uploaded your cause",
+          msg: 'Successfully Uploaded your cause',
           link: `${apiBase}/causes/cause?id=${res.insertId}`,
           id: res.insertId,
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -96,39 +90,39 @@ export async function POST(request: NextRequest) {
         JSON.stringify(bank_details || {}),
         _type,
         goal || 0,
-        location || "",
+        location || '',
         safeCategory,
-        story || "",
-        currency || "NG",
-      ]
+        story || '',
+        currency || 'NG',
+      ],
     );
 
     // total_campaigns may be missing on older DBs — fail soft
     try {
       await db.query(
-        "UPDATE centers SET total_campaigns = COALESCE(total_campaigns, 0) + 1 WHERE id = ?",
-        [center_id]
+        'UPDATE centers SET total_campaigns = COALESCE(total_campaigns, 0) + 1 WHERE id = ?',
+        [center_id],
       );
     } catch {
       /* column optional until migration */
     }
 
-    deleteRedisData("featured");
+    deleteRedisData('featured');
     deleteRedisData(`center:${center_id}`);
 
     return NextResponse.json(
       {
-        msg: "Successfully Uploaded your cause",
+        msg: 'Successfully Uploaded your cause',
         link: `${apiBase}/dashboard/centers/profile?id=${center_id}`,
         id: res.insertId,
       },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error) {
-    console.error(error);
+  } catch (_error) {
+    console.error(_error);
     return NextResponse.json(
-      { error: "Internal Server Error", msg: String(error) },
-      { status: 500 }
+      { error: 'Internal Server Error', msg: String(_error) },
+      { status: 500 },
     );
   }
 }

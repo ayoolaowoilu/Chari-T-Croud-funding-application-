@@ -1,34 +1,26 @@
-import db from "@/app/lib/DBschema";
-
-import { NextRequest, NextResponse } from "next/server";
-
+import { queryWithRetry } from '@/app/lib/DBschema';
+import { NextRequest, NextResponse } from 'next/server';
 
 function getTimeSeed() {
   const now = Date.now();
-  const windowMs = 90 * 60 * 1000; 
+  const windowMs = 90 * 60 * 1000;
   const windowIndex = Math.floor(now / windowMs);
-  return `chari-t-${windowIndex}`; 
+  return `chari-t-${windowIndex}`;
 }
-
-
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("query") || "";
-  const category = searchParams.get("category") || "All";
-  const page = Number(searchParams.get("page")) || 0;
+  const query = searchParams.get('query') || '';
+  const category = searchParams.get('category') || 'All';
+  const page = Number(searchParams.get('page')) || 0;
 
   const seed = getTimeSeed();
- 
 
   try {
-    
-
-
     let sql: string;
     let params: any[] = [];
 
-    if (category === "All" && !query) {
+    if (category === 'All' && !query) {
       sql = `
         SELECT main_img, details, donation_count, goal, raised,
                category, name, id, center_name, center_id, location,
@@ -40,9 +32,7 @@ export async function GET(request: NextRequest) {
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), seed, page * 20];
-    }
-
-    else if (category !== "All" && !query) {
+    } else if (category !== 'All' && !query) {
       sql = `
         SELECT main_img, details, donation_count, goal, raised,
                category, name, id, center_name, center_id, location,
@@ -55,9 +45,7 @@ export async function GET(request: NextRequest) {
         LIMIT 21 OFFSET ?
       `;
       params = [Date.now(), category, seed, page * 20];
-    }
-
-    else if (category === "All" && query) {
+    } else if (category === 'All' && query) {
       sql = `
         SELECT main_img, details, donation_count, goal, raised,
                category, name, id, center_name, center_id, location,
@@ -74,10 +62,16 @@ export async function GET(request: NextRequest) {
         ORDER BY MD5(CONCAT(id, ?))
         LIMIT 21 OFFSET ?
       `;
-      params = [Date.now(), `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, seed, page * 20];
-    }
-
-    else {
+      params = [
+        Date.now(),
+        `%${query}%`,
+        `%${query}%`,
+        `%${query}%`,
+        `%${query}%`,
+        seed,
+        page * 20,
+      ];
+    } else {
       sql = `
         SELECT main_img, details, donation_count, goal, raised,
                category, name, id, center_name, center_id, location,
@@ -97,18 +91,23 @@ export async function GET(request: NextRequest) {
       params = [Date.now(), category, `%${query}%`, `%${query}%`, `%${query}%`, seed, page * 20];
     }
 
-    const [results]: any = await db.query(sql, params);
+    const [results] = await queryWithRetry(sql, params);
+    const rows = (results as unknown[]) || [];
 
-    const hasMore = results.length > 20;
-    const data = results.slice(0, 20);
+    const hasMore = rows.length > 20;
+    const data = rows.slice(0, 20);
     const response = { data, hasMore };
 
-   
-
     return NextResponse.json(response, { status: 200 });
-
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Internal Server error" }, { status: 500 });
+  } catch (_error) {
+    const code = (_error as { code?: string })?.code;
+    console.error('random5:', code || _error);
+    if (code === 'ETIMEDOUT' || code === 'ECONNRESET' || code === 'ECONNREFUSED') {
+      return NextResponse.json(
+        { error: 'Database temporarily unavailable', data: [], hasMore: false },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ error: 'Internal Server error' }, { status: 500 });
   }
 }

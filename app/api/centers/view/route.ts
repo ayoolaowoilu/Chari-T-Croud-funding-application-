@@ -1,15 +1,16 @@
-import db from "@/app/lib/DBschema";
-import { NextRequest, NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { NextRequest, NextResponse } from 'next/server';
 
-const CENTERS_FIELDS = "name, email, phone, address, website, logourl , id";
-const CAMPAIGNS_FIELDS = "id, name, details, main_img, raised, center_name, center_id, date_to_completion, donation_count, category";
+const CENTERS_FIELDS = 'name, email, phone, address, website, logourl , id';
+const CAMPAIGNS_FIELDS =
+  'id, name, details, main_img, raised, center_name, center_id, date_to_completion, donation_count, category';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const page = Math.max(0, parseInt(searchParams.get("page") ?? "0", 10));
-    const type = searchParams.get("type") ?? "centers";
-    const searchQuery = searchParams.get("query")?.trim();
+    const page = Math.max(0, parseInt(searchParams.get('page') ?? '0', 10));
+    const type = searchParams.get('type') ?? 'centers';
+    const searchQuery = searchParams.get('query')?.trim();
 
     const limit = 25;
     const offset = limit * page;
@@ -22,17 +23,13 @@ export async function GET(request: NextRequest) {
 
     const searchConditionCampaign = searchQuery
       ? `AND (name LIKE ? OR details LIKE ? OR center_name LIKE "%${searchQuery}%" )`
-      : "";
+      : '';
 
-       const searchConditionCenter = searchQuery
-      ? `AND (name LIKE ? OR about LIKE ?)`
-      : "";
+    const searchConditionCenter = searchQuery ? `AND (name LIKE ? OR about LIKE ?)` : '';
 
-    const searchValues = searchQuery
-      ? [`%${searchQuery}%`, `%${searchQuery}%`]
-      : [];
+    const searchValues = searchQuery ? [`%${searchQuery}%`, `%${searchQuery}%`] : [];
 
-    if (type === "both") {
+    if (type === 'both') {
       // Centers: show verified ones, no date filter (centers don't expire)
       centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
         WHERE is_verified_status = "verified"
@@ -42,7 +39,6 @@ export async function GET(request: NextRequest) {
 
       centersParams = [...searchValues, limit + 1, offset];
 
-  
       campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
         WHERE date_to_completion > ? 
         AND center_id IS NOT NULL 
@@ -51,8 +47,7 @@ export async function GET(request: NextRequest) {
         LIMIT ? OFFSET ?`;
 
       campaignsParams = [now, ...searchValues, limit + 1, offset];
-
-    } else if (type === "campaigns") {
+    } else if (type === 'campaigns') {
       campaignsQuery = `SELECT ${CAMPAIGNS_FIELDS} FROM campaigns 
         WHERE date_to_completion > ? 
         AND center_id IS NOT NULL 
@@ -61,7 +56,6 @@ export async function GET(request: NextRequest) {
         LIMIT ? OFFSET ?`;
 
       campaignsParams = [now, ...searchValues, limit + 1, offset];
-
     } else {
       // Default: centers only — verified ones
       centersQuery = `SELECT ${CENTERS_FIELDS} FROM centers 
@@ -96,9 +90,12 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        hasMore: type === "both" 
-          ? hasMoreCenters || hasMoreCampaigns 
-          : (centersQuery ? hasMoreCenters : hasMoreCampaigns),
+        hasMore:
+          type === 'both'
+            ? hasMoreCenters || hasMoreCampaigns
+            : centersQuery
+              ? hasMoreCenters
+              : hasMoreCampaigns,
         hasMoreCenters,
         hasMoreCampaigns,
       },
@@ -108,16 +105,15 @@ export async function GET(request: NextRequest) {
         timestamp: now,
       },
     });
-
-  } catch (error) {
-    console.error("GET /api/centers-campaigns error:", error);
+  } catch (_error) {
+    console.error('GET /api/centers-campaigns _error:', _error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch data",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to fetch data',
+        message: _error instanceof Error ? _error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

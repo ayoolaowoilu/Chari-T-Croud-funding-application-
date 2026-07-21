@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { FetchProfile } from "@/app/lib/fetchRequests";
-import { useSession, signOut } from "next-auth/react";
-import { motion } from "framer-motion";
+import { useCallback, useEffect, useState } from 'react';
+import { FetchProfile } from '@/app/lib/fetchRequests';
+import { useSession, signOut } from 'next-auth/react';
+import { motion } from 'framer-motion';
 import {
   BadgeCheck,
   CircleAlert,
@@ -24,37 +24,34 @@ import {
   Zap,
   FileCheck,
   Lock,
-} from "lucide-react";
-import { UserData } from "@/app/lib/types";
-import Button from "../ui/button";
-import BankVerification from "../layout/bankVerification";
+} from 'lucide-react';
+import { UserData } from '@/app/lib/types';
+import Button from '../ui/button';
+import BankVerification from '../layout/bankVerification';
 
 interface ProfileResponse {
   userData: UserData;
   kyc: boolean;
 }
 
-const methodConfig: Record<
-  string,
-  { label: string; color: string; bg: string; icon: string }
-> = {
+const methodConfig: Record<string, { label: string; color: string; bg: string; icon: string }> = {
   google: {
-    label: "Google",
-    color: "text-red-600",
-    bg: "bg-red-50",
-    icon: "G",
+    label: 'Google',
+    color: 'text-[var(--brand)]',
+    bg: 'bg-[var(--brand-soft)]',
+    icon: 'G',
   },
   twitter: {
-    label: "Twitter",
-    color: "text-slate-900",
-    bg: "bg-slate-100",
-    icon: "X",
+    label: 'Twitter',
+    color: 'text-slate-900',
+    bg: 'bg-slate-100',
+    icon: 'X',
   },
   facebook: {
-    label: "Facebook",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    icon: "f",
+    label: 'Facebook',
+    color: 'text-[var(--brand)]',
+    bg: 'bg-[var(--brand-soft)]',
+    icon: 'f',
   },
 };
 
@@ -68,8 +65,12 @@ export default function Profile() {
               <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Bank Details Not Added</h3>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">Add your bank details to receive payouts and withdrawals</p>
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+                Bank Details Not Added
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                Add your bank details to receive payouts and withdrawals
+              </p>
             </div>
           </div>
           <div className="mt-4 sm:mt-6 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-gray-100">
@@ -77,7 +78,8 @@ export default function Profile() {
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                  Adding your bank details enables withdrawals and ensures your account is fully verified. This usually takes 1-2 business days to process.
+                  Adding your bank details enables withdrawals and ensures your account is fully
+                  verified. This usually takes 1-2 business days to process.
                 </p>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-3 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
@@ -89,7 +91,7 @@ export default function Profile() {
                     Bank-level security
                   </span>
                   <span className="flex items-center gap-1">
-                    <FileCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />
+                    <FileCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--brand)]" />
                     Verified payouts
                   </span>
                 </div>
@@ -97,7 +99,13 @@ export default function Profile() {
             </div>
           </div>
           <div className="mt-4 sm:mt-6">
-            <Button size="sm" onClick={()=>setIsBankVerOpen(true)} details="Add Bank Details" variant="secondary" className="w-full sm:w-auto justify-center text-xs sm:text-sm" />
+            <Button
+              size="sm"
+              onClick={() => setIsBankVerOpen(true)}
+              details="Add Bank Details"
+              variant="secondary"
+              className="w-full sm:w-auto justify-center text-xs sm:text-sm"
+            />
           </div>
         </div>
       </div>
@@ -112,17 +120,17 @@ export default function Profile() {
 
   // Bank edit state
   const [isEditingBank, setIsEditingBank] = useState(false);
-  const [bankDetails, setBankDetails] = useState<UserData["bank_details"]>({
-    bankName: "First Bank of Nigeria",
-    accountNumber: "090001991",
-    accountName: "John Doe",
-    bankCode: "090199",
-    subAccountCode: "",
-    email: "",
+  const [bankDetails, setBankDetails] = useState<UserData['bank_details']>({
+    bankName: 'First Bank of Nigeria',
+    accountNumber: '090001991',
+    accountName: 'John Doe',
+    bankCode: '090199',
+    subAccountCode: '',
+    email: '',
   });
-  const [tempBankDetails, setTempBankDetails] = useState<UserData["bank_details"]>(bankDetails);
+  const [tempBankDetails, setTempBankDetails] = useState<UserData['bank_details']>(bankDetails);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!session?.user?.email) return;
     setLoading(true);
     try {
@@ -132,20 +140,22 @@ export default function Profile() {
       } else {
         setData(resp);
         if (resp.userData?.full_name) {
-          setBankDetails(resp.userData.bank_details || {
-            bankName: "First Bank of Nigeria",
-            accountNumber: "090001991",
-            accountName: "John Doe",
-            bankCode: "090199",
-          });
+          setBankDetails(
+            resp.userData.bank_details || {
+              bankName: 'First Bank of Nigeria',
+              accountNumber: '090001991',
+              accountName: 'John Doe',
+              bankCode: '090199',
+            },
+          );
         }
       }
-    } catch (err) {
+    } catch (_err) {
       setError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.email]);
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -154,14 +164,14 @@ export default function Profile() {
   }, [session?.user?.email]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
-  const handleBankEdit = () => {
+  const _handleBankEdit = () => {
     setTempBankDetails(bankDetails);
     setIsEditingBank(true);
   };
@@ -176,16 +186,16 @@ export default function Profile() {
     setIsEditingBank(false);
   };
 
-  const method = data?.userData?.method?.toLowerCase() || "google";
+  const method = data?.userData?.method?.toLowerCase() || 'google';
   const methodInfo = methodConfig[method] || methodConfig.google;
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center">
+      <div className="w-full min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="space-y-4 w-full max-w-md px-6">
-          <div className="h-24 sm:h-32 bg-gray-100 rounded-2xl animate-pulse" />
-          <div className="h-40 sm:h-48 bg-gray-100 rounded-2xl animate-pulse" />
-          <div className="h-32 sm:h-40 bg-gray-100 rounded-2xl animate-pulse" />
+          <div className="h-24 sm:h-32 bg-white rounded-2xl border border-slate-200 animate-pulse" />
+          <div className="h-40 sm:h-48 bg-white rounded-2xl border border-slate-200 animate-pulse" />
+          <div className="h-32 sm:h-40 bg-white rounded-2xl border border-slate-200 animate-pulse" />
         </div>
       </div>
     );
@@ -211,7 +221,7 @@ export default function Profile() {
     <div className="w-full min-h-screen">
       <BankVerification
         isOpen={isBankVerOpen}
-        onClick={() => (window.location.href = "/dashboard/donor?goto=profile")}
+        onClick={() => (window.location.href = '/dashboard/donor?goto=profile')}
         bankName={userData?.bank_details?.bankName}
         accountNumber={userData?.bank_details?.accountNumber}
         subAccountCode=""
@@ -245,7 +255,7 @@ export default function Profile() {
               {/* KYC Verified Badge */}
               {kyc && (
                 <div
-                  className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
+                  className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 w-7 h-7 sm:w-8 sm:h-8 bg-[var(--brand)] rounded-full flex items-center justify-center border-2 border-white shadow-sm"
                   title="KYC Verified"
                 >
                   <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -260,7 +270,7 @@ export default function Profile() {
                   {userData.full_name}
                 </h1>
                 {kyc && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] sm:text-xs font-semibold rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--brand-soft)] text-[var(--brand)] text-[10px] sm:text-xs font-semibold rounded-full">
                     <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     Verified
                   </span>
@@ -400,7 +410,7 @@ export default function Profile() {
                           bankName: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 border-b border-gray-100 gap-1.5 sm:gap-2">
@@ -414,7 +424,7 @@ export default function Profile() {
                           accountNumber: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 border-b border-gray-100 gap-1.5 sm:gap-2">
@@ -428,7 +438,7 @@ export default function Profile() {
                           accountName: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-3 gap-1.5 sm:gap-2">
@@ -442,7 +452,7 @@ export default function Profile() {
                           bankCode: e.target.value,
                         }))
                       }
-                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto sm:min-w-50"
+                      className="text-xs sm:text-sm font-semibold text-gray-900 font-mono border border-gray-200 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent w-full sm:w-auto sm:min-w-50"
                     />
                   </div>
                 </>
@@ -455,7 +465,9 @@ export default function Profile() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-2 sm:py-3 border-b border-gray-100 gap-2">
-                    <span className="text-xs sm:text-sm text-gray-500 shrink-0">Account Number</span>
+                    <span className="text-xs sm:text-sm text-gray-500 shrink-0">
+                      Account Number
+                    </span>
                     <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                       <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 shrink-0" />
                       <span className="text-xs sm:text-sm font-semibold text-gray-900 font-mono truncate">
@@ -494,7 +506,7 @@ export default function Profile() {
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <div
                 className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0 ${
-                  userData.is_verified ? "bg-green-500" : "bg-amber-500"
+                  userData.is_verified ? 'bg-green-500' : 'bg-amber-500'
                 }`}
               />
               <span className="text-xs sm:text-sm font-medium text-gray-700 truncate">
@@ -503,10 +515,10 @@ export default function Profile() {
             </div>
             <span
               className={`text-xs sm:text-sm font-semibold shrink-0 ${
-                userData.is_verified ? "text-green-700" : "text-amber-700"
+                userData.is_verified ? 'text-green-700' : 'text-amber-700'
               }`}
             >
-              {userData.is_verified ? "Active" : "Pending Verification"}
+              {userData.is_verified ? 'Active' : 'Pending Verification'}
             </span>
           </div>
         </motion.div>
@@ -529,15 +541,14 @@ export default function Profile() {
                     Identity Verification Required
                   </h2>
                   <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-relaxed">
-                    Complete KYC verification to unlock full account features and
-                    increase your transaction limits.
+                    Complete KYC verification to unlock full account features and increase your
+                    transaction limits.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() =>
-                  (window.location.href =
-                    "/dashboard/kyc?redir=/dashboard/donor?goto=profile")
+                  (window.location.href = '/dashboard/kyc?redir=/dashboard/donor?goto=profile')
                 }
                 className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg sm:rounded-xl transition-colors shadow-sm shrink-0"
               >
@@ -556,7 +567,7 @@ export default function Profile() {
           className="pt-2 sm:pt-4"
         >
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ callbackUrl: '/' })}
             className="w-full flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-red-600 bg-white border border-gray-200 sm:border-2 hover:border-red-200 hover:bg-red-50 rounded-xl sm:rounded-2xl transition-all"
           >
             <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

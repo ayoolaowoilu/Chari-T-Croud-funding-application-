@@ -1,5 +1,5 @@
-import db from "@/app/lib/DBschema";
-import { NextRequest, NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Validates that a user owns a center and that the center is verified
@@ -16,52 +16,40 @@ export async function POST(request: NextRequest) {
 
     if (!id || !user_email) {
       return NextResponse.json(
-        { error: "Missing center id or user email", ok: false },
-        { status: 400 }
+        { error: 'Missing center id or user email', ok: false },
+        { status: 400 },
       );
     }
 
-    const [users]: any = await db.query(
-      "SELECT id FROM users WHERE email = ?",
-      [user_email]
-    );
+    const [users]: any = await db.query('SELECT id FROM users WHERE email = ?', [user_email]);
 
     if (!users?.length) {
-      return NextResponse.json(
-        { error: "User not found", ok: false },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found', ok: false }, { status: 404 });
     }
 
     const [centers]: any = await db.query(
-      "SELECT id, name, user_id, is_verified_status FROM centers WHERE id = ?",
-      [id]
+      'SELECT id, name, user_id, is_verified_status FROM centers WHERE id = ?',
+      [id],
     );
 
     if (!centers?.length) {
-      return NextResponse.json(
-        { error: "Center not found", ok: false },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Center not found', ok: false }, { status: 404 });
     }
 
     const center = centers[0];
 
     if (Number(center.user_id) !== Number(users[0].id)) {
-      return NextResponse.json(
-        { error: "You do not own this center", ok: false },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'You do not own this center', ok: false }, { status: 403 });
     }
 
-    if (center.is_verified_status !== "verified") {
+    if (center.is_verified_status !== 'verified') {
       return NextResponse.json(
         {
-          error: "Center must be verified before creating campaigns",
+          error: 'Center must be verified before creating campaigns',
           ok: false,
           status: center.is_verified_status,
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -77,11 +65,8 @@ export async function POST(request: NextRequest) {
         is_verified_status: center.is_verified_status,
       },
     });
-  } catch (error) {
-    console.error("verify/center:", error);
-    return NextResponse.json(
-      { error: "Internal server error", ok: false },
-      { status: 500 }
-    );
+  } catch (_error) {
+    console.error('verify/center:', _error);
+    return NextResponse.json({ error: 'Internal server error', ok: false }, { status: 500 });
   }
 }

@@ -1,104 +1,74 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Logo } from './layout/footer'
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const TIPS = [
-  'Every donation brings hope to someone in need.',
-  '100% of proceeds go directly to verified causes.',
-  'Small acts, when multiplied, transform the world.',
-  'Your support helps communities rebuild and thrive.',
-  'Transparency is at the heart of everything we do.',
-  'Join thousands of donors making a difference today.',
-]
-
-export default function PageLoader() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [tipIndex, setTipIndex] = useState(0)
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+/**
+ * Subtle route indicator — thin top bar only.
+ * Never blocks the page. Skips first paint so hard loads don't flash.
+ * Data loading should use skeletons / DualRingSpinner in-page, not this.
+ */
+export default function PageProgress() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isFirstNav = useRef(true);
+  const [active, setActive] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    setIsLoading(true)
-    setProgress(0)
-    setTipIndex(Math.floor(Math.random() * TIPS.length))
+    // Initial load: content is already there — do not show a loader
+    if (isFirstNav.current) {
+      isFirstNav.current = false;
+      return;
+    }
 
+    setActive(true);
+    setProgress(18);
 
-    const p1 = setTimeout(() => setProgress(40), 50)
-    const p2 = setTimeout(() => setProgress(75), 150)
-    const p3 = setTimeout(() => setProgress(95), 300)
-
-
-    const done = setTimeout(() => {
-      setProgress(100)
-      setTimeout(() => setIsLoading(false), 400)
-    }, 500)
+    const t1 = window.setTimeout(() => setProgress(55), 90);
+    const t2 = window.setTimeout(() => setProgress(78), 200);
+    const t3 = window.setTimeout(() => setProgress(92), 360);
+    const finish = window.setTimeout(() => {
+      setProgress(100);
+      window.setTimeout(() => {
+        setActive(false);
+        setProgress(0);
+      }, 180);
+    }, 480);
 
     return () => {
-      clearTimeout(p1)
-      clearTimeout(p2)
-      clearTimeout(p3)
-      clearTimeout(done)
-    }
-  }, [pathname, searchParams])
-
-
-  useEffect(() => {
-    if (!isLoading) return
-    const interval = setInterval(() => {
-      setTipIndex((prev) => (prev + 1) % TIPS.length)
-    }, 2800)
-    return () => clearInterval(interval)
-  }, [isLoading])
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+      window.clearTimeout(finish);
+    };
+  }, [pathname, searchParams]);
 
   return (
     <AnimatePresence>
-      {isLoading && (
+      {active && (
         <motion.div
-          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-white"
-          initial={{ opacity: 1 }}
+          className="pointer-events-none fixed inset-x-0 top-0 z-[10000] h-[2px]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          transition={{ duration: 0.15 }}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress)}
+          aria-label="Navigating"
         >
-          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="mb-10"
-          >
-           <Logo />
-          </motion.div>
-
-          <div className="w-64 h-0.75 bg-gray-100 rounded-full overflow-hidden mb-8">
-            <motion.div
-              className="h-full bg-gray-800 rounded-full origin-left"
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: progress / 100 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            />
-          </div>
-
-          {/* Tips */}
-          <div className="h-6 flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={tipIndex}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
-                className="text-sm text-gray-500 text-center max-w-xs px-4"
-              >
-                {TIPS[tipIndex]}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+            className="h-full origin-left rounded-r-full bg-[var(--brand)] shadow-[0_0_12px_rgba(15,118,110,0.45)]"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: Math.max(progress, 8) / 100 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            style={{ transformOrigin: 'left center' }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

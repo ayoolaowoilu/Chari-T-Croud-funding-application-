@@ -1,13 +1,13 @@
 'use client';
 import PaystackPop from '@paystack/inline-js';
-import { 
-  ChevronRight, 
-  CreditCard, 
-  CheckCircle, 
-  XCircle, 
-  Home, 
-  ArrowRight, 
-  Copy, 
+import {
+  ChevronRight,
+  CreditCard,
+  CheckCircle,
+  XCircle,
+  Home,
+  ArrowRight,
+  Copy,
   Check,
   Receipt,
   Wallet,
@@ -19,17 +19,17 @@ import {
   RotateCcw,
   AlertTriangle,
   User,
-  Tag
+  Tag,
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { updateDonate } from '../lib/fetchRequests';
 
-export default function PaystackPopup({ 
-  email, 
-  amount, 
-  subaccount, 
+export default function PaystackPopup({
+  email,
+  amount,
+  subaccount,
   publicKey,
-  onSuccess, 
+  onSuccess,
   onCancel,
   metadata,
   homeUrl = '/',
@@ -43,7 +43,7 @@ export default function PaystackPopup({
   message,
   center_id,
   platform_fee = 0,
-  bearer = 'account'
+  bearer = 'account',
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -84,8 +84,8 @@ export default function PaystackPopup({
       paystack.newTransaction({
         key: publicKey,
         email: email,
-        first_name: name?.split(" ")[0] || "Unknown user",
-        last_name: name?.split(" ")[1] || "Unknown user",
+        first_name: name?.split(' ')[0] || 'Unknown user',
+        last_name: name?.split(' ')[1] || 'Unknown user',
         amount: safeAmount * 100,
         transaction_charge: safePlatformFee * 100,
         subaccount: subaccount,
@@ -129,7 +129,7 @@ export default function PaystackPopup({
               transaction_id: trx.reference,
               donor_name: donor_name,
               message: message,
-              center_id: center_id
+              center_id: center_id,
             };
 
             const resp = await updateDonate(payload);
@@ -141,27 +141,30 @@ export default function PaystackPopup({
             if (resp?.error) {
               setError(
                 resp.error ||
-                  "Payment went through, but we could not record the donation. Keep your reference for support."
+                  'Payment went through, but we could not record the donation. Keep your reference for support.',
               );
               localStorage.setItem(
-                "pending_donations",
+                'pending_donations',
                 JSON.stringify({
                   reference: trx.reference,
                   id: id,
                   payload: payload,
-                })
+                }),
               );
             } else {
-              localStorage.removeItem("pending_donations");
+              localStorage.removeItem('pending_donations');
             }
 
             if (onSuccess) onSuccess(trx);
-          } catch (error) {
-            setError("Error recording donation");
-            localStorage.setItem("pending_donations", JSON.stringify({
-              reference: trx.reference,
-              id: id
-            }));
+          } catch (_error) {
+            setError('Error recording donation');
+            localStorage.setItem(
+              'pending_donations',
+              JSON.stringify({
+                reference: trx.reference,
+                id: id,
+              }),
+            );
             setLoading(false);
           }
         },
@@ -176,10 +179,9 @@ export default function PaystackPopup({
         onError: (error) => {
           setLoading(false);
           setError(error.message || 'Payment failed. Please try again.');
-        }
+        },
       });
-
-    } catch (err) {
+    } catch (_err) {
       setLoading(false);
       setError('Something went wrong: ' + (err.message || err));
     }
@@ -196,15 +198,17 @@ export default function PaystackPopup({
   const downloadReceipt = () => {
     if (!receiptRef.current) return;
 
-  
-    const url = `${window.location.origin}/api/receipts?email=${email}&amount=${amount}&platform_fee=${platform_fee}&time=${new Date().toLocaleDateString('en-NG', { 
-                    weekday: 'short', 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}&transaction_id=${transaction?.reference}`;
+    const url = `${window.location.origin}/api/receipts?email=${email}&amount=${amount}&platform_fee=${platform_fee}&time=${new Date().toLocaleDateString(
+      'en-NG',
+      {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      },
+    )}&transaction_id=${transaction?.reference}`;
     const a = document.createElement('a');
     a.href = url;
     a.download = `chari-t-receipt-${transaction?.reference || 'donation'}.png`;
@@ -223,7 +227,6 @@ export default function PaystackPopup({
   const SuccessCard = () => (
     <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
       <div className="min-h-screen flex flex-col">
-
         {/* Top Status Bar */}
         <div className="bg-emerald-50 border-b border-emerald-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -235,7 +238,6 @@ export default function PaystackPopup({
 
         {/* Main Content */}
         <div className="flex-1 px-6 py-8 sm:px-10 sm:py-12 max-w-2xl mx-auto w-full">
-
           {/* Hero Section */}
           <div className="text-center mb-10">
             <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-100">
@@ -246,8 +248,10 @@ export default function PaystackPopup({
           </div>
 
           {/* Amount Card */}
-          <div ref={receiptRef} className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-8 shadow-sm">
-
+          <div
+            ref={receiptRef}
+            className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-8 shadow-sm"
+          >
             {/* Amount Header */}
             <div className="bg-gray-50 px-6 py-8 text-center border-b border-gray-100">
               <p className="text-gray-500 text-sm mb-2">Total Amount Paid</p>
@@ -256,7 +260,6 @@ export default function PaystackPopup({
 
             {/* Breakdown */}
             <div className="p-6 space-y-4">
-
               <div className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -312,7 +315,7 @@ export default function PaystackPopup({
                   <Hash className="w-4 h-4" />
                   <span className="text-sm">Reference</span>
                 </div>
-                <button 
+                <button
                   onClick={copyReference}
                   className="flex items-center gap-2 text-blue-600 text-sm hover:text-blue-700 transition-colors"
                 >
@@ -349,13 +352,13 @@ export default function PaystackPopup({
                   <span className="text-sm">Date</span>
                 </div>
                 <span className="text-gray-900 text-sm">
-                  {new Date().toLocaleDateString('en-NG', { 
-                    weekday: 'short', 
-                    year: 'numeric', 
-                    month: 'short', 
+                  {new Date().toLocaleDateString('en-NG', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
                   })}
                 </span>
               </div>
@@ -385,7 +388,7 @@ export default function PaystackPopup({
               Download Receipt
             </button>
 
-            <a 
+            <a
               href={causesUrl}
               className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl transition-colors text-sm"
             >
@@ -393,7 +396,7 @@ export default function PaystackPopup({
               <ArrowRight className="w-4 h-4" />
             </a>
 
-            <a 
+            <a
               href={homeUrl}
               className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl transition-colors text-sm"
             >
@@ -417,7 +420,6 @@ export default function PaystackPopup({
   const CancelledCard = () => (
     <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
       <div className="min-h-screen flex flex-col">
-
         {/* Top Status Bar */}
         <div className="bg-amber-50 border-b border-amber-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -428,7 +430,6 @@ export default function PaystackPopup({
 
         {/* Main Content */}
         <div className="flex-1 px-6 py-8 sm:px-10 sm:py-12 max-w-2xl mx-auto w-full">
-
           {/* Hero Section */}
           <div className="text-center mb-10">
             <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-100">
@@ -459,7 +460,9 @@ export default function PaystackPopup({
                       <Wallet className="w-4 h-4" />
                       <span className="text-sm">Platform Fee</span>
                     </div>
-                    <span className="text-gray-400 text-sm">₦{safePlatformFee.toLocaleString()}</span>
+                    <span className="text-gray-400 text-sm">
+                      ₦{safePlatformFee.toLocaleString()}
+                    </span>
                   </div>
                 </>
               )}
@@ -506,7 +509,7 @@ export default function PaystackPopup({
               Try Again
             </button>
 
-            <a 
+            <a
               href={causesUrl}
               className="flex items-center justify-center gap-2 w-full bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-xl transition-colors text-sm"
             >
@@ -514,7 +517,7 @@ export default function PaystackPopup({
               <ArrowRight className="w-4 h-4" />
             </a>
 
-            <a 
+            <a
               href={homeUrl}
               className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-xl transition-colors text-sm"
             >
@@ -562,7 +565,9 @@ export default function PaystackPopup({
         disabled={loading}
         className="group relative w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 disabled:shadow-none overflow-hidden"
       >
-        <div className={`absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full ${!loading ? 'group-hover:translate-x-full' : ''} transition-transform duration-1000`} />
+        <div
+          className={`absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full ${!loading ? 'group-hover:translate-x-full' : ''} transition-transform duration-1000`}
+        />
         <span className="relative flex items-center justify-center gap-2">
           {loading ? (
             <>

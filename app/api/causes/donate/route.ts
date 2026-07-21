@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { recordVerifiedDonation } from "@/app/lib/recordDonation";
+import { NextRequest, NextResponse } from 'next/server';
+import { recordVerifiedDonation } from '@/app/lib/recordDonation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
           message: result.message,
           error: result.error || result.message,
         },
-        { status: result.status }
+        { status: result.status },
       );
     }
 
@@ -33,16 +33,16 @@ export async function POST(request: NextRequest) {
         duplicate: result.duplicate || false,
         amount: result.amount,
       },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error) {
-    console.error(error);
+  } catch (_error) {
+    console.error(_error);
     return NextResponse.json(
       {
-        message: "Internal server error",
-        error: (error as Error).message,
+        message: 'Internal server error',
+        error: (_error as Error).message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
