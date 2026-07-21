@@ -176,18 +176,33 @@ const FetchALLUserData = async (email: string) => {
   );
 };
 
-const FetchUserCauses = async (email: string) => {
+const FetchUserCauses = async (
+  email: string,
+  cursor?: string | number | null,
+  limit?: number,
+) => {
+  // Cursor pages should not be long-cached as a single key
+  const cacheKey =
+    cursor != null
+      ? `user:causes:${email}:c:${cursor}:l:${limit || 20}`
+      : `user:causes:${email}`;
+
   return withCache(
-    `user:causes:${email}`,
+    cacheKey,
     async () => {
       try {
-        const resp = await fetch(`${API_URL}/api/dashboard/yourcam?email=${email}`);
+        const params = new URLSearchParams({ email });
+        if (cursor != null && cursor !== '') params.set('cursor', String(cursor));
+        if (limit != null) params.set('limit', String(limit));
+        const resp = await fetch(
+          `${API_URL}/api/dashboard/yourcam?${params.toString()}`,
+        );
         return await resp.json();
       } catch (_error) {
         return { error: 'Unable to fetch data' };
       }
     },
-    TTL.USER_CAUSES,
+    cursor != null ? 30 : TTL.USER_CAUSES,
   );
 };
 
