@@ -28,18 +28,42 @@ const footerLinks = {
 };
 
 const Logo: React.FC<{ nav?: boolean }> = ({ nav }) => {
+  // Prefer brand wordmark from main when available; fall back to icon mark
   return (
     <div className="flex items-center gap-2.5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/ct_logo_texts.png"
+        alt="Chari-T"
+        className={nav ? "h-7 w-auto" : "h-9 w-auto"}
+        onError={(e) => {
+          const el = e.currentTarget;
+          el.style.display = "none";
+          const fallback = el.nextElementSibling as HTMLElement | null;
+          if (fallback) fallback.style.display = "flex";
+        }}
+      />
       <div
         className={`${
-          nav ? 'w-8 h-8' : 'w-9 h-9'
-        } bg-[var(--brand)] rounded-[0.65rem] flex items-center justify-center shadow-sm shadow-teal-900/10 ring-1 ring-black/5`}
+          nav ? "w-8 h-8" : "w-9 h-9"
+        } hidden items-center gap-2.5`}
+        style={{ display: "none" }}
       >
-        <Leaf size={nav ? 15 : 17} className="text-white" strokeWidth={2.5} />
+        <div
+          className={`${
+            nav ? "w-8 h-8" : "w-9 h-9"
+          } bg-[var(--brand)] rounded-[0.65rem] flex items-center justify-center shadow-sm shadow-teal-900/10 ring-1 ring-black/5`}
+        >
+          <Leaf size={nav ? 15 : 17} className="text-white" strokeWidth={2.5} />
+        </div>
+        <span
+          className={`font-semibold tracking-[-0.045em] ${
+            nav ? "text-[21px]" : "text-[28px]"
+          }`}
+        >
+          Chari<span className="text-[var(--brand)]">-T</span>
+        </span>
       </div>
-      <span className={`font-semibold tracking-[-0.045em] ${nav ? 'text-[21px]' : 'text-[28px]'}`}>
-        Chari<span className="text-[var(--brand)]">-T</span>
-      </span>
     </div>
   );
 };

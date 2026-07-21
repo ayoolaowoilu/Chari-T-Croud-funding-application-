@@ -1,9 +1,11 @@
-import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
-import Twitter from 'next-auth/providers/twitter';
-import db from '@/app/lib/DBschema';
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import Twitter from "next-auth/providers/twitter";
+import db from "@/app/lib/DBschema";
+import { sendSingleEmail } from "@/app/lib/emails/email";
+import { welcomeEmail } from "@/app/lib/emails/email_templates";
 
-declare module 'next-auth/jwt' {
+declare module "next-auth/jwt" {
   interface JWT {
     userId?: string;
     provider?: string;
@@ -26,31 +28,70 @@ const handler = NextAuth({
     }),
   ],
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 60 * 60 * 24 * 30,
   },
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/signin',
+    signIn: "/auth/signin",
+    error: "/auth/signin",
   },
   callbacks: {
     async signIn({ account, profile }) {
-      console.log('[AUTH] signIn callback', { account, profile });
       if (!profile?.email) return false;
+
       try {
-        const [rows]: any = await db.query('SELECT id FROM users WHERE email = ?', [profile.email]);
+        const [rows]: any = await db.query(
+          "SELECT id FROM users WHERE email = ?",
+          [profile.email]
+        );
 
         if (rows.length === 0) {
-          await db.query('INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)', [
-            profile.name || 'User',
-            profile.image || (profile as { picture?: string }).picture || null,
-            profile.email,
-            account?.provider || 'oauth',
-          ]);
+          await db.query(
+            "INSERT INTO users(full_name, image, email, method) VALUES(?,?,?,?)",
+            [
+              profile.name || "User",
+              profile.image ||
+                (profile as { picture?: string }).picture ||
+                null,
+              profile.email,
+              account?.provider || "oauth",
+            ]
+          );
+
+          // Welcome email for new users (best-effort)
+          try {
+            await sendSingleEmail(profile.email, {
+              from: "Chari-T Welcomes you <support@chari-t.live>",
+              subject: `${(profile.name || "there").split(" ")[0]} - Welcome`,
+              html: welcomeEmail({
+                name: profile.name || "there",
+                companyName: "Chari-T",
+                loginUrl: `${process.env.API_URL || ""}/causes/get`,
+              }),
+            });
+          } catch (e) {
+            console.error("welcome email failed", e);
+          }
+        } else {
+          // Optional welcome-back email — best-effort, don't block login
+          try {
+            await sendSingleEmail(profile.email, {
+              from: "Login detected <support@chari-t.live>",
+              subject: `${(profile.name || "there").split(" ")[0]} - Welcome back`,
+              html: welcomeEmail({
+                name: profile.name || "there",
+                companyName: "Chari-T",
+                loginUrl: `${process.env.API_URL || ""}/causes/get`,
+              }),
+            });
+          } catch (e) {
+            console.error("login email failed", e);
+          }
         }
+
         return true;
       } catch (error) {
-        console.error('SignIn error:', error);
+        console.error("SignIn error:", error);
         return false;
       }
     },
@@ -59,26 +100,26 @@ const handler = NextAuth({
       if (account && profile) {
         token.email = profile.email;
         token.name = profile.name;
-        token.picture = profile.image || (profile as { picture?: string }).picture;
+        token.picture =
+          profile.image || (profile as { picture?: string }).picture;
         token.provider = account.provider;
       }
 
-      // Always resolve DB user id + role by email (not OAuth sub)
       const email = token.email || profile?.email;
       if (email) {
         try {
           const [rows]: any = await db.query(
-            'SELECT id, role, full_name, image FROM users WHERE email = ?',
-            [email],
+            "SELECT id, role, full_name, image FROM users WHERE email = ?",
+            [email]
           );
           if (rows?.length) {
             token.userId = String(rows[0].id);
-            token.role = rows[0].role || 'donor';
+            token.role = rows[0].role || "donor";
             if (rows[0].full_name) token.name = rows[0].full_name;
             if (rows[0].image) token.picture = rows[0].image;
           }
-        } catch (_e) {
-          console.error('jwt user lookup failed', _e);
+        } catch (e) {
+          console.error("jwt user lookup failed", e);
         }
       }
 

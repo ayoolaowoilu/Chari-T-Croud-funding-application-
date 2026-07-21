@@ -1,7 +1,7 @@
 'use server';
 
 import { getSubAccountCode } from './paystack';
-import { Campaign, CenterRegistrationPayload, KycFormData, UserData } from './types';
+import { Campaign, CenterRegistrationPayload, Comments, KycFormData, Subscribed, UserData } from './types';
 import { addRedisData, getRedisData, deleteRedisData } from './redis';
 
 type causeData = Pick<Campaign, 'name' | 'details' | 'category' | 'bank_details'> & {
@@ -436,6 +436,91 @@ const FetchUserPublicProfileById = async (id: number) => {
   );
 };
 
+const Handle_comment = async(type:"GET" | "PUT" | "DELETE" , data?:Comments , page?:number) =>{
+        let fetch_fn;
+        let path = "/api/causes/interactions/comment"
+  try {
+       if(type == "GET"){
+         fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`)   
+       }else {
+           fetch_fn = await fetch(`${API_URL}${path}/put` , { 
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(data)   
+           })
+       }
+
+       const resp = await fetch_fn.json();
+       
+       return resp;
+  } catch (error) {
+       console.log(error)
+        return {error:"Network Error"}
+  }
+}
+
+const Handle_subscribe = async (
+  type: "GET" | "PUT" | "UN_SUB" | "CHECK",
+  data?: Subscribed,
+  page?: number
+) => {
+  const path = "/api/causes/interactions/subscribe";
+
+  try {
+    let res: Response;
+
+    switch (type) {
+      case "GET": {
+        // List subscribers for a campaign
+        res = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`);
+        break;
+      }
+
+      case "PUT": {
+        // Subscribe a user to a campaign
+        res = await fetch(`${API_URL}${path}/put`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        break;
+      }
+
+      case "UN_SUB": {
+        // Unsubscribe a user
+        res = await fetch(`${API_URL}${path}/unsubscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identity_key: data?.identity_key , campaign_id:data?.campaign_id
+           }),
+        });
+        break;
+      }
+
+      case "CHECK": {
+        // Check whether a user is subscribed to a campaign
+        res = await fetch(
+          `${API_URL}${path}/check?identity_key=${data?.identity_key}&campaign_id=${data?.campaign_id}`
+        );
+        break;
+      }
+
+      default: {
+        return { error: "Invalid subscribe action" };
+      }
+    }
+
+    if (!res.ok) {
+      return { error: `Request failed with status ${res.status}` };
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+    return { error: "Network Error" };
+  }
+};
+
 export {
   type Report,
   type verifyCenter,
@@ -460,4 +545,6 @@ export {
   GetCenter,
   GetCenterViews,
   FetchUserPublicProfileById,
+  Handle_comment,
+  Handle_subscribe,
 };

@@ -24,7 +24,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return buildOgMeta({
     title: campaign.name,
     description: campaign.details,
-    imageUrl: campaign.main_img?.url,
+    imageUrl:  `${process.env.API_URL}/api/og/campaign?id=${campaign.id}`,
     id: campaign.id,
   });
 }

@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [data]: any = await db.query(sql, [id]);
+    console.log(data)
 
     return NextResponse.json(data, { status: 200 });
   } catch (_error) {
