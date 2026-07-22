@@ -293,7 +293,7 @@ const CampaignCard: React.FC<Don> = ({
               variant="outline"
               size="md"
               className="flex-1 border-slate-200 hover:border-[var(--brand)] hover:text-[var(--brand)]"
-              onClick={() => redirect(`/causes/cause?id=${id}`)}
+              onClick={() => window.location.href = `/causes/cause?id=${id}` }
             />
             <CardMenu
               id={id}
