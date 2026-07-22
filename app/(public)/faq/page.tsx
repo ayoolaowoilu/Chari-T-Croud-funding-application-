@@ -144,23 +144,6 @@ export default function FAQPage() {
             />
           ))}
         </div>
-
-        {/* Still have questions */}
-        <div className="mt-10 sm:mt-14 text-center">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
-            Still have questions?
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-md mx-auto">
-            Our support team is happy to help. Send us a message and we'll get back to you within
-            24–48 hours.
-          </p>
-          <a
-            href="/contact"
-            className="inline-flex items-center justify-center px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors text-base"
-          >
-            Contact Us
-          </a>
-        </div>
       </main>
 
       <Footer />
