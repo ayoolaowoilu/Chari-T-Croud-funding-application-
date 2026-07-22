@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 // next.config.js
 // module.exports = {
@@ -16,9 +16,11 @@ import type { NextConfig } from "next";
 //     ];
 //   },
 // };
-const nextConfig: NextConfig = {
-  /* config options here */
 
+module.exports = {
+  allowedDevOrigins: ['10.209.91.103'],
 };
+
+const nextConfig: NextConfig = {/* config options here */};
 
 export default nextConfig;

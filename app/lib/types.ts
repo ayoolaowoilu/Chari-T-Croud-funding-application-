@@ -3,8 +3,8 @@ interface Campaign {
   name: string;
   details: string;
   story: string;
-  main_img: {url:string}
-  imgs: string;   
+  main_img: { url: string };
+  imgs: string;
   donors: Donor[];
   goal: number;
   raised: number;
@@ -12,41 +12,36 @@ interface Campaign {
   center_name: string | null;
   center_id: string | number;
   user_id: number;
-  date_to_completion: string; 
+  date_to_completion: string;
   created_at: string;
-  currency: "NG" | "USD" | "EURO";
-  category: "Education" | "Community" | "CroudFunding" | "Business" | "Health";
-    donation_count:number,
-    bank_details:bankDetails,
-    escrowed:number,
-    safety_rating:  'verified_safe' |
-    'likely_safe' |
-    'uncertain' |
-    'likely_risky' |
-    'unsafe'; 
- subscribed_count:any,
- comments_count:any
+  currency: 'NG' | 'USD' | 'EURO';
+  category: 'Education' | 'Community' | 'CroudFunding' | 'Business' | 'Health';
+  donation_count: number;
+  bank_details: bankDetails;
+  escrowed?: number;
+  safety_rating: 'verified_safe' | 'likely_safe' | 'uncertain' | 'likely_risky' | 'unsafe';
+  subscribed_count?: number;
+  comments_count?: number;
 }
 
- interface Subscribed {
-    user_id?:string,
-    name?:string,
-    email?:string,
-    img_url?:string
-    identity_key?:string
-    campaign_id?:number
+interface Subscribed {
+  user_id?: string;
+  name?: string;
+  email?: string;
+  img_url?: string;
+  identity_key?: string;
+  campaign_id?: number;
 }
 
-
-  interface Comments {
-    user_id?:string,
-    name?:string,
-    email?:string,
-    comment?:string,
-    created_at?:string,
-    img_url?:string,
-    identity_key?:string,
-    campaign_id?:number
+interface Comments {
+  user_id?: string;
+  name?: string;
+  email?: string;
+  comment?: string;
+  created_at?: string;
+  img_url?: string;
+  identity_key?: string;
+  campaign_id?: number;
 }
 interface Donor {
   name: string;
@@ -54,49 +49,48 @@ interface Donor {
 }
 
 interface bankDetails {
-    accountName?:string,
-    accountNumber?:string,
-    bankName?:string,
-    bankCode?:string,
-    subAccountCode:string,
-    email:string
+  accountName?: string;
+  accountNumber?: string;
+  bankName?: string;
+  bankCode?: string;
+  subAccountCode: string;
+  email: string;
 }
 
 interface UserData {
-  full_name: string
-  email: string
-  is_verified: number
-  created_at: string
-  image: string
-  donations: number
-   recieved: number
-  bank_details:bankDetails;
-  method:string
+  full_name: string;
+  email: string;
+  is_verified: number;
+  created_at: string;
+  image: string;
+  donations: number;
+  recieved: number;
+  bank_details: bankDetails;
+  method: string;
 }
 
-
 interface CloudinaryImage {
-  url: string
-  publicId: string
-  isUploading: boolean
-  uploadProgress: number
+  url: string;
+  publicId: string;
+  isUploading: boolean;
+  uploadProgress: number;
 }
 
 interface PaystackBank {
-    name: string
-    code: string
-    slug: string
-    longcode: string
-    gateway: string | null
-    pay_with_bank: boolean
-    active: boolean
-    is_deleted: boolean
-    country: string
-    currency: string
-    type: string
+  name: string;
+  code: string;
+  slug: string;
+  longcode: string;
+  gateway: string | null;
+  pay_with_bank: boolean;
+  active: boolean;
+  is_deleted: boolean;
+  country: string;
+  currency: string;
+  type: string;
 }
 
-type DocType = "NIN" | "BVN" | "DRIVERS_LICENSE" | "PASSPORT" | "VOTERS_CARD";
+type DocType = 'NIN' | 'BVN' | 'DRIVERS_LICENSE' | 'PASSPORT' | 'VOTERS_CARD';
 
 interface KycFormData {
   fullName: string;
@@ -105,50 +99,55 @@ interface KycFormData {
   address: string;
   city: string;
   state: string;
-  documentType: DocType | "";
+  documentType: DocType | '';
   documentNumber: string;
 }
 
 interface VerificationDocument {
-  url: string
-  public_id: string
-  width: number
-  height: number
-  original_name: string
-  compressed: boolean
-  compression_ratio: string | null
+  url: string;
+  public_id: string;
+  width: number;
+  height: number;
+  original_name: string;
+  compressed: boolean;
+  compression_ratio: string | null;
 }
 
 interface BankDetails {
-  account_name: string
-  account_number: string
-  bank_name: string
-  bank_code: string
-  branch: string
-  swift_code: string
-  subAccountCode: string
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+  bank_code: string;
+  branch: string;
+  swift_code: string;
+  subAccountCode: string;
 }
 
 interface CenterRegistrationPayload {
-  name: string
-  registration_number: string
-  email: string
-  userEmail:string
-  phone: string
-  address: string
-  website: string
-  is_verified_status: 'pending'
-  about: string
-  logourl: string | null
-  geo_location: string
-  bank_details: BankDetails
-  verification_documents: VerificationDocument[]
+  name: string;
+  registration_number: string;
+  email: string;
+  userEmail: string;
+  phone: string;
+  address: string;
+  website: string;
+  is_verified_status: 'pending';
+  about: string;
+  logourl: string | null;
+  geo_location: string;
+  bank_details: BankDetails;
+  verification_documents: VerificationDocument[];
 }
 
-export type { 
-  
-  Campaign, Donor, UserData , CloudinaryImage , bankDetails, PaystackBank , KycFormData , CenterRegistrationPayload,
+export type {
+  Campaign,
+  Donor,
+  UserData,
+  CloudinaryImage,
+  bankDetails,
+  PaystackBank,
+  KycFormData,
+  CenterRegistrationPayload,
   Subscribed,
-  Comments
-  
-} 
+  Comments,
+};

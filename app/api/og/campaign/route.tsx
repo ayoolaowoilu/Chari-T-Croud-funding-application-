@@ -11,10 +11,19 @@ export async function GET(request: NextRequest) {
   const id = idParam ? Number(idParam) : null;
   if (!id || isNaN(id) || id <= 0) {
     return new ImageResponse(
-      <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a' }}>
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#1a1a1a',
+        }}
+      >
         <span style={{ color: '#fff', fontSize: 32 }}>Invalid Cause ID</span>
       </div>,
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630 },
     );
   }
 
@@ -24,19 +33,37 @@ export async function GET(request: NextRequest) {
     data = await fetchOneCauseById(id, 1);
   } catch {
     return new ImageResponse(
-      <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a' }}>
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#1a1a1a',
+        }}
+      >
         <span style={{ color: '#fff', fontSize: 28 }}>Unable to load cause</span>
       </div>,
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630 },
     );
   }
 
   if (!data) {
     return new ImageResponse(
-      <div style={{ display: 'flex', height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a' }}>
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#1a1a1a',
+        }}
+      >
         <span style={{ color: '#fff', fontSize: 28 }}>Cause not found</span>
       </div>,
-      { width: 1200, height: 630 }
+      { width: 1200, height: 630 },
     );
   }
 
@@ -73,7 +100,6 @@ export async function GET(request: NextRequest) {
         }}
       />
 
-     
       <div
         style={{
           position: 'absolute',
@@ -86,8 +112,6 @@ export async function GET(request: NextRequest) {
         }}
       />
 
-
-   
       <div
         style={{
           position: 'absolute',
@@ -126,7 +150,6 @@ export async function GET(request: NextRequest) {
         />
       </div>
 
-
       <div
         style={{
           position: 'absolute',
@@ -146,6 +169,6 @@ export async function GET(request: NextRequest) {
     {
       width: 1200,
       height: 630,
-    }
+    },
   );
 }

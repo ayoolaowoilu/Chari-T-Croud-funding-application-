@@ -1,19 +1,17 @@
-import db from "@/app/lib/DBschema";
-import { NextRequest, NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const id = request.nextUrl.searchParams.get("id");
-  const type = Number(request.nextUrl.searchParams.get("type"));
+  const id = request.nextUrl.searchParams.get('id');
+  const type = Number(request.nextUrl.searchParams.get('type'));
 
   if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   }
 
-  const cacheKey = `campaign:${id}:type${type}`;
+  const _cacheKey = `campaign:${id}:type${type}`;
 
   try {
- 
-
     let sql: string;
 
     if (type === 1) {
@@ -23,13 +21,10 @@ export async function GET(request: NextRequest) {
     }
 
     const [data]: any = await db.query(sql, [id]);
-    console.log(data)
-
 
     return NextResponse.json(data, { status: 200 });
-
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: "Internal Server error" }, { status: 500 });
+  } catch (_error) {
+    console.log(_error);
+    return NextResponse.json({ error: 'Internal Server error' }, { status: 500 });
   }
 }

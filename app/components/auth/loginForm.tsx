@@ -1,64 +1,47 @@
+'use client';
 
+import SocialButtons from './socialButtons';
+import { useSearchParams } from 'next/navigation';
+import { AlertCircle } from 'lucide-react';
 
-import { Lock, Mail, Search, User, UserCircle } from "lucide-react";
-import Button from "../ui/button";
-import SocialButtons from "./socialButtons";
-import { useState } from "react";
-import { DualRingSpinner } from "../ui/loading";
+const ERROR_COPY: Record<string, string> = {
+  OAuthSignin: 'Could not reach the sign-in provider. Check your network connection and try again.',
+  OAuthCallback: 'Sign-in was interrupted. Please try again.',
+  OAuthCreateAccount: 'We could not create your account. Please try again in a moment.',
+  Callback: 'Something went wrong during sign-in. Please try again.',
+  OAuthAccountNotLinked: 'This email is already linked to another sign-in method.',
+  EmailCreateAccount: 'We could not create your account with that email.',
+  AccessDenied: 'Access was denied. You may have cancelled sign-in.',
+  Configuration: 'Sign-in is misconfigured. Please contact support.',
+  Default: 'Sign-in failed. Please try again.',
+};
 
+export default function LoginForm() {
+  const params = useSearchParams();
+  const error = params.get('error');
+  const message = error && (ERROR_COPY[error] || ERROR_COPY.Default);
 
-export default function LoginForm(){
-      const [loading , setLoading] = useState(false);
+  return (
+    <div className="w-full space-y-4">
+      {message && (
+        <div
+          role="alert"
+          className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        >
+          <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" strokeWidth={1.75} />
+          <div>
+            <p className="font-semibold text-amber-950">Sign-in issue</p>
+            <p className="mt-0.5 text-amber-800/90 leading-relaxed">{message}</p>
+          </div>
+        </div>
+      )}
 
-    return(
-         <div className="">
-            
-        {loading ? (
-              <div className="p-6 pt-10 mx-auto  h-100 my-auto w-full rounded  flex flex-col items-center bg-white">
-                <DualRingSpinner  />
-                <div className="mx-auto text-gray-600">
-                     logging in...
-                </div>
-
-                </div>
-        ) : (
-               <div className="p-6 mx-auto my-auto w-full  rounded h-lg   bg-white mt-10">
-                    {/* <div className="mt-4 text-2xl font-bold text-gray-700">
-                          Login Form
-                    </div>
-                    <small className="text-xs text-gray-500 mb-4">Impact Lives</small>
-
-                     <div className="relative w-full mt-4">
-                            <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                
-                                type="text"
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-                                placeholder="Input Email Address "
-                            />
-                        </div>
-
-                          <div className="relative w-full mt-4">
-                            <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                
-                                type="password"
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-                                placeholder="Input Password "
-                            />
-                        </div>
-
-                        <Button className="mt-4 w-full" details="Sign In" variant="secondary" size="md" /> */}
-
-                          {/* <div className="flex mt-4 justify-center text-gray-500">
-                          Or continue with
-                          </div> */}
-
-                                <SocialButtons />
-
-                    </div>
-        )}
-            </div>
-  
-    )
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-[var(--shadow-sm)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400 mb-4">
+          Continue with
+        </p>
+        <SocialButtons />
+      </div>
+    </div>
+  );
 }

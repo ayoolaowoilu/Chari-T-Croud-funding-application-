@@ -1,56 +1,58 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import Footer from "@/app/components/layout/footer";
-import NavBar from "@/app/components/layout/NavBar";
-
-
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Footer from '@/app/components/layout/footer';
+import NavBar from '@/app/components/layout/NavBar';
 
 type StyleInfo = {
   name: string;
   desc: string;
 };
 
-
 const STYLE_LABELS: Record<number, StyleInfo> = {
-  1: { name: "Magazine Cover", desc: "Bold hero image with editorial layout and story-driven stats" },
-  2: { name: "Poster Dark", desc: "High-contrast dark theme with cinematic image treatment" },
-  3: { name: "Ticket Card", desc: "Dashed borders, rounded corners, event-ticket aesthetic" },
-  4: { name: "Story Mode", desc: "Full-bleed photography with narrative copy and impact focus" },
-  5: { name: "Minimal Impact", desc: "Clean grid layout with bold typography and side image" },
+  1: {
+    name: 'Magazine Cover',
+    desc: 'Bold hero image with editorial layout and story-driven stats',
+  },
+  2: { name: 'Poster Dark', desc: 'High-contrast dark theme with cinematic image treatment' },
+  3: { name: 'Ticket Card', desc: 'Dashed borders, rounded corners, event-ticket aesthetic' },
+  4: { name: 'Story Mode', desc: 'Full-bleed photography with narrative copy and impact focus' },
+  5: { name: 'Minimal Impact', desc: 'Clean grid layout with bold typography and side image' },
 };
 
 const STYLES = [1, 2, 3, 4, 5] as const;
 
-
-
 function formatCurrency(amount: string): string {
   const num = parseFloat(amount);
-  if (isNaN(num)) return "₦0";
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
+  if (isNaN(num)) return '₦0';
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
     maximumFractionDigits: 0,
   }).format(num);
 }
 
-function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
+    const textToCopy =
+      text.startsWith('/') && typeof window !== 'undefined'
+        ? `${window.location.origin}${text}`
+        : text;
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand("copy");
+      document.execCommand('copy');
       document.body.removeChild(textarea);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -62,11 +64,11 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
       onClick={handleCopy}
       className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 ${
         copied
-          ? "bg-green-50 border-green-300 text-green-700"
-          : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+          ? 'bg-green-50 border-green-300 text-green-700'
+          : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
       }`}
     >
-      {copied ? "Copied!" : label}
+      {copied ? 'Copied!' : label}
     </button>
   );
 }
@@ -85,7 +87,7 @@ function FlierCard({
   const label = STYLE_LABELS[style];
 
   const handleDownload = useCallback(() => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = imageUrl;
     link.download = downloadUrl;
     document.body.appendChild(link);
@@ -109,11 +111,24 @@ function FlierCard({
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-10">
             <div className="text-center px-6">
-              <svg className="w-10 h-10 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="w-10 h-10 text-red-400 mx-auto mb-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
               <p className="text-sm text-red-600 font-medium">Failed to load</p>
-              <button onClick={() => window.location.reload()} className="mt-2 text-xs text-red-500 hover:text-red-700 underline">
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-xs text-red-500 hover:text-red-700 underline"
+              >
                 Retry
               </button>
             </div>
@@ -125,7 +140,7 @@ function FlierCard({
           alt={`Style ${style} — ${label.name}`}
           onLoad={() => setLoaded(true)}
           onError={() => setError(true)}
-          className={`w-full h-full object-cover transition-transform duration-500 ${loaded ? "group-hover:scale-[1.03]" : "opacity-0"}`}
+          className={`w-full h-full object-cover transition-transform duration-500 ${loaded ? 'group-hover:scale-[1.03]' : 'opacity-0'}`}
           loading="lazy"
         />
 
@@ -149,7 +164,12 @@ function FlierCard({
             className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
             </svg>
             Download
           </button>
@@ -161,54 +181,53 @@ function FlierCard({
   );
 }
 
-
 export default function Flier() {
   const searchParams = useSearchParams();
   useEffect(() => {
-      document.title = `Flier Preview - ${searchParams.get("campaign_name") || "Support Our Cause"}`;
-  }, []);
+    document.title = `Flier Preview - ${searchParams.get('campaign_name') || 'Support Our Cause'}`;
+  }, [searchParams]);
 
   const baseData = useMemo(
     () => ({
-      campaign_name: searchParams.get("campaign_name") || "Support Our Cause",
-      raised: searchParams.get("raised") || "0",
-      goal: searchParams.get("goal") || undefined,
-      campaign_id: parseInt(searchParams.get("campaign_id") || "0", 10),
-      center_logo_url: searchParams.get("center_logo_url") || undefined,
+      campaign_name: searchParams.get('campaign_name') || 'Support Our Cause',
+      raised: searchParams.get('raised') || '0',
+      goal: searchParams.get('goal') || undefined,
+      campaign_id: parseInt(searchParams.get('campaign_id') || '0', 10),
+      center_logo_url: searchParams.get('center_logo_url') || undefined,
       campaign_logo_url:
-        searchParams.get("campaign_logo_url") ||
-        "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=1200&h=800&fit=crop",
+        searchParams.get('campaign_logo_url') ||
+        'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?w=1200&h=800&fit=crop',
       qr_code_url:
-        searchParams.get("qr_code_url") ||
-        "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://chari-t.com/donate",
-      tagline: searchParams.get("tagline") || undefined,
-      details: searchParams.get("details") || undefined,
-      center_name: searchParams.get("center_name") || undefined,
-      center_handle: searchParams.get("center_handle") || undefined,
-      _type: (searchParams.get("_type") as "center" | "normal") || "normal",
+        searchParams.get('qr_code_url') ||
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://chari-t.com/donate',
+      tagline: searchParams.get('tagline') || undefined,
+      details: searchParams.get('details') || undefined,
+      center_name: searchParams.get('center_name') || undefined,
+      center_handle: searchParams.get('center_handle') || undefined,
+      _type: (searchParams.get('_type') as 'center' | 'normal') || 'normal',
     }),
-    [searchParams]
+    [searchParams],
   );
 
   const getFlierUrl = useCallback(
-    (style: number):string => {
+    (style: number): string => {
       const sp = new URLSearchParams();
-      sp.set("style", String(style));
-      sp.set("campaign_name", baseData.campaign_name);
-      sp.set("raised", baseData.raised);
-      if (baseData.goal) sp.set("goal", baseData.goal);
-      sp.set("campaign_id", String(baseData.campaign_id));
-      sp.set("campaign_logo_url", baseData.campaign_logo_url);
-      sp.set("qr_code_url", baseData.qr_code_url);
-      if (baseData.tagline) sp.set("tagline", baseData.tagline);
-      if (baseData.details) sp.set("details", baseData.details);
-      if (baseData.center_name) sp.set("center_name", baseData.center_name);
-      if (baseData.center_handle) sp.set("center_handle", baseData.center_handle);
-      if (baseData.center_logo_url) sp.set("center_logo_url", baseData.center_logo_url);
-      sp.set("_type", baseData._type);
-      return `${window.origin}/api/flier?${sp.toString()}`;
+      sp.set('style', String(style));
+      sp.set('campaign_name', baseData.campaign_name);
+      sp.set('raised', baseData.raised);
+      if (baseData.goal) sp.set('goal', baseData.goal);
+      sp.set('campaign_id', String(baseData.campaign_id));
+      sp.set('campaign_logo_url', baseData.campaign_logo_url);
+      sp.set('qr_code_url', baseData.qr_code_url);
+      if (baseData.tagline) sp.set('tagline', baseData.tagline);
+      if (baseData.details) sp.set('details', baseData.details);
+      if (baseData.center_name) sp.set('center_name', baseData.center_name);
+      if (baseData.center_handle) sp.set('center_handle', baseData.center_handle);
+      if (baseData.center_logo_url) sp.set('center_logo_url', baseData.center_logo_url);
+      sp.set('_type', baseData._type);
+      return `/api/flier?${sp.toString()}`;
     },
-    [baseData]
+    [baseData],
   );
 
   const progress = useMemo(() => {
@@ -230,8 +249,8 @@ export default function Flier() {
             <span className="px-3 py-1 rounded-full bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Campaign #{baseData.campaign_id}
             </span>
-          
-            {baseData._type === "center" && baseData.center_name && (
+
+            {baseData._type === 'center' && baseData.center_name && (
               <span className="px-3 py-1 rounded-full bg-blue-50 text-xs font-semibold text-blue-700 uppercase tracking-wider">
                 {baseData.center_name} ✓
               </span>
@@ -243,7 +262,7 @@ export default function Flier() {
           </h1>
 
           <p className="mt-3 text-lg text-gray-500 max-w-2xl">
-            All 5 style variations for{" "}
+            All 5 style variations for{' '}
             <span className="font-semibold text-gray-900">{baseData.campaign_name}</span>
           </p>
 
@@ -253,15 +272,21 @@ export default function Flier() {
               <span className="text-3xl font-black text-gray-900">
                 {formatCurrency(baseData.raised)}
               </span>
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">raised</span>
+              <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                raised
+              </span>
             </div>
 
             {baseData.goal && (
               <>
                 <div className="hidden sm:block w-px h-8 bg-gray-200" />
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold text-gray-600">{formatCurrency(baseData.goal)}</span>
-                  <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">goal</span>
+                  <span className="text-xl font-bold text-gray-600">
+                    {formatCurrency(baseData.goal)}
+                  </span>
+                  <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                    goal
+                  </span>
                 </div>
               </>
             )}
@@ -271,7 +296,10 @@ export default function Flier() {
                 <div className="hidden sm:block w-px h-8 bg-gray-200" />
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-gray-900 rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
+                    <div
+                      className="h-full bg-gray-900 rounded-full transition-all duration-700"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
                   <span className="text-sm font-bold text-gray-900">{progress}%</span>
                 </div>
@@ -295,10 +323,22 @@ export default function Flier() {
         {/* URL Builder */}
         <div className="mt-20 p-8 bg-gray-50 rounded-2xl border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">URL Parameters</h3>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+              URL Parameters
+            </h3>
           </div>
 
           <code className="block text-sm text-gray-600 font-mono bg-white p-5 rounded-xl border border-gray-200 overflow-x-auto leading-relaxed">
@@ -308,27 +348,39 @@ export default function Flier() {
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-gray-500">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span><strong>campaign_logo_url</strong> — required</span>
+              <span>
+                <strong>campaign_logo_url</strong> — required
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span><strong>qr_code_url</strong> — required (QR image)</span>
+              <span>
+                <strong>qr_code_url</strong> — required (QR image)
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span><strong>tagline</strong> — optional short message</span>
+              <span>
+                <strong>tagline</strong> — optional short message
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span><strong>details</strong> — optional longer description</span>
+              <span>
+                <strong>details</strong> — optional longer description
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span><strong>center_name</strong> — shows verified badge</span>
+              <span>
+                <strong>center_name</strong> — shows verified badge
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span><strong>_type</strong> — "center" or "normal"</span>
+              <span>
+                <strong>_type</strong> — "center" or "normal"
+              </span>
             </div>
           </div>
         </div>

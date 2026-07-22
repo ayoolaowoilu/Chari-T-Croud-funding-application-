@@ -7,16 +7,23 @@ Chari-T is a purpose-built digital platform designed to bridge the gap between c
 - User authentication & role management (donor/admin)
 - KYC verification system
 - Campaign creation & management
-- Donation processing
+- Donation processing (Paystack + server-side verification)
 - Center/organization verification
 - Reporting system
 - Safety ratings for campaigns
+- Optional tips only (no platform cut on gifts)
+- Blind / anonymous-to-fundraiser donations
 
+## Product idea (hackathon)
+
+Chari-T is a **trust-first** crowdfunding platform: donors discover causes and verified charity centers, fundraisers pass bank + KYC checks, and campaigns carry **safety ratings** driven by verification and community reports.
 
 ## Tech Stack
 
-- **Frontend:** Next.js, React , cloudinary
-- **Database:** MySQL , redis ,Serverless , typescript 
+- **Frontend:** Next.js, React, Tailwind, Cloudinary
+- **Backend:** Next.js API routes, TypeScript
+- **Database:** MySQL + Upstash Redis
+- **Payments:** Paystack (subaccounts + tips)
 
 ## Getting Started
 
@@ -36,6 +43,7 @@ npm install
 ### Enviroment variables
 
 ### .env(ill drop the testKeys if ur intrested)
+
 ```bash
 
 GOOGLE_CLIENT_ID = ""
@@ -45,24 +53,33 @@ DB_USER = root
 DB_PASSWORD = "khaleed"
 DB_PORT = "3306"
 DB_DATABASE = "charit"
+# Remote MySQL (Aiven etc.) — longer timeouts / smaller pool help avoid ETIMEDOUT
+# DB_CONNECT_TIMEOUT=20000
+# DB_POOL_SIZE=5
+# DB_SSL=true
+# DB_SSL_REJECT_UNAUTHORIZED=false
 CLOUDINARY_CLOUD_NAME = ""
 CLOUDINARY_API_KEY = ""
 CLOUDINARY_API_SECRET = ""
 API_URL = "http://localhost:3000"
-NEXT_PUBLIC_PAYSTACK_SECRET_KEY = "sk_test_df293748288b83367301d9b9f68a3fd7582a0e37"
-NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY = "pk_test_a3556b84fe1c7b8fab91df5491aff03c0c9ac2e0"
+# Prefer PAYSTACK_SECRET_KEY (server-only). NEXT_PUBLIC_ is supported for legacy demos only.
+PAYSTACK_SECRET_KEY = "sk_test_..."
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY = "pk_test_..."
 PAYSTACK_APP_URL ="https://api.paystack.co"
 
 ```
+
 ### .env.local
+
 ```bash
 NEXTAUTH_URL = http://localhost:3000
 NEXTAUTH_SECRET = "jijsijijejijje jijjfjjjefeeff"
- ```
-
+```
 
 ### Database Setup
+
 Run the following SQL to create the required tables(MySql):
+
 ```bash
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,7 +92,7 @@ CREATE TABLE users (
     method varchar(255),
     donations INT DEFAULT 0,
     recieved INT DEFAULT 0,
-    bank_details JSON 
+    bank_details JSON
 );
 
 CREATE TABLE kyc (
@@ -174,8 +191,49 @@ CREATE TABLE reports (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
-### Running 
- ```bash
- npm run dev
+
+### Running
+
+```bash
+pnpm install
+pnpm dev
 ```
 
+### Demo walkthrough (for presentations)
+
+1. **Landing** — `/` — mission, featured causes, blind-donation pitch, zero-fee story
+2. **How it works** — `/how-it-works` — safety tiers + start-a-cause steps
+3. **Browse** — `/causes/get` — filter by category
+4. **Sign in** — Google / X
+5. **Bank + KYC** — required before publishing a cause
+6. **Start a cause** — `/startcauses` — multi-step wizard with drafts
+7. **Donate** — open a cause → Donate → optional tip → Paystack test card
+8. **Local centers** — `/dashboard/centers/local-centers`
+9. **Admin** — `/admin` (user `role` must be `admin` in MySQL)
+
+### Schema upgrades (existing DBs)
+
+```sql
+ALTER TABLE centers ADD COLUMN total_donators INT DEFAULT 0;
+ALTER TABLE centers ADD COLUMN total_campaigns INT DEFAULT 0;
+-- Promote a demo admin:
+-- UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+```
+
+### Demo seed campaigns
+
+```bash
+# After tables exist:
+mysql -u root -p charit < scripts/demo-seed.sql
+```
+
+Creates `demo@chari-t.local` + 3 sample campaigns with local images so browse/donate UI looks full during presentations.  
+**Note:** Live Paystack still needs a real subaccount code on the campaign/user bank details.
+
+### Paystack webhook (recommended)
+
+In Paystack Dashboard → Settings → Webhooks:
+
+`https://<your-domain>/api/webhooks/paystack`
+
+Events: `charge.success`. Uses HMAC `x-paystack-signature` + the same verified recording path as the client callback.

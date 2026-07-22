@@ -1,126 +1,145 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { FetchProfile } from "../lib/fetchRequests"
-import { useSession } from "next-auth/react"
-import NavBar from "../components/layout/NavBar"
-import Footer from "../components/layout/footer"
-import { DualRingSpinner } from "../components/ui/loading"
+import { useEffect, useState } from 'react';
+import { FetchProfile } from '../lib/fetchRequests';
+import { useSession } from 'next-auth/react';
+import NavBar from '../components/layout/NavBar';
+import Footer from '../components/layout/footer';
+import { DualRingSpinner } from '../components/ui/loading';
 import {
-  AlertCircle, Users, Building2, Megaphone, CheckCircle, Clock,
-  CreditCard, Flag, ChevronLeft, ChevronRight, Search, Ban, Eye,
-  Check, X, Trash2, ShieldAlert, FileText, UserCheck, UserX,
-  HandCoins, ExternalLink, MapPin, Globe, Phone, Calendar
-} from "lucide-react"
-import Button from "../components/ui/button"
+  AlertCircle,
+  Users,
+  Building2,
+  Megaphone,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Flag,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Ban,
+  Check,
+  X,
+  Trash2,
+  ShieldAlert,
+  FileText,
+  UserCheck,
+  UserX,
+  HandCoins,
+  ExternalLink,
+  MapPin,
+  Globe,
+  Phone,
+  Calendar,
+} from 'lucide-react';
+import Button from '../components/ui/button';
 
 // ─── Types ─────────────────────────────────────────────────────────
 
 interface Stats {
-  totalUsers: number
-  totalCenters: number
-  all_time_campaigns: number
-  funded_campaigns: number
-  due_campaigns: number
-  all_time_transactions: number
-  reported_campaigns: number
+  totalUsers: number;
+  totalCenters: number;
+  all_time_campaigns: number;
+  funded_campaigns: number;
+  due_campaigns: number;
+  all_time_transactions: number;
+  reported_campaigns: number;
 }
 
 interface Campaign {
-  id: number
-  name: string
-  main_img: string
-  goal: number
-  raised: number
-  _type: string
-  center_name: string | null
-  user_id: number
-  date_to_completion: number // Date.now() timestamp
-  created_at: string
-  currency: "NG" | "USD" | "EURO"
-  category: string
-  donation_count: number
-  safety_rating: 'verified_safe' | 'likely_safe' | 'uncertain' | 'likely_risky' | 'unsafe'
-  reports: number
+  id: number;
+  name: string;
+  main_img: string;
+  goal: number;
+  raised: number;
+  _type: string;
+  center_name: string | null;
+  user_id: number;
+  date_to_completion: number; // Date.now() timestamp
+  created_at: string;
+  currency: 'NG' | 'USD' | 'EURO';
+  category: string;
+  donation_count: number;
+  safety_rating: 'verified_safe' | 'likely_safe' | 'uncertain' | 'likely_risky' | 'unsafe';
+  reports: number;
 }
 
 interface Center {
-  id?: number
-  name: string
-  registration_number: string
-  email: string
-  userEmail: string
-  phone: string
-  address: string
-  website: string
-  is_verified_status: 'pending' | 'verified' | 'rejected'
-  about: string
-  logourl: string | null
-  geo_location: string
-  verification_documents: { url: string; type: string }[]
-  created_at?: string
+  id?: number;
+  name: string;
+  registration_number: string;
+  email: string;
+  userEmail: string;
+  phone: string;
+  address: string;
+  website: string;
+  is_verified_status: 'pending' | 'verified' | 'rejected';
+  about: string;
+  logourl: string | null;
+  geo_location: string;
+  verification_documents: { url: string; type: string }[];
+  created_at?: string;
 }
 
 interface KycData {
-  id: number
-  user_id: number
-  full_name: string
-  date_of_birth: string
-  phone: string
-  address_line: string
-  city: string
-  state: string
-  document_type: 'NIN' | 'BVN' | 'DRIVERS_LICENSE' | 'PASSPORT' | 'VOTERS_CARD'
-  document_number: string
-  document_url: string
-  document_public_id: string
-  status: 'pending' | 'approved' | 'rejected'
-  rejection_reason: string | null
-  created_at: string
-  updated_at: string
-  reviewed_at: string | null
+  id: number;
+  user_id: number;
+  full_name: string;
+  date_of_birth: string;
+  phone: string;
+  address_line: string;
+  city: string;
+  state: string;
+  document_type: 'NIN' | 'BVN' | 'DRIVERS_LICENSE' | 'PASSPORT' | 'VOTERS_CARD';
+  document_number: string;
+  document_url: string;
+  document_public_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewed_at: string | null;
 }
 
 interface UserData {
-  id?: number
-  full_name: string
-  email: string
-  is_verified: number
-  created_at: string
-  image: string
-  donations: number
-  recived: number
-  method: string
-  kyc?: KycData
+  id?: number;
+  full_name: string;
+  email: string;
+  is_verified: number;
+  created_at: string;
+  image: string;
+  donations: number;
+  recived: number;
+  method: string;
+  kyc?: KycData;
 }
 
 interface Transaction {
-  id: number
-  owner_id: number
-  refrence: string
-  ammount: number
-  payer_id: number | null
-  paid_to: "normal" | "center"
-  created_at?: string
+  id: number;
+  owner_id: number;
+  refrence: string;
+  ammount: number;
+  payer_id: number | null;
+  paid_to: 'normal' | 'center';
+  created_at?: string;
 }
 
-type TableType = "users" | "centers" | "campaigns" | "transactions"
-type CampaignFilter = "all" | "funded" | "due" | "reported"
-
-
+type TableType = 'users' | 'centers' | 'campaigns' | 'transactions';
+type CampaignFilter = 'all' | 'funded' | 'due' | 'reported';
 
 function KycModal({
   isOpen,
   onClose,
   user,
-  kyc
+  kyc,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  user: UserData | null
-  kyc: KycData | null
+  isOpen: boolean;
+  onClose: () => void;
+  user: UserData | null;
+  kyc: KycData | null;
 }) {
-  if (!isOpen || !user) return null
+  if (!isOpen || !user) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -152,21 +171,33 @@ function KycModal({
         ) : (
           <div className="p-6 space-y-6">
             {/* Status Banner */}
-            <div className={`rounded-xl p-4 flex items-center gap-3 ${
-              kyc.status === 'approved' ? 'bg-green-50 border border-green-200' :
-              kyc.status === 'rejected' ? 'bg-red-50 border border-red-200' :
-              'bg-amber-50 border border-amber-200'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                kyc.status === 'approved' ? 'bg-green-500' :
-                kyc.status === 'rejected' ? 'bg-red-500' :
-                'bg-amber-500'
-              }`} />
-              <span className={`font-medium capitalize ${
-                kyc.status === 'approved' ? 'text-green-700' :
-                kyc.status === 'rejected' ? 'text-red-700' :
-                'text-amber-700'
-              }`}>
+            <div
+              className={`rounded-xl p-4 flex items-center gap-3 ${
+                kyc.status === 'approved'
+                  ? 'bg-green-50 border border-green-200'
+                  : kyc.status === 'rejected'
+                    ? 'bg-red-50 border border-red-200'
+                    : 'bg-amber-50 border border-amber-200'
+              }`}
+            >
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  kyc.status === 'approved'
+                    ? 'bg-green-500'
+                    : kyc.status === 'rejected'
+                      ? 'bg-red-500'
+                      : 'bg-amber-500'
+                }`}
+              />
+              <span
+                className={`font-medium capitalize ${
+                  kyc.status === 'approved'
+                    ? 'text-green-700'
+                    : kyc.status === 'rejected'
+                      ? 'text-red-700'
+                      : 'text-amber-700'
+                }`}
+              >
                 {kyc.status}
               </span>
               {kyc.reviewed_at && (
@@ -178,7 +209,9 @@ function KycModal({
 
             {/* Personal Info */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Personal Information</h4>
+              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+                Personal Information
+              </h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-gray-500 text-xs mb-1">Full Name</p>
@@ -186,7 +219,9 @@ function KycModal({
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-gray-500 text-xs mb-1">Date of Birth</p>
-                  <p className="font-medium text-gray-900">{new Date(kyc.date_of_birth).toLocaleDateString()}</p>
+                  <p className="font-medium text-gray-900">
+                    {new Date(kyc.date_of_birth).toLocaleDateString()}
+                  </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-gray-500 text-xs mb-1">Phone</p>
@@ -201,16 +236,22 @@ function KycModal({
 
             {/* Address */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Address</h4>
+              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+                Address
+              </h4>
               <div className="p-3 bg-gray-50 rounded-lg text-sm">
                 <p className="text-gray-900">{kyc.address_line}</p>
-                <p className="text-gray-500">{kyc.city}, {kyc.state}</p>
+                <p className="text-gray-500">
+                  {kyc.city}, {kyc.state}
+                </p>
               </div>
             </div>
 
             {/* Document */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Document</h4>
+              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+                Document
+              </h4>
               <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-200">
                 <div className="p-3 bg-gray-100 rounded-lg">
                   <FileText className="w-6 h-6 text-gray-600" />
@@ -246,19 +287,19 @@ function KycModal({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function CenterDocsModal({
   isOpen,
   onClose,
-  center
+  center,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  center: Center | null
+  isOpen: boolean;
+  onClose: () => void;
+  center: Center | null;
 }) {
-  if (!isOpen || !center) return null
+  if (!isOpen || !center) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -291,7 +332,9 @@ function CenterDocsModal({
 
           {/* Contact & Web */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Contact</h4>
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              Contact
+            </h4>
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <MailIcon className="w-4 h-4 text-gray-400" />
@@ -303,7 +346,9 @@ function CenterDocsModal({
               </div>
               {center.website && (
                 <a
-                  href={center.website.startsWith('http') ? center.website : `https://${center.website}`}
+                  href={
+                    center.website.startsWith('http') ? center.website : `https://${center.website}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-sm text-blue-600 hover:underline"
@@ -317,7 +362,9 @@ function CenterDocsModal({
 
           {/* Location */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Location</h4>
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              Location
+            </h4>
             <div className="p-3 bg-gray-50 rounded-lg">
               <div className="flex items-start gap-2 text-sm text-gray-700">
                 <MapPin className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
@@ -332,20 +379,27 @@ function CenterDocsModal({
           {/* About */}
           {center.about && (
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">About</h4>
+              <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+                About
+              </h4>
               <p className="text-sm text-gray-600 leading-relaxed">{center.about}</p>
             </div>
           )}
 
           {/* Verification Documents */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Verification Documents</h4>
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              Verification Documents
+            </h4>
             {!center.verification_documents?.length ? (
               <p className="text-sm text-gray-500">No documents uploaded</p>
             ) : (
               <div className="space-y-2">
                 {center.verification_documents.map((doc, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors"
+                  >
                     <div className="p-2 bg-gray-100 rounded-lg">
                       <FileText className="w-5 h-5 text-gray-600" />
                     </div>
@@ -369,265 +423,291 @@ function CenterDocsModal({
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-
 
 function MailIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
     </svg>
-  )
+  );
 }
-
-
 
 interface StatCardProps {
-  label: string
-  value: number
-  icon: React.ReactNode
-  accent?: "default" | "success" | "warning" | "danger"
-  onClick?: () => void
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  accent?: 'default' | 'success' | 'warning' | 'danger';
+  onClick?: () => void;
 }
 
-function StatCard({ label, value, icon, accent = "default", onClick }: StatCardProps) {
+function StatCard({ label, value, icon, accent = 'default', onClick }: StatCardProps) {
   const accentStyles = {
-    default: "border-gray-200 hover:border-gray-300",
-    success: "border-green-200 bg-green-50/50 hover:border-green-300",
-    warning: "border-amber-200 bg-amber-50/50 hover:border-amber-300",
-    danger: "border-red-200 bg-red-50/50 hover:border-red-300",
-  }
+    default: 'border-gray-200 hover:border-gray-300',
+    success: 'border-green-200 bg-green-50/50 hover:border-green-300',
+    warning: 'border-amber-200 bg-amber-50/50 hover:border-amber-300',
+    danger: 'border-red-200 bg-red-50/50 hover:border-red-300',
+  };
 
   return (
     <button
       onClick={onClick}
       className={`w-full text-left rounded-xl border ${accentStyles[accent]} bg-white p-6 shadow-sm transition-all hover:shadow-md`}
     >
-      <div className="p-2 rounded-lg bg-gray-100 text-gray-700 w-fit">
-        {icon}
-      </div>
+      <div className="p-2 rounded-lg bg-gray-100 text-gray-700 w-fit">{icon}</div>
       <div className="mt-4">
         <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
         <p className="text-sm text-gray-500 mt-1">{label}</p>
       </div>
     </button>
-  )
+  );
 }
 
 function SafetyBadge({ rating }: { rating: Campaign['safety_rating'] }) {
   const styles = {
-    verified_safe: "bg-green-100 text-green-700",
-    likely_safe: "bg-emerald-100 text-emerald-700",
-    uncertain: "bg-amber-100 text-amber-700",
-    likely_risky: "bg-orange-100 text-orange-700",
-    unsafe: "bg-red-100 text-red-700",
-  }
+    verified_safe: 'bg-green-100 text-green-700',
+    likely_safe: 'bg-emerald-100 text-emerald-700',
+    uncertain: 'bg-amber-100 text-amber-700',
+    likely_risky: 'bg-orange-100 text-orange-700',
+    unsafe: 'bg-red-100 text-red-700',
+  };
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[rating] || "bg-gray-100 text-gray-600"}`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${styles[rating] || 'bg-gray-100 text-gray-600'}`}
+    >
       {rating?.replace('_', ' ') || 'Unknown'}
     </span>
-  )
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending: "bg-amber-100 text-amber-700",
-    approved: "bg-green-100 text-green-700",
-    verified: "bg-green-100 text-green-700",
-    rejected: "bg-red-100 text-red-700",
-    completed: "bg-green-100 text-green-700",
-    failed: "bg-red-100 text-red-700",
-    active: "bg-blue-100 text-blue-700",
-  }
+    pending: 'bg-amber-100 text-amber-700',
+    approved: 'bg-green-100 text-green-700',
+    verified: 'bg-green-100 text-green-700',
+    rejected: 'bg-red-100 text-red-700',
+    completed: 'bg-green-100 text-green-700',
+    failed: 'bg-red-100 text-red-700',
+    active: 'bg-blue-100 text-blue-700',
+  };
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-600'}`}
+    >
       {status}
     </span>
-  )
+  );
 }
 
-
-
 export default function Page() {
-  const { data: session, status } = useSession()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
-  const [stage, setStage] = useState<1 | 2>(1)
-  const [stats, setStats] = useState<Stats | null>(null)
+  const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [stage, setStage] = useState<1 | 2>(1);
+  const [stats, setStats] = useState<Stats | null>(null);
 
- 
-  const [activeTable, setActiveTable] = useState<TableType>("campaigns")
-  const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("all")
-  const [tableData, setTableData] = useState<any[]>([])
-  const [tableLoading, setTableLoading] = useState(false)
-  const [page, setPage] = useState(0)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [totalPages, setTotalPages] = useState(1)
-  const [txTotal, setTxTotal] = useState(0)
+  const [activeTable, setActiveTable] = useState<TableType>('campaigns');
+  const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>('all');
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [totalPages, setTotalPages] = useState(1);
+  const [txTotal, setTxTotal] = useState(0);
 
+  const [kycModalOpen, setKycModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [selectedKyc, setSelectedKyc] = useState<KycData | null>(null);
 
-  const [kycModalOpen, setKycModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
-  const [selectedKyc, setSelectedKyc] = useState<KycData | null>(null)
-
-  const [centerModalOpen, setCenterModalOpen] = useState(false)
-  const [selectedCenter, setSelectedCenter] = useState<Center | null>(null)
-
+  const [centerModalOpen, setCenterModalOpen] = useState(false);
+  const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
 
   const fetchUserData = async () => {
-    setLoading(true)
-    setError(false)
-    if (status === "loading") return
+    setLoading(true);
+    setError(false);
+    if (status === 'loading') return;
 
     try {
-      const resp = await FetchProfile(session?.user?.email as string)
-      if (resp.error) { setError(true); return }
-      if (resp.userData.role !== "admin") { window.location.href = "/"; return }
+      const resp = await FetchProfile(session?.user?.email as string);
+      if (resp.error) {
+        setError(true);
+        return;
+      }
+      if (resp.userData.role !== 'admin') {
+        window.location.href = '/';
+        return;
+      }
 
-      const resp1 = await fetch("/api/ad45667899/stats")
-      if (!resp1.ok) { setError(true); return }
-      const data: Stats = await resp1.json()
-      setStats(data)
-    } catch (error) {
-      console.log(error)
-      setError(true)
+      const resp1 = await fetch('/api/ad45667899/stats');
+      if (!resp1.ok) {
+        setError(true);
+        return;
+      }
+      const data: Stats = await resp1.json();
+      setStats(data);
+    } catch (_error) {
+      console.log(_error);
+      setError(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
   const fetchTableData = async (
     targetTable: TableType,
     targetPage: number = 0,
-    filter?: CampaignFilter
+    filter?: CampaignFilter,
   ) => {
-    setTableLoading(true)
+    setTableLoading(true);
     try {
-      let url = `/api/ad45667899/data?page=${targetPage}&table=${targetTable}`
-      if (targetTable === "campaigns" && filter && filter !== "all") {
-        url += `&_type=${filter}`
+      let url = `/api/ad45667899/data?page=${targetPage}&table=${targetTable}`;
+      if (targetTable === 'campaigns' && filter && filter !== 'all') {
+        url += `&_type=${filter}`;
       }
-      const resp = await fetch(url)
-      if (!resp.ok) throw new Error("Failed to fetch")
-      const data = await resp.json()
-      setTableData(data.rows || [])
-      setTotalPages(data.totalPages || 1)
-      setPage(targetPage)
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Failed to fetch');
+      const data = await resp.json();
+      setTableData(data.rows || []);
+      setTotalPages(data.totalPages || 1);
+      setPage(targetPage);
 
       // Calculate transaction total
-      if (targetTable === "transactions") {
-        const total = (data.rows || []).reduce((sum: number, tx: Transaction) => sum + (tx.ammount || 0), 0)
-        setTxTotal(total)
+      if (targetTable === 'transactions') {
+        const total = (data.rows || []).reduce(
+          (sum: number, tx: Transaction) => sum + (tx.ammount || 0),
+          0,
+        );
+        setTxTotal(total);
       }
-    } catch (error) {
-      console.log(error)
+    } catch (_error) {
+      console.log(_error);
     } finally {
-      setTableLoading(false)
+      setTableLoading(false);
     }
-  }
+  };
   const fetchKyc = async (userId: number) => {
     try {
-      const resp = await fetch(`/api/ad45667899/kyc?userId=${userId}`)
-      if (!resp.ok) return null
-      const data = await resp.json()
-      console.log(data)
-      return data.kyc as KycData || null
-    } catch (error) {
-      console.log(error)
-      return null
+      const resp = await fetch(`/api/ad45667899/kyc?userId=${userId}`);
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      console.log(data);
+      return (data.kyc as KycData) || null;
+    } catch (_error) {
+      console.log(_error);
+      return null;
     }
-  }
+  };
   const openKycModal = async (user: UserData) => {
-    setSelectedUser(user)
-    const kyc = user.id ? await fetchKyc(user.id) : null
-    setSelectedKyc(kyc)
-    setKycModalOpen(true)
-  }
+    setSelectedUser(user);
+    const kyc = user.id ? await fetchKyc(user.id) : null;
+    setSelectedKyc(kyc);
+    setKycModalOpen(true);
+  };
   const openCenterModal = (center: Center) => {
-    setSelectedCenter(center)
-    setCenterModalOpen(true)
-  }
+    setSelectedCenter(center);
+    setCenterModalOpen(true);
+  };
   const handleVerifyUser = async (email: string, verify: boolean) => {
     try {
       await fetch(`/api/ad45667899/users/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verify }),
-      })
-      fetchTableData(activeTable, page, campaignFilter)
-    } catch (error) { console.log(error) }
-  }
+      });
+      fetchTableData(activeTable, page, campaignFilter);
+    } catch (_error) {
+      console.log(_error);
+    }
+  };
   const handleBanUser = async (email: string) => {
-    if (!confirm("Ban this user permanently?")) return
+    if (!confirm('Ban this user permanently?')) return;
     try {
       await fetch(`/api/ad45667899/users/ban`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      })
-      fetchTableData(activeTable, page, campaignFilter)
-    } catch (error) { console.log(error) }
-  }
+      });
+      fetchTableData(activeTable, page, campaignFilter);
+    } catch (_error) {
+      console.log(_error);
+    }
+  };
   const handleVerifyCenter = async (email: string, verify: boolean) => {
     try {
       await fetch(`/api/ad45667899/centers/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, verify }),
-      })
-      fetchTableData(activeTable, page, campaignFilter)
-    } catch (error) { console.log(error) }
-  }
+      });
+      fetchTableData(activeTable, page, campaignFilter);
+    } catch (_error) {
+      console.log(_error);
+    }
+  };
   const handleTakeDownCampaign = async (id: number) => {
-    if (!confirm("Take down this campaign?")) return
+    if (!confirm('Take down this campaign?')) return;
     try {
-      await fetch(`/api/ad45667899/campaigns/${id}/takedown`, { method: "POST" })
-      fetchTableData(activeTable, page, campaignFilter)
-    } catch (error) { console.log(error) }
-  }
+      await fetch(`/api/ad45667899/campaigns/${id}/takedown`, { method: 'POST' });
+      fetchTableData(activeTable, page, campaignFilter);
+    } catch (_error) {
+      console.log(_error);
+    }
+  };
   const handleRefundTransaction = async (id: number) => {
-    if (!confirm("Refund this transaction?")) return
+    if (!confirm('Refund this transaction?')) return;
     try {
-      await fetch(`/api/ad45667899/transactions/${id}/refund`, { method: "POST" })
-      fetchTableData(activeTable, page, campaignFilter)
-    } catch (error) { console.log(error) }
-  }
+      await fetch(`/api/ad45667899/transactions/${id}/refund`, { method: 'POST' });
+      fetchTableData(activeTable, page, campaignFilter);
+    } catch (_error) {
+      console.log(_error);
+    }
+  };
   const goToStage2 = (table: TableType, filter?: CampaignFilter) => {
-    setActiveTable(table)
-    if (filter) setCampaignFilter(filter)
-    setPage(0)
-    setSearchQuery("")
-    setTxTotal(0)
-    fetchTableData(table, 0, filter)
-    setStage(2)
-  }
+    setActiveTable(table);
+    if (filter) setCampaignFilter(filter);
+    setPage(0);
+    setSearchQuery('');
+    setTxTotal(0);
+    fetchTableData(table, 0, filter);
+    setStage(2);
+  };
 
-
-
-  useEffect(() => { fetchUserData() }, [status])
-
-
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData, status]);
 
   const filteredData = tableData.filter((item) => {
-    if (!searchQuery) return true
-    const q = searchQuery.toLowerCase()
-    if (activeTable === "users") return item.full_name?.toLowerCase().includes(q) || item.email?.toLowerCase().includes(q)
-    if (activeTable === "centers") return item.name?.toLowerCase().includes(q) || item.email?.toLowerCase().includes(q)
-    if (activeTable === "campaigns") return item.name?.toLowerCase().includes(q) || item.center_name?.toLowerCase().includes(q)
-    if (activeTable === "transactions") return item.refrence?.toLowerCase().includes(q) || item.owner_id?.toString().includes(q)
-    return true
-  })
-
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    if (activeTable === 'users')
+      return item.full_name?.toLowerCase().includes(q) || item.email?.toLowerCase().includes(q);
+    if (activeTable === 'centers')
+      return item.name?.toLowerCase().includes(q) || item.email?.toLowerCase().includes(q);
+    if (activeTable === 'campaigns')
+      return item.name?.toLowerCase().includes(q) || item.center_name?.toLowerCase().includes(q);
+    if (activeTable === 'transactions')
+      return item.refrence?.toLowerCase().includes(q) || item.owner_id?.toString().includes(q);
+    return true;
+  });
 
   const formatCampaignDate = (ts: number) => {
-    if (!ts || ts < 100000000000) return "—" 
-    return new Date(ts).toLocaleDateString()
-  }
+    if (!ts || ts < 100000000000) return '—';
+    return new Date(ts).toLocaleDateString();
+  };
   const isCampaignDue = (ts: number) => {
-    if (!ts) return false
-    return ts > Date.now()
-  }
+    if (!ts) return false;
+    return ts > Date.now();
+  };
 
   if (loading) {
     return (
@@ -638,7 +718,7 @@ export default function Page() {
         </div>
         <Footer />
       </div>
-    )
+    );
   }
   if (error) {
     return (
@@ -654,7 +734,7 @@ export default function Page() {
         </div>
         <Footer />
       </>
-    )
+    );
   }
   if (stage === 1) {
     return (
@@ -667,47 +747,94 @@ export default function Page() {
               <p className="text-sm text-gray-500">Platform overview and key metrics</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label="Total Users" value={stats?.totalUsers || 0} icon={<Users className="w-5 h-5" />} onClick={() => goToStage2("users")} />
-              <StatCard label="Total Centers" value={stats?.totalCenters || 0} icon={<Building2 className="w-5 h-5" />} onClick={() => goToStage2("centers")} />
-              <StatCard label="All Time Campaigns" value={stats?.all_time_campaigns || 0} icon={<Megaphone className="w-5 h-5" />} onClick={() => goToStage2("campaigns", "all")} />
-              <StatCard label="Funded Campaigns" value={stats?.funded_campaigns || 0} icon={<CheckCircle className="w-5 h-5" />} accent="success" onClick={() => goToStage2("campaigns", "funded")} />
-              <StatCard label="Due Campaigns" value={stats?.due_campaigns || 0} icon={<Clock className="w-5 h-5" />} accent="warning" onClick={() => goToStage2("campaigns", "due")} />
-              <StatCard label="All Time Transactions" value={stats?.all_time_transactions || 0} icon={<CreditCard className="w-5 h-5" />} onClick={() => goToStage2("transactions")} />
-              <StatCard label="Reported Campaigns" value={stats?.reported_campaigns || 0} icon={<Flag className="w-5 h-5" />} accent="danger" onClick={() => goToStage2("campaigns", "reported")} />
+              <StatCard
+                label="Total Users"
+                value={stats?.totalUsers || 0}
+                icon={<Users className="w-5 h-5" />}
+                onClick={() => goToStage2('users')}
+              />
+              <StatCard
+                label="Total Centers"
+                value={stats?.totalCenters || 0}
+                icon={<Building2 className="w-5 h-5" />}
+                onClick={() => goToStage2('centers')}
+              />
+              <StatCard
+                label="All Time Campaigns"
+                value={stats?.all_time_campaigns || 0}
+                icon={<Megaphone className="w-5 h-5" />}
+                onClick={() => goToStage2('campaigns', 'all')}
+              />
+              <StatCard
+                label="Funded Campaigns"
+                value={stats?.funded_campaigns || 0}
+                icon={<CheckCircle className="w-5 h-5" />}
+                accent="success"
+                onClick={() => goToStage2('campaigns', 'funded')}
+              />
+              <StatCard
+                label="Due Campaigns"
+                value={stats?.due_campaigns || 0}
+                icon={<Clock className="w-5 h-5" />}
+                accent="warning"
+                onClick={() => goToStage2('campaigns', 'due')}
+              />
+              <StatCard
+                label="All Time Transactions"
+                value={stats?.all_time_transactions || 0}
+                icon={<CreditCard className="w-5 h-5" />}
+                onClick={() => goToStage2('transactions')}
+              />
+              <StatCard
+                label="Reported Campaigns"
+                value={stats?.reported_campaigns || 0}
+                icon={<Flag className="w-5 h-5" />}
+                accent="danger"
+                onClick={() => goToStage2('campaigns', 'reported')}
+              />
             </div>
           </div>
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
     <div className="bg-white w-screen min-h-screen">
       <NavBar />
 
-
       <KycModal
         isOpen={kycModalOpen}
-        onClose={() => { setKycModalOpen(false); setSelectedUser(null); setSelectedKyc(null) }}
+        onClose={() => {
+          setKycModalOpen(false);
+          setSelectedUser(null);
+          setSelectedKyc(null);
+        }}
         user={selectedUser}
         kyc={selectedKyc}
       />
       <CenterDocsModal
         isOpen={centerModalOpen}
-        onClose={() => { setCenterModalOpen(false); setSelectedCenter(null) }}
+        onClose={() => {
+          setCenterModalOpen(false);
+          setSelectedCenter(null);
+        }}
         center={selectedCenter}
       />
 
       <main className="text-black max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => setStage(1)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <button
+            onClick={() => setStage(1)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 capitalize">
-              {activeTable === "campaigns" && campaignFilter !== "all"
+              {activeTable === 'campaigns' && campaignFilter !== 'all'
                 ? `${campaignFilter} Campaigns`
                 : activeTable}
             </h1>
@@ -715,7 +842,7 @@ export default function Page() {
           </div>
         </div>
 
-        {activeTable === "transactions" && (
+        {activeTable === 'transactions' && (
           <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gray-900 rounded-lg">
@@ -723,26 +850,27 @@ export default function Page() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ₦{txTotal.toLocaleString()}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">₦{txTotal.toLocaleString()}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-500">
-              Across {filteredData.length} transactions
-            </p>
+            <p className="text-sm text-gray-500">Across {filteredData.length} transactions</p>
           </div>
         )}
 
         {/* Campaign Filter Tabs */}
-        {activeTable === "campaigns" && (
+        {activeTable === 'campaigns' && (
           <div className="flex gap-2 mb-6">
-            {(["all", "funded", "due", "reported"] as CampaignFilter[]).map((f) => (
+            {(['all', 'funded', 'due', 'reported'] as CampaignFilter[]).map((f) => (
               <button
                 key={f}
-                onClick={() => { setCampaignFilter(f); fetchTableData("campaigns", 0, f) }}
+                onClick={() => {
+                  setCampaignFilter(f);
+                  fetchTableData('campaigns', 0, f);
+                }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  campaignFilter === f ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  campaignFilter === f
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -772,7 +900,7 @@ export default function Page() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-200">
-                  {activeTable === "users" && (
+                  {activeTable === 'users' && (
                     <tr>
                       <th className="px-6 py-4">User</th>
                       <th className="px-6 py-4">Status</th>
@@ -780,7 +908,7 @@ export default function Page() {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   )}
-                  {activeTable === "centers" && (
+                  {activeTable === 'centers' && (
                     <tr>
                       <th className="px-6 py-4">Center</th>
                       <th className="px-6 py-4">Status</th>
@@ -788,7 +916,7 @@ export default function Page() {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   )}
-                  {activeTable === "campaigns" && (
+                  {activeTable === 'campaigns' && (
                     <tr>
                       <th className="px-6 py-4">Campaign</th>
                       <th className="px-6 py-4">Progress</th>
@@ -798,7 +926,7 @@ export default function Page() {
                       <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   )}
-                  {activeTable === "transactions" && (
+                  {activeTable === 'transactions' && (
                     <tr>
                       <th className="px-6 py-4">Reference</th>
                       <th className="px-6 py-4">Owner</th>
@@ -818,15 +946,18 @@ export default function Page() {
                     </tr>
                   )}
 
-               
-                  {activeTable === "users" &&
+                  {activeTable === 'users' &&
                     filteredData.map((user: UserData, i: number) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center text-gray-500 text-xs font-bold">
                               {user.image ? (
-                                <img src={user.image} alt="" className="w-full h-full object-cover" />
+                                <img
+                                  src={user.image}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
                               ) : (
                                 user.full_name?.charAt(0)
                               )}
@@ -838,7 +969,7 @@ export default function Page() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <StatusBadge status={user.is_verified ? "verified" : "pending"} />
+                          <StatusBadge status={user.is_verified ? 'verified' : 'pending'} />
                         </td>
                         <td className="px-6 py-4 text-gray-500">
                           {new Date(user.created_at).toLocaleDateString()}
@@ -884,15 +1015,18 @@ export default function Page() {
                       </tr>
                     ))}
 
-             
-                  {activeTable === "centers" &&
+                  {activeTable === 'centers' &&
                     filteredData.map((center: Center, i: number) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
                               {center.logourl ? (
-                                <img src={center.logourl} alt="" className="w-full h-full object-cover" />
+                                <img
+                                  src={center.logourl}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
                               ) : (
                                 <Building2 className="w-5 h-5 text-gray-400" />
                               )}
@@ -920,7 +1054,7 @@ export default function Page() {
                               <FileText className="w-4 h-4" />
                             </button>
                             {/* Verify / Reject / Revoke */}
-                            {center.is_verified_status === "pending" && (
+                            {center.is_verified_status === 'pending' && (
                               <>
                                 <button
                                   onClick={() => handleVerifyCenter(center.email, true)}
@@ -938,7 +1072,7 @@ export default function Page() {
                                 </button>
                               </>
                             )}
-                            {center.is_verified_status === "verified" && (
+                            {center.is_verified_status === 'verified' && (
                               <button
                                 onClick={() => handleVerifyCenter(center.email, false)}
                                 className="p-2 rounded-lg hover:bg-amber-50 text-amber-600 transition-colors"
@@ -952,8 +1086,7 @@ export default function Page() {
                       </tr>
                     ))}
 
-
-                  {activeTable === "campaigns" &&
+                  {activeTable === 'campaigns' &&
                     filteredData.map((campaign: Campaign, index: number) => (
                       <tr key={index} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
@@ -961,7 +1094,11 @@ export default function Page() {
                             <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
                               {campaign.main_img ? (
                                 <img
-                                  src={campaign.main_img.startsWith('http') ? campaign.main_img : JSON.parse(campaign.main_img)?.url}
+                                  src={
+                                    campaign.main_img.startsWith('http')
+                                      ? campaign.main_img
+                                      : JSON.parse(campaign.main_img)?.url
+                                  }
                                   alt=""
                                   className="w-full h-full object-cover"
                                 />
@@ -970,23 +1107,37 @@ export default function Page() {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 line-clamp-1">{campaign.name}</p>
-                              <p className="text-xs text-gray-500">{campaign.center_name || "No center"} · {campaign.category}</p>
+                              <p className="font-medium text-gray-900 line-clamp-1">
+                                {campaign.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {campaign.center_name || 'No center'} · {campaign.category}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
-                              <span className={campaign.raised >= campaign.goal ? "text-green-600 font-medium" : "text-gray-500"}>
+                              <span
+                                className={
+                                  campaign.raised >= campaign.goal
+                                    ? 'text-green-600 font-medium'
+                                    : 'text-gray-500'
+                                }
+                              >
                                 {campaign.currency} {campaign.raised?.toLocaleString()}
                               </span>
-                              <span className="font-medium text-gray-900">{campaign.currency} {campaign.goal?.toLocaleString()}</span>
+                              <span className="font-medium text-gray-900">
+                                {campaign.currency} {campaign.goal?.toLocaleString()}
+                              </span>
                             </div>
                             <div className="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${campaign.raised >= campaign.goal ? 'bg-green-600' : 'bg-gray-800'}`}
-                                style={{ width: `${Math.min((campaign.raised / campaign.goal) * 100, 100)}%` }}
+                                style={{
+                                  width: `${Math.min((campaign.raised / campaign.goal) * 100, 100)}%`,
+                                }}
                               />
                             </div>
                           </div>
@@ -1002,8 +1153,12 @@ export default function Page() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1.5">
-                            <Calendar className={`w-3.5 h-3.5 ${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-500' : 'text-gray-400'}`} />
-                            <span className={`${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-600 font-medium' : 'text-gray-600'}`}>
+                            <Calendar
+                              className={`w-3.5 h-3.5 ${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-500' : 'text-gray-400'}`}
+                            />
+                            <span
+                              className={`${isCampaignDue(Number(campaign.date_to_completion)) ? 'text-amber-600 font-medium' : 'text-gray-600'}`}
+                            >
                               {formatCampaignDate(Number(campaign.date_to_completion))}
                             </span>
                           </div>
@@ -1022,13 +1177,10 @@ export default function Page() {
                       </tr>
                     ))}
 
-                
-                  {activeTable === "transactions" &&
+                  {activeTable === 'transactions' &&
                     filteredData.map((tx: Transaction, i: number) => (
                       <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-mono text-xs text-gray-600">
-                          {tx.refrence}
-                        </td>
+                        <td className="px-6 py-4 font-mono text-xs text-gray-600">{tx.refrence}</td>
                         <td className="px-6 py-4 text-gray-900">
                           <div className="flex items-center gap-2">
                             <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
@@ -1041,9 +1193,13 @@ export default function Page() {
                           ₦{tx.ammount?.toLocaleString()}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            tx.payer_id ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
-                          }`}>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              tx.payer_id
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
                             {tx.payer_id ? 'Donation' : 'System'}
                           </span>
                         </td>
@@ -1094,5 +1250,5 @@ export default function Page() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

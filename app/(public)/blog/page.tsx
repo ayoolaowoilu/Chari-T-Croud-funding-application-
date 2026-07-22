@@ -1,12 +1,19 @@
-"use client"
+'use client';
 
-import Explain from "@/app/components/layout/explain";
-import { Logo } from "@/app/components/layout/footer";
-import NavBar from "@/app/components/layout/NavBar";
-import Button from "@/app/components/ui/button";
-import { ChevronLeft, ChevronRight, Heart, MessageCircleCode, Timer, Send, User } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-
+import Explain from '@/app/components/layout/explain';
+import { Logo } from '@/app/components/layout/footer';
+import NavBar from '@/app/components/layout/NavBar';
+import Button from '@/app/components/ui/button';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  MessageCircleCode,
+  Timer,
+  Send,
+  User,
+} from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 type StorySection = {
   topic: string;
@@ -24,9 +31,9 @@ type BlogCard = {
 };
 
 type PaginatedResponse = {
-  blogs: number;      // total count
-  page: number;       // current page
-  data: BlogCard[];   // actual blog cards
+  blogs: number; // total count
+  page: number; // current page
+  data: BlogCard[]; // actual blog cards
 };
 
 type Comment = {
@@ -41,23 +48,93 @@ type Comment = {
 // ─── Mock Comments Data ────────────────────────────────────────────
 const MOCK_COMMENTS: Record<number, Comment[]> = {
   0: [
-    { id: 1, author: "Sarah Chen", avatar: "https://picsum.photos/seed/sarah/100/100", text: "Great update! The bug fixes have really improved performance on our end.", timestamp: "2 hours ago", likes: 12 },
-    { id: 2, author: "Mike Ross", avatar: "https://picsum.photos/seed/mike/100/100", text: "Looking forward to the migration guide. When will the full documentation be available?", timestamp: "5 hours ago", likes: 8 },
-    { id: 3, author: "Emma Wilson", avatar: "https://picsum.photos/seed/emma/100/100", text: "The key improvements section is exactly what we needed. Thanks team!", timestamp: "1 day ago", likes: 24 }
+    {
+      id: 1,
+      author: 'Sarah Chen',
+      avatar: 'https://picsum.photos/seed/sarah/100/100',
+      text: 'Great update! The bug fixes have really improved performance on our end.',
+      timestamp: '2 hours ago',
+      likes: 12,
+    },
+    {
+      id: 2,
+      author: 'Mike Ross',
+      avatar: 'https://picsum.photos/seed/mike/100/100',
+      text: 'Looking forward to the migration guide. When will the full documentation be available?',
+      timestamp: '5 hours ago',
+      likes: 8,
+    },
+    {
+      id: 3,
+      author: 'Emma Wilson',
+      avatar: 'https://picsum.photos/seed/emma/100/100',
+      text: 'The key improvements section is exactly what we needed. Thanks team!',
+      timestamp: '1 day ago',
+      likes: 24,
+    },
   ],
   1: [
-    { id: 1, author: "David Park", avatar: "https://picsum.photos/seed/david/100/100", text: "What an incredible evening! Proud to be part of this community.", timestamp: "3 hours ago", likes: 45 },
-    { id: 2, author: "Lisa Thompson", avatar: "https://picsum.photos/seed/lisa/100/100", text: "The silent auction items were amazing. Can't wait for next year!", timestamp: "6 hours ago", likes: 18 }
+    {
+      id: 1,
+      author: 'David Park',
+      avatar: 'https://picsum.photos/seed/david/100/100',
+      text: 'What an incredible evening! Proud to be part of this community.',
+      timestamp: '3 hours ago',
+      likes: 45,
+    },
+    {
+      id: 2,
+      author: 'Lisa Thompson',
+      avatar: 'https://picsum.photos/seed/lisa/100/100',
+      text: "The silent auction items were amazing. Can't wait for next year!",
+      timestamp: '6 hours ago',
+      likes: 18,
+    },
   ],
   2: [
-    { id: 1, author: "James Miller", avatar: "https://picsum.photos/seed/james/100/100", text: "Volunteered last weekend. The organization was top-notch!", timestamp: "1 day ago", likes: 33 }
+    {
+      id: 1,
+      author: 'James Miller',
+      avatar: 'https://picsum.photos/seed/james/100/100',
+      text: 'Volunteered last weekend. The organization was top-notch!',
+      timestamp: '1 day ago',
+      likes: 33,
+    },
   ],
   3: [
-    { id: 1, author: "Anna Kowalski", avatar: "https://picsum.photos/seed/anna/100/100", text: "Blockchain transparency is the future of charitable giving. Exciting times!", timestamp: "4 hours ago", likes: 67 },
-    { id: 2, author: "Tom Bradley", avatar: "https://picsum.photos/seed/tom/100/100", text: "Would love to see a case study on the AI implementation results.", timestamp: "8 hours ago", likes: 21 },
-    { id: 3, author: "Nina Patel", avatar: "https://picsum.photos/seed/nina/100/100", text: "Digital transformation is crucial for smaller nonprofits with limited staff.", timestamp: "12 hours ago", likes: 15 },
-    { id: 4, author: "Chris Anderson", avatar: "https://picsum.photos/seed/chris/100/100", text: "Great overview of the tech landscape in philanthropy.", timestamp: "1 day ago", likes: 9 }
-  ]
+    {
+      id: 1,
+      author: 'Anna Kowalski',
+      avatar: 'https://picsum.photos/seed/anna/100/100',
+      text: 'Blockchain transparency is the future of charitable giving. Exciting times!',
+      timestamp: '4 hours ago',
+      likes: 67,
+    },
+    {
+      id: 2,
+      author: 'Tom Bradley',
+      avatar: 'https://picsum.photos/seed/tom/100/100',
+      text: 'Would love to see a case study on the AI implementation results.',
+      timestamp: '8 hours ago',
+      likes: 21,
+    },
+    {
+      id: 3,
+      author: 'Nina Patel',
+      avatar: 'https://picsum.photos/seed/nina/100/100',
+      text: 'Digital transformation is crucial for smaller nonprofits with limited staff.',
+      timestamp: '12 hours ago',
+      likes: 15,
+    },
+    {
+      id: 4,
+      author: 'Chris Anderson',
+      avatar: 'https://picsum.photos/seed/chris/100/100',
+      text: 'Great overview of the tech landscape in philanthropy.',
+      timestamp: '1 day ago',
+      likes: 9,
+    },
+  ],
 };
 
 const ITEMS_PER_PAGE = 4; // adjust based on your API
@@ -65,10 +142,10 @@ const ITEMS_PER_PAGE = 4; // adjust based on your API
 export default function Page() {
   const [stage, setStage] = useState<1 | 2>(1);
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
-  const [commentText, setCommentText] = useState("");
+  const [commentText, setCommentText] = useState('');
   const [localComments, setLocalComments] = useState<Record<number, Comment[]>>(MOCK_COMMENTS);
   const [likedSections, setLikedSections] = useState<Set<string>>(new Set());
-  
+
   // ─── Pagination State ────────────────────────────────────────────
   const [blog, setBlog] = useState<BlogCard[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -82,15 +159,17 @@ export default function Page() {
   const fetch_data = async (page: number) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${window.location.origin}/api/blog?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const response = await fetch(
+        `${window.location.origin}/api/blog?page=${page}&limit=${ITEMS_PER_PAGE}`,
+      );
       const result: PaginatedResponse = await response.json();
-      
+
       setBlog(result.data);
       setCurrentPage(result.page);
       setTotalBlogs(result.blogs);
       setTotalPages(Math.ceil(result.blogs / ITEMS_PER_PAGE));
-    } catch (error) {
-      console.error("Failed to fetch blog data:", error);
+    } catch (_error) {
+      console.error('Failed to fetch blog data:', _error);
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +184,7 @@ export default function Page() {
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
     fetch_data(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePrevPage = () => handlePageChange(currentPage - 1);
@@ -114,36 +193,36 @@ export default function Page() {
   const handleViewMore = (index: number) => {
     setActiveCardIndex(index);
     setStage(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBack = () => {
     setStage(1);
-    setCommentText("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setCommentText('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
-    
+
     const newComment: Comment = {
       id: Date.now(),
-      author: "You",
-      avatar: "https://picsum.photos/seed/you/100/100",
+      author: 'You',
+      avatar: 'https://picsum.photos/seed/you/100/100',
       text: commentText.trim(),
-      timestamp: "Just now",
-      likes: 0
+      timestamp: 'Just now',
+      likes: 0,
     };
 
-    setLocalComments(prev => ({
+    setLocalComments((prev) => ({
       ...prev,
-      [activeCardIndex]: [...(prev[activeCardIndex] || []), newComment]
+      [activeCardIndex]: [...(prev[activeCardIndex] || []), newComment],
     }));
-    setCommentText("");
+    setCommentText('');
   };
 
   const toggleSectionLike = (sectionTopic: string) => {
-    setLikedSections(prev => {
+    setLikedSections((prev) => {
       const next = new Set(prev);
       if (next.has(sectionTopic)) {
         next.delete(sectionTopic);
@@ -154,85 +233,93 @@ export default function Page() {
     });
   };
 
- 
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5; // max page buttons to show
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
       // Always show first page
       pages.push(1);
-      
+
       let start = Math.max(2, currentPage - 1);
       let end = Math.min(totalPages - 1, currentPage + 1);
-      
+
       // Adjust if near start or end
       if (currentPage <= 2) end = 4;
       if (currentPage >= totalPages - 1) start = totalPages - 3;
-      
-      if (start > 2) pages.push("...");
+
+      if (start > 2) pages.push('...');
       for (let i = start; i <= end; i++) pages.push(i);
-      if (end < totalPages - 1) pages.push("...");
-      
+      if (end < totalPages - 1) pages.push('...');
+
       // Always show last page
       pages.push(totalPages);
     }
-    
+
     return pages;
   };
 
-  const blog_cards = useCallback((cards: BlogCard) => {
-    return (
-      <div className="w-full mb-4 text-black shadow-xl rounded flex flex-col bg-white">
-        <div className="w-full h-40">
-          <img className="object-cover w-full h-full" src={cards.img_url} alt={cards.topic} />
+  const blog_cards = useCallback(
+    (cards: BlogCard) => {
+      return (
+        <div className="w-full mb-4 text-black shadow-xl rounded flex flex-col bg-white">
+          <div className="w-full h-40">
+            <img className="object-cover w-full h-full" src={cards.img_url} alt={cards.topic} />
+          </div>
+          <div className="p-4">
+            <div className="font-bold text-2xl line-clamp-2 h-18 mb-3" title={cards.topic}>
+              {cards.topic}
+            </div>
+            <div className="text-xs flex justify-start gap-2 mb-3">
+              <div className="rounded-full w-6 h-6 border-2 border-gray-600 overflow-hidden">
+                <img
+                  src="https://picsum.photos/seed/charit-logo/100/100"
+                  alt=""
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="text-gray-700 my-auto">
+                <Explain details="A Crowdfunding application" topic="Chari-T" />
+              </div>
+              <span
+                className="inline-flex items-center transition-transform duration-300 hover:scale-110 my-auto"
+                title="Verified Charity"
+              >
+                <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
+                </svg>
+              </span>
+            </div>
+            <div className="text-gray-700 text-sm mb-3 h-20 line-clamp-4">{cards.description}</div>
+            <div className="flex justify-start gap-4">
+              <div className="flex text-gray-700 text-sm gap-2">
+                <Heart size={20} /> {Math.floor(Math.random() * 10000)}
+              </div>
+              <div className="flex text-gray-700 text-sm gap-2">
+                <MessageCircleCode size={20} /> {Math.floor(Math.random() * 300)}
+              </div>
+              <div className="flex text-gray-700 text-sm gap-2">
+                <Timer size={20} /> {cards.min_read} mins read
+              </div>
+            </div>
+            <Button
+              onClick={() => handleViewMore(blog.indexOf(cards))}
+              className="mt-4"
+              details={
+                <span className="flex gap-2">
+                  View More <ChevronRight />
+                </span>
+              }
+              variant="secondary"
+            />
+          </div>
         </div>
-        <div className="p-4">
-          <div className="font-bold text-2xl line-clamp-2 h-18 mb-3" title={cards.topic} >
-            {cards.topic}
-          </div>
-          <div className="text-xs flex justify-start gap-2 mb-3">
-            <div className="rounded-full w-6 h-6 border-2 border-gray-600 overflow-hidden">
-              <img src="https://picsum.photos/seed/charit-logo/100/100" alt="" className="object-cover w-full h-full" />
-            </div>
-            <div className="text-gray-700 my-auto">
-              <Explain details="A Crowdfunding application" topic="Chari-T" />
-            </div>
-            <span 
-              className="inline-flex items-center transition-transform duration-300 hover:scale-110 my-auto" 
-              title="Verified Charity"
-            >
-              <svg className="h-5 w-5 text-[#1d9bf0]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
-              </svg>
-            </span>
-          </div>
-          <div className="text-gray-700 text-sm mb-3 h-20 line-clamp-4">
-            {cards.description}
-          </div>
-          <div className="flex justify-start gap-4">
-            <div className="flex text-gray-700 text-sm gap-2">
-              <Heart size={20} /> {Math.floor(Math.random() * 10000)}
-            </div>
-            <div className="flex text-gray-700 text-sm gap-2">
-              <MessageCircleCode size={20} /> {Math.floor(Math.random() * 300)}
-            </div>
-            <div className="flex text-gray-700 text-sm gap-2">
-              <Timer size={20} /> {cards.min_read} mins read
-            </div>
-          </div>
-          <Button 
-            onClick={() => handleViewMore(blog.indexOf(cards))} 
-            className="mt-4" 
-            details={<span className="flex gap-2">View More <ChevronRight /></span>} 
-            variant="secondary" 
-          />
-        </div>
-      </div>
-    );
-  }, [blog]);
+      );
+    },
+    [blog],
+  );
 
   // ─── Stage 2: Full Blog Post Reader (Mobile Optimized) ───────────
   const BlogReader = () => {
@@ -242,8 +329,8 @@ export default function Page() {
       <div className="min-h-screen bg-white">
         {/* Hero Banner - Mobile Responsive */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden">
-          <img 
-            src={activeCard.img_url} 
+          <img
+            src={activeCard.img_url}
             alt={activeCard.topic}
             className="object-cover w-full h-full"
           />
@@ -254,7 +341,7 @@ export default function Page() {
                 onClick={handleBack}
                 className="flex items-center gap-2 text-white/90 hover:text-white mb-2 sm:mb-4 transition-colors text-sm font-medium"
               >
-                <ChevronLeft size={16} className="sm:size-[18px]" /> 
+                <ChevronLeft size={16} className="sm:size-[18px]" />
                 <span className="hidden sm:inline">Back to Blog</span>
                 <span className="sm:hidden">Back</span>
               </button>
@@ -264,14 +351,24 @@ export default function Page() {
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-white/80 text-xs sm:text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden border border-white/30">
-                    <img src="https://picsum.photos/seed/charit-logo/100/100" alt="" className="w-full h-full object-cover" />
+                    <img
+                      src="https://picsum.photos/seed/charit-logo/100/100"
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <span>Chari-T Team</span>
                 </div>
                 <span className="hidden sm:inline">•</span>
                 <span>{activeCard.min_read} min read</span>
                 <span className="hidden sm:inline">•</span>
-                <span className="hidden sm:inline">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                <span className="hidden sm:inline">
+                  {new Date().toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
               </div>
             </div>
           </div>
@@ -298,18 +395,23 @@ export default function Page() {
                     onClick={() => toggleSectionLike(section.topic)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all self-start sm:self-auto ${
                       likedSections.has(section.topic)
-                        ? "bg-red-50 text-red-600 border border-red-200"
-                        : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
+                        ? 'bg-red-50 text-red-600 border border-red-200'
+                        : 'bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100'
                     }`}
                   >
-                    <Heart size={12} className={likedSections.has(section.topic) ? "fill-red-600" : ""} />
-                    {likedSections.has(section.topic) ? "Liked" : "Like"}
+                    <Heart
+                      size={12}
+                      className={likedSections.has(section.topic) ? 'fill-red-600' : ''}
+                    />
+                    {likedSections.has(section.topic) ? 'Liked' : 'Like'}
                   </button>
                 </div>
-                
+
                 <div className="prose prose-sm sm:prose-lg max-w-none text-gray-700 leading-relaxed pl-8 sm:pl-11">
                   {section.details.split('\n').map((paragraph, pIdx) => (
-                    <p key={pIdx} className="mb-3 sm:mb-4">{paragraph}</p>
+                    <p key={pIdx} className="mb-3 sm:mb-4">
+                      {paragraph}
+                    </p>
                   ))}
                 </div>
 
@@ -327,16 +429,24 @@ export default function Page() {
               <div className="flex items-center gap-4 sm:gap-6">
                 <button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors">
                   <Heart size={18} className="sm:size-[20px]" />
-                  <span className="font-medium text-sm sm:text-base">{Math.floor(Math.random() * 1000) + 100} likes</span>
+                  <span className="font-medium text-sm sm:text-base">
+                    {Math.floor(Math.random() * 1000) + 100} likes
+                  </span>
                 </button>
                 <button className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
                   <MessageCircleCode size={18} className="sm:size-[20px]" />
-                  <span className="font-medium text-sm sm:text-base">{comments.length} comments</span>
+                  <span className="font-medium text-sm sm:text-base">
+                    {comments.length} comments
+                  </span>
                 </button>
               </div>
               <Button
                 onClick={handleBack}
-                details={<span className="flex items-center gap-2"><ChevronLeft size={16} /> Back to Blog</span>}
+                details={
+                  <span className="flex items-center gap-2">
+                    <ChevronLeft size={16} /> Back to Blog
+                  </span>
+                }
                 variant="secondary"
               />
             </div>
@@ -367,7 +477,7 @@ export default function Page() {
                     disabled={!commentText.trim()}
                     className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-900 text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    <Send size={12} className="sm:size-[14px]" /> 
+                    <Send size={12} className="sm:size-[14px]" />
                     <span className="hidden sm:inline">Post Comment</span>
                     <span className="sm:hidden">Post</span>
                   </button>
@@ -380,20 +490,32 @@ export default function Page() {
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-2 sm:gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
-                    <img src={comment.avatar} alt={comment.author} className="w-full h-full object-cover" />
+                    <img
+                      src={comment.avatar}
+                      alt={comment.author}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-100 shadow-sm">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1.5 sm:mb-2 gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900 text-sm">{comment.author}</span>
-                          {comment.author === "You" && (
-                            <span className="px-1.5 sm:px-2 py-0.5 bg-gray-900 text-white text-[10px] sm:text-xs rounded-full">You</span>
+                          <span className="font-semibold text-gray-900 text-sm">
+                            {comment.author}
+                          </span>
+                          {comment.author === 'You' && (
+                            <span className="px-1.5 sm:px-2 py-0.5 bg-gray-900 text-white text-[10px] sm:text-xs rounded-full">
+                              You
+                            </span>
                           )}
                         </div>
-                        <span className="text-[10px] sm:text-xs text-gray-400">{comment.timestamp}</span>
+                        <span className="text-[10px] sm:text-xs text-gray-400">
+                          {comment.timestamp}
+                        </span>
                       </div>
-                      <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">{comment.text}</p>
+                      <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
+                        {comment.text}
+                      </p>
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 mt-1.5 sm:mt-2 ml-1 sm:ml-2">
                       <button className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 hover:text-red-500 transition-colors">
@@ -409,7 +531,10 @@ export default function Page() {
 
               {comments.length === 0 && (
                 <div className="text-center py-8 sm:py-10 text-gray-400">
-                  <MessageCircleCode size={32} className="sm:size-[40px] mx-auto mb-2 sm:mb-3 opacity-30" />
+                  <MessageCircleCode
+                    size={32}
+                    className="sm:size-[40px] mx-auto mb-2 sm:mb-3 opacity-30"
+                  />
                   <p className="text-sm">No comments yet. Be the first!</p>
                 </div>
               )}
@@ -418,34 +543,48 @@ export default function Page() {
 
           {/* Related Posts Navigation */}
           <div className="mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">More Stories</h3>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">
+              More Stories
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {blog.filter((_, idx) => idx !== activeCardIndex).slice(0, 2).map((card, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActiveCardIndex(blog.indexOf(card));
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all text-left bg-white"
-                >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
-                    <img src={card.img_url} alt={card.topic} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-semibold text-gray-900 line-clamp-2 text-xs sm:text-sm mb-1">{card.topic}</h4>
-                    <p className="text-[10px] sm:text-xs text-gray-500 line-clamp-2">{card.description}</p>
-                    <span className="text-[10px] sm:text-xs text-gray-400 mt-1 sm:mt-2 block">{card.min_read} min read</span>
-                  </div>
-                </button>
-              ))}
+              {blog
+                .filter((_, idx) => idx !== activeCardIndex)
+                .slice(0, 2)
+                .map((card, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setActiveCardIndex(blog.indexOf(card));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all text-left bg-white"
+                  >
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
+                      <img
+                        src={card.img_url}
+                        alt={card.topic}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-gray-900 line-clamp-2 text-xs sm:text-sm mb-1">
+                        {card.topic}
+                      </h4>
+                      <p className="text-[10px] sm:text-xs text-gray-500 line-clamp-2">
+                        {card.description}
+                      </p>
+                      <span className="text-[10px] sm:text-xs text-gray-400 mt-1 sm:mt-2 block">
+                        {card.min_read} min read
+                      </span>
+                    </div>
+                  </button>
+                ))}
             </div>
           </div>
         </div>
       </div>
     );
   };
-
 
   return (
     <div className="min-h-screen bg-white">
@@ -456,11 +595,15 @@ export default function Page() {
           <div className="max-w-7xl mx-auto">
             <div className="mb-6 sm:mb-8 md:mb-10">
               <h1 className="text-2xl sm:text-3xl flex-col gap-2 sm:gap-4 font-bold text-gray-900 mb-2">
-                <div className="mb-2 sm:mb-4"><Logo /></div>
+                <div className="mb-2 sm:mb-4">
+                  <Logo />
+                </div>
                 Blog Posts
               </h1>
               <p className="text-gray-500 text-sm sm:text-base leading-relaxed">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui possimus culpa, cupiditate officia expedita saepe dicta modi. Aut numquam asperiores sunt iure molestiae atque dolorem facere, debitis animi laborum quas.
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui possimus culpa,
+                cupiditate officia expedita saepe dicta modi. Aut numquam asperiores sunt iure
+                molestiae atque dolorem facere, debitis animi laborum quas.
               </p>
               <p className="text-gray-400 text-xs mt-2">
                 Showing {blog.length} of {totalBlogs} posts • Page {currentPage} of {totalPages}
@@ -498,23 +641,28 @@ export default function Page() {
                 </button>
 
                 <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2">
-                  {getPageNumbers().map((page, idx) => (
-                    page === "..." ? (
-                      <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 text-xs sm:text-sm">...</span>
+                  {getPageNumbers().map((page, idx) =>
+                    page === '...' ? (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="px-1 text-gray-400 text-xs sm:text-sm"
+                      >
+                        ...
+                      </span>
                     ) : (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page as number)}
                         className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium border transition-all ${
                           currentPage === page
-                            ? "border-gray-900 bg-gray-900 text-white shadow-sm"
-                            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+                            ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
                         }`}
                       >
                         {page}
                       </button>
-                    )
-                  ))}
+                    ),
+                  )}
                 </div>
 
                 <button

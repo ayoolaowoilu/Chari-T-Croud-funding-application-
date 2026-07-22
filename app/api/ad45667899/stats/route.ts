@@ -1,34 +1,30 @@
-import db from "@/app/lib/DBschema";
-import { NextResponse } from "next/server";
+import db from '@/app/lib/DBschema';
+import { requireAdmin } from '@/app/lib/adminAuth';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return auth.response;
+
   try {
+    const [row]: any = await db.query('SELECT COUNT(*) as count FROM users');
 
-    const [row]: any = await db.query("SELECT COUNT(*) as count FROM users");
+    const [row1]: any = await db.query('SELECT COUNT(*) as count FROM centers');
 
-  
-    const [row1]: any = await db.query("SELECT COUNT(*) as count FROM centers");
+    const [row2]: any = await db.query('SELECT COUNT(*) as count FROM campaigns');
 
-    
-    const [row2]: any = await db.query("SELECT COUNT(*) as count FROM campaigns");
-
-   
     const [row3]: any = await db.query(
-      "SELECT COUNT(*) as count FROM campaigns WHERE goal <= raised"
+      'SELECT COUNT(*) as count FROM campaigns WHERE goal <= raised',
     );
 
-   
     const [row4]: any = await db.query(
-      "SELECT COUNT(*) as count FROM campaigns WHERE date_to_completion > ? ",[Date.now()]
+      'SELECT COUNT(*) as count FROM campaigns WHERE date_to_completion > ? ',
+      [Date.now()],
     );
 
-  
-    const [row5]: any = await db.query("SELECT COUNT(*) as count FROM transactions");
+    const [row5]: any = await db.query('SELECT COUNT(*) as count FROM transactions');
 
-  
-    const [row6]: any = await db.query(
-      "SELECT COUNT(*) as count FROM campaigns WHERE reports > 0"
-    );
+    const [row6]: any = await db.query('SELECT COUNT(*) as count FROM campaigns WHERE reports > 0');
 
     return NextResponse.json(
       {
@@ -40,15 +36,15 @@ export async function GET() {
         all_time_transactions: row5[0].count,
         reported_campaigns: row6[0].count,
       },
-      { status: 200 }
+      { status: 200 },
     );
-  } catch (error) {
-    console.error(error);
+  } catch (_error) {
+    console.error(_error);
     return NextResponse.json(
       {
-        error: "Error fetching data",
+        error: 'Error fetching data',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
