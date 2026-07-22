@@ -16,7 +16,6 @@ type BlogCard = {
 };
 
 const BLOG_DATA: BlogCard[] = [
- 
   {
     topic: 'New Years Eve with Chari-T',
     description:

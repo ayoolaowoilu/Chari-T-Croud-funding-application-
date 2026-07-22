@@ -1,7 +1,14 @@
 'use server';
 
 import { getSubAccountCode } from './paystack';
-import { Campaign, CenterRegistrationPayload, Comments, KycFormData, Subscribed, UserData } from './types';
+import {
+  Campaign,
+  CenterRegistrationPayload,
+  Comments,
+  KycFormData,
+  Subscribed,
+  UserData,
+} from './types';
 import { addRedisData, getRedisData, deleteRedisData } from './redis';
 
 type causeData = Pick<Campaign, 'name' | 'details' | 'category' | 'bank_details'> & {
@@ -176,16 +183,10 @@ const FetchALLUserData = async (email: string) => {
   );
 };
 
-const FetchUserCauses = async (
-  email: string,
-  cursor?: string | number | null,
-  limit?: number,
-) => {
+const FetchUserCauses = async (email: string, cursor?: string | number | null, limit?: number) => {
   // Cursor pages should not be long-cached as a single key
   const cacheKey =
-    cursor != null
-      ? `user:causes:${email}:c:${cursor}:l:${limit || 20}`
-      : `user:causes:${email}`;
+    cursor != null ? `user:causes:${email}:c:${cursor}:l:${limit || 20}` : `user:causes:${email}`;
 
   return withCache(
     cacheKey,
@@ -194,9 +195,7 @@ const FetchUserCauses = async (
         const params = new URLSearchParams({ email });
         if (cursor != null && cursor !== '') params.set('cursor', String(cursor));
         if (limit != null) params.set('limit', String(limit));
-        const resp = await fetch(
-          `${API_URL}/api/dashboard/yourcam?${params.toString()}`,
-        );
+        const resp = await fetch(`${API_URL}/api/dashboard/yourcam?${params.toString()}`);
         return await resp.json();
       } catch (_error) {
         return { error: 'Unable to fetch data' };
@@ -451,77 +450,79 @@ const FetchUserPublicProfileById = async (id: number) => {
   );
 };
 
-const Handle_comment = async(type:"GET" | "PUT" | "DELETE" , data?:Comments , page?:number) =>{
-        let fetch_fn;
-        let path = "/api/causes/interactions/comment"
+const Handle_comment = async (type: 'GET' | 'PUT' | 'DELETE', data?: Comments, page?: number) => {
+  let fetch_fn;
+  const path = '/api/causes/interactions/comment';
   try {
-       if(type == "GET"){
-         fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`)   
-       }else {
-           fetch_fn = await fetch(`${API_URL}${path}/put` , { 
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify(data)   
-           })
-       }
+    if (type == 'GET') {
+      fetch_fn = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`);
+    } else {
+      fetch_fn = await fetch(`${API_URL}${path}/put`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    }
 
-       const resp = await fetch_fn.json();
-       
-       return resp;
+    const resp = await fetch_fn.json();
+
+    return resp;
   } catch (error) {
-       console.log(error)
-        return {error:"Network Error"}
+    console.log(error);
+    return { error: 'Network Error' };
   }
-}
+};
 
 const Handle_subscribe = async (
-  type: "GET" | "PUT" | "UN_SUB" | "CHECK",
+  type: 'GET' | 'PUT' | 'UN_SUB' | 'CHECK',
   data?: Subscribed,
-  page?: number
+  page?: number,
 ) => {
-  const path = "/api/causes/interactions/subscribe";
+  const path = '/api/causes/interactions/subscribe';
 
   try {
     let res: Response;
 
     switch (type) {
-      case "GET": {
+      case 'GET': {
         // List subscribers for a campaign
         res = await fetch(`${API_URL}${path}/fetch?id=${data?.campaign_id}&page=${page || 0}`);
         break;
       }
 
-      case "PUT": {
+      case 'PUT': {
         // Subscribe a user to a campaign
         res = await fetch(`${API_URL}${path}/put`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
         break;
       }
 
-      case "UN_SUB": {
+      case 'UN_SUB': {
         // Unsubscribe a user
         res = await fetch(`${API_URL}${path}/unsubscribe`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identity_key: data?.identity_key , campaign_id:data?.campaign_id
-           }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            identity_key: data?.identity_key,
+            campaign_id: data?.campaign_id,
+          }),
         });
         break;
       }
 
-      case "CHECK": {
+      case 'CHECK': {
         // Check whether a user is subscribed to a campaign
         res = await fetch(
-          `${API_URL}${path}/check?identity_key=${data?.identity_key}&campaign_id=${data?.campaign_id}`
+          `${API_URL}${path}/check?identity_key=${data?.identity_key}&campaign_id=${data?.campaign_id}`,
         );
         break;
       }
 
       default: {
-        return { error: "Invalid subscribe action" };
+        return { error: 'Invalid subscribe action' };
       }
     }
 
@@ -532,7 +533,7 @@ const Handle_subscribe = async (
     return await res.json();
   } catch (error) {
     console.log(error);
-    return { error: "Network Error" };
+    return { error: 'Network Error' };
   }
 };
 

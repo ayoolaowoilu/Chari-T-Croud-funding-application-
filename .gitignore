@@ -43,3 +43,6 @@ data.sql
 
 DESIGN.md
 /.vscode/
+
+package-lock.json
+pnpm-lock.yaml

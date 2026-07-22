@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { EyeOff, Shield, Heart, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { motion } from 'framer-motion';
+import { EyeOff, Shield, Heart, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const benefits = [
   {
     icon: EyeOff,
-    title: "Hidden from fundraisers",
-    desc: "Your name is not shown on the campaign donor list. Give quietly when you prefer privacy.",
+    title: 'Hidden from fundraisers',
+    desc: 'Your name is not shown on the campaign donor list. Give quietly when you prefer privacy.',
   },
   {
     icon: Shield,
-    title: "Secure checkout",
-    desc: "Payments run through Paystack. You stay in control of what the fundraiser sees.",
+    title: 'Secure checkout',
+    desc: 'Payments run through Paystack. You stay in control of what the fundraiser sees.',
   },
   {
     icon: Heart,
-    title: "True altruism",
-    desc: "Give without seeking recognition. Help because it matters — not for the shout-out.",
+    title: 'True altruism',
+    desc: 'Give without seeking recognition. Help because it matters — not for the shout-out.',
   },
 ];
 
@@ -35,7 +35,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
+    transition: { duration: 0.4, ease: 'easeOut' as const },
   },
 };
 
@@ -65,15 +65,15 @@ export default function BlindDonations() {
             </h2>
 
             <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 max-w-lg">
-              Prefer to help without a public name on the campaign? Toggle blind
-              donation at checkout — fundraisers see &quot;Unknown&quot; while
-              your payment still reaches the cause.
+              Prefer to help without a public name on the campaign? Toggle blind donation at
+              checkout — fundraisers see &quot;Unknown&quot; while your payment still reaches the
+              cause.
             </p>
 
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => router.push("/causes/get")}
+                onClick={() => router.push('/causes/get')}
                 className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition-colors"
               >
                 Browse causes
@@ -81,7 +81,7 @@ export default function BlindDonations() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/how-it-works")}
+                onClick={() => router.push('/how-it-works')}
                 className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm font-semibold text-slate-200 hover:bg-white/5 transition-colors"
               >
                 Learn more
@@ -108,12 +108,8 @@ export default function BlindDonations() {
                     <Icon size={20} className="text-slate-200" strokeWidth={1.75} />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold mb-1 tracking-tight">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">
-                      {benefit.desc}
-                    </p>
+                    <h3 className="text-base font-semibold mb-1 tracking-tight">{benefit.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{benefit.desc}</p>
                   </div>
                 </motion.div>
               );

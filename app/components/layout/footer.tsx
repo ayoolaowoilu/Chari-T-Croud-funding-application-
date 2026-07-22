@@ -31,35 +31,31 @@ const Logo: React.FC<{ nav?: boolean }> = ({ nav }) => {
   // Prefer brand wordmark from main when available; fall back to icon mark
   return (
     <div className="flex items-center gap-2.5">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {}
       <img
         src="/ct_logo_texts.png"
         alt="Chari-T"
-        className={nav ? "h-7 w-auto" : "h-9 w-auto"}
+        className={nav ? 'h-7 w-auto' : 'h-9 w-auto'}
         onError={(e) => {
           const el = e.currentTarget;
-          el.style.display = "none";
+          el.style.display = 'none';
           const fallback = el.nextElementSibling as HTMLElement | null;
-          if (fallback) fallback.style.display = "flex";
+          if (fallback) fallback.style.display = 'flex';
         }}
       />
       <div
-        className={`${
-          nav ? "w-8 h-8" : "w-9 h-9"
-        } hidden items-center gap-2.5`}
-        style={{ display: "none" }}
+        className={`${nav ? 'w-8 h-8' : 'w-9 h-9'} hidden items-center gap-2.5`}
+        style={{ display: 'none' }}
       >
         <div
           className={`${
-            nav ? "w-8 h-8" : "w-9 h-9"
+            nav ? 'w-8 h-8' : 'w-9 h-9'
           } bg-[var(--brand)] rounded-[0.65rem] flex items-center justify-center shadow-sm shadow-teal-900/10 ring-1 ring-black/5`}
         >
           <Leaf size={nav ? 15 : 17} className="text-white" strokeWidth={2.5} />
         </div>
         <span
-          className={`font-semibold tracking-[-0.045em] ${
-            nav ? "text-[21px]" : "text-[28px]"
-          }`}
+          className={`font-semibold tracking-[-0.045em] ${nav ? 'text-[21px]' : 'text-[28px]'}`}
         >
           Chari<span className="text-[var(--brand)]">-T</span>
         </span>
@@ -106,7 +102,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto border-t border-slate-200/80 bg-white text-slate-600">
       {/* Calm CTA — single band, no competing boxes */}
-      <div className="border-b border-slate-100 bg-slate-50/80">
+      {/* <div className="border-b border-slate-100 bg-slate-50/80">
         <div className="mx-auto max-w-7xl px-6 md:px-8 py-12 md:py-14">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="max-w-xl">
@@ -126,7 +122,7 @@ export default function Footer() {
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main — airy flat columns (all content kept) */}
       <div className="mx-auto max-w-7xl px-6 md:px-8 py-14 md:py-20">

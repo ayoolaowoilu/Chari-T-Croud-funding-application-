@@ -1,5 +1,3 @@
-
-
 export const welcomeEmail = (data: {
   name: string;
   companyName?: string;
@@ -170,14 +168,18 @@ export const campaignUpdateEmail = (data: {
       <div class="update-box">
         <p style="margin: 0; color: #000000;">${data.updateMessage}</p>
       </div>
-      ${data.progress || data.raised ? `
+      ${
+        data.progress || data.raised
+          ? `
         <div class="stats">
           ${data.raised ? `<div class="stat-item"><div class="stat-label">Raised</div><div class="stat-value">${data.raised}</div></div>` : ''}
           ${data.goal ? `<div class="stat-item"><div class="stat-label">Goal</div><div class="stat-value">${data.goal}</div></div>` : ''}
           ${data.progress ? `<div class="stat-item"><div class="stat-label">Progress</div><div class="stat-value">${data.progress}</div></div>` : ''}
           ${data.daysLeft ? `<div class="stat-item"><div class="stat-label">Days Left</div><div class="stat-value">${data.daysLeft}</div></div>` : ''}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       ${data.viewUrl ? `<a href="${data.viewUrl}" class="button">View Campaign</a>` : ''}
       <p style="font-size: 14px; color: #000000;">Thank you for your continued support on Chari-T.</p>
     </div>
@@ -279,10 +281,10 @@ export const kycSubmittedEmail = (data: {
   supportUrl?: string;
 }): string => {
   const statusMessages = {
-    'pending': 'Your documents have been received and are pending review.',
+    pending: 'Your documents have been received and are pending review.',
     'in-review': 'Your documents are currently being reviewed by our team.',
-    'approved': 'Your KYC has been approved!',
-    'rejected': 'Please review your documents and resubmit.',
+    approved: 'Your KYC has been approved!',
+    rejected: 'Please review your documents and resubmit.',
   };
 
   return `
@@ -328,12 +330,16 @@ export const kycSubmittedEmail = (data: {
         <p style="margin-top: 12px; color: #000000;">${statusMessages[data.status]}</p>
         <p><strong>Submission ID:</strong> ${data.submissionId}</p>
       </div>
-      ${data.documents && data.documents.length > 0 ? `
+      ${
+        data.documents && data.documents.length > 0
+          ? `
         <p><strong>Documents Submitted:</strong></p>
         <ul class="doc-list">
-          ${data.documents.map(doc => `<li>${doc}</li>`).join('')}
+          ${data.documents.map((doc) => `<li>${doc}</li>`).join('')}
         </ul>
-      ` : ''}
+      `
+          : ''
+      }
       ${data.estimatedTime ? `<p><strong>Estimated Processing Time:</strong> ${data.estimatedTime}</p>` : ''}
       ${data.supportUrl ? `<a href="${data.supportUrl}" class="button">Contact Support</a>` : ''}
       <p style="font-size: 14px; color: #000000;">We'll notify you once the verification is complete.</p>
@@ -403,11 +409,15 @@ export const youDonatedEmail = (data: {
         ${data.date ? `<div style="font-size: 14px; margin-top: 8px; color: #000000;">${data.date}</div>` : ''}
       </div>
       <p><strong>Transaction ID:</strong> ${data.transactionId}</p>
-      ${data.message ? `
+      ${
+        data.message
+          ? `
         <div class="message-box">
           <p style="margin: 0; color: #000000;">"${data.message}"</p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0;">
         ${data.taxReceiptUrl ? `<a href="${data.taxReceiptUrl}" class="button">View Tax Receipt</a>` : ''}
         ${data.shareUrl ? `<a href="${data.shareUrl}" class="button-secondary">Share Your Impact</a>` : ''}

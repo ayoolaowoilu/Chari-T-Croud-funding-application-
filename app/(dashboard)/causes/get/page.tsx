@@ -346,7 +346,7 @@ export default function Explore() {
             <div className="flex flex-wrap justify-center gap-3">
               <Link
                 href="/startcauses"
-                className="inline-flex items-center px-5 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800"
+                className="inline-flex items-center px-5 py-2.5 rounded-xl bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-hover)] transition-colors shadow-sm hover:shadow-md"
               >
                 Start a cause
               </Link>

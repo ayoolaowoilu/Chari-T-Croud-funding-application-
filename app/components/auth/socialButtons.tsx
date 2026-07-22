@@ -1,8 +1,12 @@
+'use client';
+
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const GoogleSvg = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden>
     <path
       fill="#4285F4"
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -22,66 +26,55 @@ const GoogleSvg = () => (
   </svg>
 );
 
-const FaceBookSVG = () => (
-  <svg className="w-5 h-5" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-    <path
-      fill="#1877F2"
-      d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"
-    />
-  </svg>
-);
-
 const XIcon = () => (
-  <svg
-    className="w-5 h-5"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="currentColor"
-  >
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
 
 const SocialButtons = () => {
   const search = useSearchParams();
-  const redirect = search.get('redir');
+  const redirect = search.get('redir') || search.get('callbackUrl') || '/';
+  const [pending, setPending] = useState<string | null>(null);
 
-  const handleSignIn = (provider: string) => {
-    signIn(provider, { callbackUrl: redirect || '/' });
+  const handleSignIn = async (provider: string) => {
+    try {
+      setPending(provider);
+      await signIn(provider, { callbackUrl: redirect });
+    } catch {
+      setPending(null);
+    }
   };
 
   return (
     <div className="space-y-3">
-      {/* Google */}
       <button
+        type="button"
+        disabled={!!pending}
         onClick={() => handleSignIn('google')}
-        className="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200 shadow-sm hover:shadow"
+        className="w-full flex items-center justify-center gap-3 h-12 px-5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 transition-all duration-200 disabled:opacity-60 disabled:cursor-wait"
       >
-        <GoogleSvg />
-        <span className="font-medium text-slate-700">Continue with Google</span>
+        {pending === 'google' ? (
+          <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+        ) : (
+          <GoogleSvg />
+        )}
+        <span className="text-sm font-semibold text-slate-800">
+          {pending === 'google' ? 'Connecting…' : 'Continue with Google'}
+        </span>
       </button>
 
-      {/* X (Twitter) */}
       <button
+        type="button"
         disabled
         title="Coming soon"
-        onClick={() => handleSignIn('twitter')}
-        className="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-black rounded-2xl opacity-50 cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-3 h-12 px-5 rounded-xl bg-slate-900 text-white opacity-40 cursor-not-allowed"
       >
         <XIcon />
-        <span className="font-medium text-white">Continue with X</span>
+        <span className="text-sm font-semibold">Continue with X</span>
       </button>
 
-      {/* Facebook */}
-      <button
-        disabled
-        title="Coming soon"
-        onClick={() => handleSignIn('facebook')}
-        className="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-[#1877F2] rounded-2xl opacity-50 cursor-not-allowed"
-      >
-        <FaceBookSVG />
-        <span className="font-medium text-white">Continue with Facebook</span>
-      </button>
+      <p className="text-center text-xs text-slate-400 pt-1">More sign-in options coming soon</p>
     </div>
   );
 };

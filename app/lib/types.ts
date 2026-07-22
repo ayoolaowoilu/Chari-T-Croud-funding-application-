@@ -24,25 +24,24 @@ interface Campaign {
   comments_count?: number;
 }
 
- interface Subscribed {
-    user_id?:string,
-    name?:string,
-    email?:string,
-    img_url?:string
-    identity_key?:string
-    campaign_id?:number
+interface Subscribed {
+  user_id?: string;
+  name?: string;
+  email?: string;
+  img_url?: string;
+  identity_key?: string;
+  campaign_id?: number;
 }
 
-
-  interface Comments {
-    user_id?:string,
-    name?:string,
-    email?:string,
-    comment?:string,
-    created_at?:string,
-    img_url?:string,
-    identity_key?:string,
-    campaign_id?:number
+interface Comments {
+  user_id?: string;
+  name?: string;
+  email?: string;
+  comment?: string;
+  created_at?: string;
+  img_url?: string;
+  identity_key?: string;
+  campaign_id?: number;
 }
 interface Donor {
   name: string;
