@@ -28,7 +28,6 @@ const footerLinks = {
 };
 
 const Logo: React.FC<{ nav?: boolean }> = ({ nav }) => {
-  // Prefer brand wordmark from main when available; fall back to icon mark
   return (
     <div className="flex items-center gap-2.5">
       {}

@@ -3,7 +3,7 @@
 import Button from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { redirect } from 'next/navigation';
-import { Clock, Users, MapPin, MoreVertical, Copy, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Clock, Users, MapPin, MoreVertical, Copy, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { categoryLabel } from '@/app/lib/categories';
 
@@ -53,15 +53,7 @@ function safetyLabel(level?: string) {
   return level.replace(/_/g, ' ');
 }
 
-const CardMenu = ({
-  id,
-  onCopyLink,
-}: {
-  id: number;
-  title?: string;
-  onCopyLink: () => void;
-  onGetFlier?: () => void;
-}) => {
+const CardMenu = ({ onCopyLink }: { onCopyLink: () => void }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -99,18 +91,6 @@ const CardMenu = ({
               >
                 <Copy className="w-4 h-4 text-[var(--brand)]" />
                 Copy link
-              </button>
-              <div className="border-t border-slate-100" />
-              <button
-                type="button"
-                onClick={() => {
-                  redirect(`/causes/cause?id=${id}`);
-                  setOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <ExternalLink className="w-4 h-4 text-[var(--brand)]" />
-                View more
               </button>
             </motion.div>
           </>
@@ -295,12 +275,15 @@ const CampaignCard: React.FC<Don> = ({
               className="flex-1 border-slate-200 hover:border-[var(--brand)] hover:text-[var(--brand)]"
               onClick={() => window.location.href = `/causes/cause?id=${id}` }
             />
-            <CardMenu
-              id={id}
-              title={title}
-              onCopyLink={handleCopyLink}
-              onGetFlier={() => undefined}
-            />
+
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-[var(--brand)] transition-colors flex items-center justify-center"
+              aria-label="Copy link"
+            >
+              <Copy className="w-4 h-4 text-slate-600" />
+            </button>
           </div>
         </div>
       </div>

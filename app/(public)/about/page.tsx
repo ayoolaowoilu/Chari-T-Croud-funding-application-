@@ -39,6 +39,7 @@ export default function Page() {
             <Logo />
           </div>
           <h1 className="text-4xl font-bold mb-4 text-slate-900">About Chari-T</h1>
+
           <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
             Bridging the gap between generous{' '}
             <Explain

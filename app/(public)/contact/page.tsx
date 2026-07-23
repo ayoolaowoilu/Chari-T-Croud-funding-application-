@@ -115,7 +115,7 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full py-3 px-6 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors text-base sm:text-lg"
+                className="w-full h-11 px-6 rounded-xl bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-hover)] transition-colors shadow-sm shadow-teal-900/10"
               >
                 Send Message
               </button>
@@ -149,7 +149,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:hello@chari-t.org"
-                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base truncate max-w-full"
+                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base"
                   >
                     hello@chari-t.org
                   </a>
@@ -179,7 +179,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:partnerships@chari-t.org"
-                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base truncate max-w-full"
+                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base"
                   >
                     partnerships@chari-t.org
                   </a>
@@ -209,7 +209,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:support@chari-t.org"
-                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base truncate max-w-full"
+                    className="text-gray-900 font-medium hover:underline mt-0.5 sm:mt-1 inline-block text-sm sm:text-base"
                   >
                     support@chari-t.org
                   </a>
@@ -217,26 +217,47 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Social Links */}
+            {/* Social Links with Icons */}
             <div className="pt-4 border-t border-gray-100">
               <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">
                 Follow us
               </h3>
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                {[
-                  { name: 'Twitter', href: '#' },
-                  { name: 'LinkedIn', href: '#' },
-                  { name: 'Instagram', href: '#' },
-                  { name: 'Facebook', href: '#' },
-                ].map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    className="px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
-                  >
-                    {social.name}
-                  </a>
-                ))}
+              <div className="flex gap-3">
+                <a
+                  href="#"
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all hover:scale-105"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25l-.203 2.47-2.18.09-.21 2.472h2.39l-.204 2.47h-2.39l-.21 2.472-2.18.09-.203 2.47h2.39l-.204 2.47h-2.39l-.21 2.472-2.18.09-.203 2.47h2.39l-.204 2.47h-2.39l-.21 2.472-2.18.09-.203 2.47h2.39l-.204 2.47h-2.39l-.21 2.472-2.18.09-.203 2.47h2.39l-.204 2.47h-2.39l-.21 2.472-2.18.09-.203 2.47h2.39l-.204 2.47h-2.39z" />
+                  </svg>
+                </a>
+
+                <a
+                  href="#"
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all hover:scale-105"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
+                  </svg>
+                </a>
+
+                <a
+                  href="#"
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all hover:scale-105"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.849.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.07 2.695.327.273 2.674.076 7.01.01 8.297 0 8.706 0 12c0 3.294.01 3.703.076 4.99.197 4.336 2.619 6.683 6.98 6.94 1.28.057 1.69.071 4.949.071 3.259 0 3.668-.014 4.948-.07 4.358-.267 6.78-2.614 6.977-6.95.066-1.287.076-1.696.076-4.99 0-3.294-.01-3.703-.076-4.99C21.727 2.674 19.305.327 14.947.07 13.667.014 13.259 0 12 0z" />
+                  </svg>
+                </a>
+
+                <a
+                  href="#"
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all hover:scale-105"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </a>
               </div>
             </div>
 
