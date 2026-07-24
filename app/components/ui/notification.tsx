@@ -23,7 +23,7 @@ const Notification: React.FC<NotProp> = ({ message, status }) => {
     if (timer >= 10) {
       setActive(false);
     }
-  }, []);
+  }, [timer]);
 
   const progressWidth = (timer / 10) * 100;
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { Heart, Mail, Phone, MapPin, ArrowUp, Leaf, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { Heart, Mail, Phone, MapPin, ArrowUp, Leaf } from 'lucide-react';
 import Link from 'next/link';
 
 const footerLinks = {
@@ -30,7 +31,6 @@ const footerLinks = {
 const Logo: React.FC<{ nav?: boolean }> = ({ nav }) => {
   return (
     <div className="flex items-center gap-2.5">
-      {}
       <img
         src="/ct_logo_texts.png"
         alt="Chari-T"
@@ -93,6 +93,84 @@ function FooterColumn({
   );
 }
 
+function NewsletterForm() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setStatus('success');
+        setMessage(data.message || 'Subscribed successfully!');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'Something went wrong.');
+      }
+    } catch (_err) {
+      setStatus('error');
+      setMessage('Network error. Please try again.');
+    }
+  };
+
+  return (
+    <form className="space-y-3" onSubmit={handleSubmit}>
+      <label htmlFor="footer-email" className="sr-only">
+        Email address
+      </label>
+      <div className="relative">
+        <input
+          id="footer-email"
+          type="email"
+          required
+          placeholder="your@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={status === 'loading' || status === 'success'}
+          className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/15 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={status === 'loading' || status === 'success' || !email}
+        className="w-full h-11 px-6 rounded-xl bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-hover)] transition-colors shadow-sm shadow-teal-900/10 disabled:opacity-55 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      >
+        {status === 'loading' ? (
+          <>
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Subscribing...
+          </>
+        ) : status === 'success' ? (
+          'Subscribed!'
+        ) : (
+          'Subscribe'
+        )}
+      </button>
+      {message && (
+        <p
+          className={`text-xs mt-2 ${status === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}
+        >
+          {message}
+        </p>
+      )}
+    </form>
+  );
+}
+
 export default function Footer() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -100,33 +178,8 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto border-t border-slate-200/80 bg-white text-slate-600">
-      {/* Calm CTA — single band, no competing boxes */}
-      {/* <div className="border-b border-slate-100 bg-slate-50/80">
-        <div className="mx-auto max-w-7xl px-6 md:px-8 py-12 md:py-14">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="max-w-xl">
-              <p className="ct-overline mb-3">Give with confidence</p>
-              <h3 className="ct-h2 text-slate-900">Ready to make an impact?</h3>
-              <p className="ct-muted mt-3 max-w-md">
-                Browse safety-rated causes and verified charity centers. Optional tips only — your
-                gift goes to the cause.
-              </p>
-            </div>
-            <Link
-              href="/causes/get"
-              className="inline-flex items-center justify-center gap-2 self-start md:self-center h-11 px-6 rounded-full bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-hover)] transition-colors shadow-sm shadow-teal-900/10"
-            >
-              Start giving today
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Main — airy flat columns (all content kept) */}
       <div className="mx-auto max-w-7xl px-6 md:px-8 py-14 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-10">
-          {/* Brand + contact */}
           <div className="lg:col-span-4 space-y-8">
             <div>
               <Logo />
@@ -181,7 +234,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Link columns */}
           <div className="lg:col-span-5 grid grid-cols-2 sm:grid-cols-4 gap-10 sm:gap-8">
             <FooterColumn title="Causes" links={footerLinks.causes} />
             <FooterColumn title="Company" links={footerLinks.company} />
@@ -189,7 +241,6 @@ export default function Footer() {
             <FooterColumn title="Legal" links={footerLinks.legal} />
           </div>
 
-          {/* Newsletter — quiet column, not a dark brick */}
           <div className="lg:col-span-3">
             <h4 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-5">
               Stay updated
@@ -197,23 +248,7 @@ export default function Footer() {
             <p className="text-sm text-slate-500 leading-relaxed mb-5">
               Get impact stories and updates delivered to your inbox weekly.
             </p>
-            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-              <label htmlFor="footer-email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="footer-email"
-                type="email"
-                placeholder="your@email.com"
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/15 transition-all"
-              />
-              <button
-                type="submit"
-                className="w-full h-11 px-6  rounded-xl bg-[var(--brand)] text-white text-sm font-semibold hover:bg-[var(--brand-hover)] transition-colors shadow-sm shadow-teal-900/10"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
             <p className="mt-4 text-xs text-slate-400 leading-relaxed">
               No spam, ever. Unsubscribe anytime.
             </p>
@@ -221,7 +256,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-slate-100">
         <div className="mx-auto max-w-7xl px-6 md:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-slate-400">

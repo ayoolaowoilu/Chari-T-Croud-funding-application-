@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FetchProfile } from '../lib/fetchRequests';
 import { useSession } from 'next-auth/react';
 import NavBar from '../components/layout/NavBar';
@@ -533,7 +533,7 @@ export default function Page() {
   const [centerModalOpen, setCenterModalOpen] = useState(false);
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     setLoading(true);
     setError(false);
     if (status === 'loading') return;
@@ -562,7 +562,7 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.email, status]);
   const fetchTableData = async (
     targetTable: TableType,
     targetPage: number = 0,

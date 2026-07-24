@@ -77,7 +77,6 @@ export default function Page() {
     fetchData(viewType, 0, searchQuery || undefined);
   }, [fetchData, searchQuery, viewType]);
 
-  // Handle view type change
   const handleViewChange = (type: ViewType) => {
     setViewType(type);
     setPage(0);
@@ -122,8 +121,8 @@ export default function Page() {
                   onClick={() => handleViewChange(type)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
                     viewType === type
-                      ? 'bg-gray-900 text-white shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-[var(--brand)] text-white shadow-sm'
+                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   {type === 'both' ? 'All' : type}
@@ -137,11 +136,11 @@ export default function Page() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent w-full sm:w-64"
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent w-full sm:w-64"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+                className="px-4 py-2 bg-[var(--brand)] text-white rounded-xl text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors"
               >
                 Search
               </button>
@@ -299,7 +298,7 @@ export function CenterCard({ center }: { center: Center }) {
             {hasWebsite && (
               <div className="mt-1.5 flex items-center gap-1.5">
                 <Globe size={13} className="text-gray-400 shrink-0" />
-                <span className="text-sm text-blue-500 truncate">
+                <span className="text-sm text-[var(--brand)] truncate">
                   {center.website.replace(/^https?:\/\//, '')}
                 </span>
               </div>
@@ -310,7 +309,7 @@ export function CenterCard({ center }: { center: Center }) {
         {/* Bottom Action */}
         <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
           <span className="text-xs text-gray-400 truncate max-w-50">{center.email}</span>
-          <span className="flex items-center gap-1 text-xs font-medium text-blue-600 group-hover:text-blue-700 transition-colors">
+          <span className="flex items-center gap-1 text-xs font-medium text-[var(--brand)] group-hover:text-[var(--brand-hover)] transition-colors">
             View Center
             <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
           </span>

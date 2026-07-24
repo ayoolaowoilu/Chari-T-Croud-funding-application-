@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Footer from '@/app/components/layout/footer';
 import NavBar from '@/app/components/layout/NavBar';
+import { Download, Link as LinkIcon, Check, AlertCircle, RefreshCw } from 'lucide-react';
 
 type StyleInfo = {
   name: string;
@@ -62,13 +63,21 @@ function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) 
   return (
     <button
       onClick={handleCopy}
-      className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 ${
+      className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 ${
         copied
-          ? 'bg-green-50 border-green-300 text-green-700'
-          : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+          : 'border-gray-200 text-gray-700 hover:bg-[var(--brand-soft)]/40 hover:border-[var(--brand)]/30'
       }`}
     >
-      {copied ? 'Copied!' : label}
+      {copied ? (
+        <>
+          <Check className="w-4 h-4 text-emerald-600" /> Copied!
+        </>
+      ) : (
+        <>
+          <LinkIcon className="w-4 h-4 text-gray-500" /> {label}
+        </>
+      )}
     </button>
   );
 }
@@ -96,40 +105,30 @@ function FlierCard({
   }, [imageUrl, downloadUrl]);
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       {/* Image container */}
       <div className="relative aspect-3/4 bg-gray-50 overflow-hidden">
         {!loaded && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
-              <span className="text-sm text-gray-400 font-medium">Loading...</span>
+              <div className="w-8 h-8 border-2 border-emerald-100 border-t-[var(--brand)] rounded-full animate-spin" />
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                Generating Flier...
+              </span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-red-50 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-red-50/50 z-10">
             <div className="text-center px-6">
-              <svg
-                className="w-10 h-10 text-red-400 mx-auto mb-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <p className="text-sm text-red-600 font-medium">Failed to load</p>
+              <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-2" />
+              <p className="text-sm text-red-600 font-semibold">Failed to generate flier</p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-2 text-xs text-red-500 hover:text-red-700 underline"
+                className="mt-2 text-xs text-red-500 hover:text-red-700 font-medium underline flex items-center gap-1 mx-auto"
               >
-                Retry
+                <RefreshCw className="w-3 h-3" /> Retry
               </button>
             </div>
           </div>
@@ -146,31 +145,26 @@ function FlierCard({
 
         {/* Style badge */}
         <div className="absolute top-4 left-4">
-          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-white/95 backdrop-blur-sm text-gray-900 shadow-sm border border-gray-100">
+          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-extrabold bg-white/90 backdrop-blur-md text-[var(--brand-ink)] shadow-sm border border-emerald-100">
             Style {style}
           </span>
         </div>
       </div>
 
       {/* Info */}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900">{label.name}</h3>
-        <p className="mt-1 text-sm text-gray-500 leading-relaxed">{label.desc}</p>
+      <div className="p-6">
+        <h3 className="text-lg font-black text-gray-950">{label.name}</h3>
+        <p className="mt-1 text-sm text-gray-500 leading-relaxed min-h-[40px] font-medium">
+          {label.desc}
+        </p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-5 flex gap-2.5">
           <button
             onClick={handleDownload}
             disabled={!loaded || error}
-            className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
+            <Download className="w-4 h-4" />
             Download
           </button>
 
@@ -239,152 +233,99 @@ export default function Flier() {
   }, [baseData]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <NavBar />
+    <div className="min-h-screen bg-gray-50/50 flex flex-col justify-between">
+      <div>
+        <NavBar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="px-3 py-1 rounded-full bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Campaign #{baseData.campaign_id}
-            </span>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Hero Header Card - Emerald / Brand Theme */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-teal-950 via-[var(--brand-ink)] to-slate-900 text-white rounded-3xl p-8 lg:p-12 shadow-xl mb-12">
+            {/* Subtle background glow */}
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 rounded-full bg-[var(--brand)]/20 blur-3xl" />
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl" />
 
-            {baseData._type === 'center' && baseData.center_name && (
-              <span className="px-3 py-1 rounded-full bg-blue-50 text-xs font-semibold text-blue-700 uppercase tracking-wider">
-                {baseData.center_name} ✓
-              </span>
-            )}
-          </div>
+            <div className="relative z-10">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-emerald-200 border border-white/10">
+                  Campaign #{baseData.campaign_id}
+                </span>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Campaign Flier Preview
-          </h1>
+                {baseData._type === 'center' && baseData.center_name && (
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-sm text-xs font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/25">
+                    {baseData.center_name} Verified
+                  </span>
+                )}
+              </div>
 
-          <p className="mt-3 text-lg text-gray-500 max-w-2xl">
-            All 5 style variations for{' '}
-            <span className="font-semibold text-gray-900">{baseData.campaign_name}</span>
-          </p>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none mb-4">
+                Campaign Flier Generator
+              </h1>
 
-          {/* Stats bar */}
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-gray-900">
-                {formatCurrency(baseData.raised)}
-              </span>
-              <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-                raised
-              </span>
+              <p className="text-lg text-emerald-100/80 max-w-2xl font-medium">
+                Promote <span className="text-white font-extrabold">{baseData.campaign_name}</span>{' '}
+                with professional, print-ready marketing fliers. Select a design style below to
+                download or copy the direct link.
+              </p>
+
+              {/* Premium Stats bar */}
+              <div className="mt-8 flex flex-wrap items-center gap-6 bg-white/5 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/10 max-w-3xl">
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wide">
+                    Raised
+                  </span>
+                  <span className="text-2xl lg:text-3xl font-black text-white">
+                    {formatCurrency(baseData.raised)}
+                  </span>
+                </div>
+
+                {baseData.goal && (
+                  <>
+                    <div className="hidden sm:block w-px h-10 bg-white/10" />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wide">
+                        Goal
+                      </span>
+                      <span className="text-xl lg:text-2xl font-bold text-white/90">
+                        {formatCurrency(baseData.goal)}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {progress !== null && (
+                  <>
+                    <div className="hidden sm:block w-px h-10 bg-white/10" />
+                    <div className="flex-1 min-w-[150px]">
+                      <div className="flex justify-between items-center mb-1 text-xs font-semibold text-emerald-200">
+                        <span>Progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[var(--brand)] to-emerald-400 rounded-full transition-all duration-700"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-
-            {baseData.goal && (
-              <>
-                <div className="hidden sm:block w-px h-8 bg-gray-200" />
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold text-gray-600">
-                    {formatCurrency(baseData.goal)}
-                  </span>
-                  <span className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-                    goal
-                  </span>
-                </div>
-              </>
-            )}
-
-            {progress !== null && (
-              <>
-                <div className="hidden sm:block w-px h-8 bg-gray-200" />
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gray-900 rounded-full transition-all duration-700"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-bold text-gray-900">{progress}%</span>
-                </div>
-              </>
-            )}
           </div>
-        </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {STYLES.map((style) => (
-            <FlierCard
-              key={style}
-              style={style}
-              imageUrl={getFlierUrl(style)}
-              downloadUrl={`flier-style-${style}-${baseData.campaign_id}.png`}
-            />
-          ))}
-        </div>
-
-        {/* URL Builder */}
-        <div className="mt-20 p-8 bg-gray-50 rounded-2xl border border-gray-200">
-          <div className="flex items-center gap-2 mb-4">
-            <svg
-              className="w-5 h-5 text-gray-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          {/* Fliers Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {STYLES.map((style) => (
+              <FlierCard
+                key={style}
+                style={style}
+                imageUrl={getFlierUrl(style)}
+                downloadUrl={`flier-style-${style}-${baseData.campaign_id}.png`}
               />
-            </svg>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
-              URL Parameters
-            </h3>
+            ))}
           </div>
-
-          <code className="block text-sm text-gray-600 font-mono bg-white p-5 rounded-xl border border-gray-200 overflow-x-auto leading-relaxed">
-            ?campaign_name=Your+Campaign&raised=15420&goal=50000&campaign_id=42&campaign_logo_url=https://...&qr_code_url=https://...&tagline=...&details=...&center_name=...&center_handle=...&_type=center
-          </code>
-
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span>
-                <strong>campaign_logo_url</strong> — required
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              <span>
-                <strong>qr_code_url</strong> — required (QR image)
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span>
-                <strong>tagline</strong> — optional short message
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span>
-                <strong>details</strong> — optional longer description
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span>
-                <strong>center_name</strong> — shows verified badge
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-              <span>
-                <strong>_type</strong> — "center" or "normal"
-              </span>
-            </div>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <Footer />
     </div>

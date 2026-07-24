@@ -249,7 +249,6 @@ export default function KycForm() {
         <div className="min-h-screen bg-white flex items-center justify-center px-4">
           <div className="text-center max-w-sm">
             <DualRingSpinner />
-            <h2 className="text-xl mt-10 font-bold text-gray-900">Loading...</h2>
           </div>
         </div>
       </>
@@ -305,7 +304,7 @@ export default function KycForm() {
         <div className="max-w-lg mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-[var(--brand)] rounded-xl flex items-center justify-center mx-auto mb-4">
               <User className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Identity Verification</h1>
@@ -331,7 +330,7 @@ export default function KycForm() {
                   placeholder="John Ade Doe"
                   className={`w-full h-11 px-4 bg-white border text-black rounded-xl text-sm
                   ${errors.fullName ? 'border-red-300' : 'border-gray-200'}
-                  focus:outline-none focus:border-gray-900`}
+                  focus:outline-none focus:border-[var(--brand)]`}
                 />
                 {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName}</p>}
               </div>
@@ -347,7 +346,7 @@ export default function KycForm() {
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                     className={`w-full h-11 px-4 bg-white border text-black rounded-xl text-sm
                     ${errors.dateOfBirth ? 'border-red-300' : 'border-gray-200'}
-                    focus:outline-none focus:border-gray-900`}
+                    focus:outline-none focus:border-[var(--brand)]`}
                   />
                   {errors.dateOfBirth && (
                     <p className="text-xs text-red-500 mt-1">{errors.dateOfBirth}</p>
@@ -366,7 +365,7 @@ export default function KycForm() {
                     placeholder="08012345678"
                     className={`w-full h-11 px-4 text-black bg-white border rounded-xl text-sm
                     ${errors.phone ? 'border-red-300' : 'border-gray-200'}
-                    focus:outline-none focus:border-gray-900`}
+                    focus:outline-none focus:border-[var(--brand)]`}
                   />
                   {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
                 </div>
@@ -391,7 +390,7 @@ export default function KycForm() {
                   placeholder="12 Lagos Street"
                   className={`w-full h-11 px-4 text-black bg-white border rounded-xl text-sm
                   ${errors.address ? 'border-red-300' : 'border-gray-200'}
-                  focus:outline-none focus:border-gray-900`}
+                  focus:outline-none focus:border-[var(--brand)]`}
                 />
                 {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
               </div>
@@ -406,7 +405,7 @@ export default function KycForm() {
                     placeholder="Ikeja"
                     className={`w-full h-11 text-black px-4 bg-white border rounded-xl text-sm
                     ${errors.city ? 'border-red-300' : 'border-gray-200'}
-                    focus:outline-none focus:border-gray-900`}
+                    focus:outline-none focus:border-[var(--brand)]`}
                   />
                   {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
                 </div>
@@ -417,7 +416,7 @@ export default function KycForm() {
                     onChange={(e) => handleInputChange('state', e.target.value)}
                     className={`w-full h-11 px-4 text-black bg-white border rounded-xl text-sm
                     ${errors.state ? 'border-red-300' : 'border-gray-200'}
-                    focus:outline-none focus:border-gray-900`}
+                    focus:outline-none focus:border-[var(--brand)]`}
                   >
                     <option value="">Select state</option>
                     {nigerianStates.map((s) => (
@@ -454,7 +453,7 @@ export default function KycForm() {
                       className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all
                       ${
                         formData.documentType === doc.value
-                          ? 'bg-gray-900 text-white border-gray-900'
+                          ? 'bg-[var(--brand)] text-white border-[var(--brand)]'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -490,7 +489,7 @@ export default function KycForm() {
                       maxLength={selectedDoc.maxLength}
                       className={`w-full h-11 px-4 text-black bg-white border rounded-xl text-sm font-mono tracking-wider
                       ${errors.documentNumber ? 'border-red-300' : 'border-gray-200'}
-                      focus:outline-none focus:border-gray-900`}
+                      focus:outline-none focus:border-[var(--brand)]`}
                     />
                     {errors.documentNumber && (
                       <p className="text-xs text-red-500 mt-1">{errors.documentNumber}</p>
@@ -558,8 +557,8 @@ export default function KycForm() {
                         type="button"
                         onClick={handleUploadToCloudinary}
                         disabled={uploading}
-                        className="w-full h-10 bg-gray-900 text-white rounded-lg text-sm font-medium
-                        hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed
+                        className="w-full h-10 bg-[var(--brand)] text-white rounded-lg text-sm font-medium
+                        hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed
                         transition-colors flex items-center justify-center gap-2"
                       >
                         {uploading ? (
@@ -603,8 +602,8 @@ export default function KycForm() {
             <button
               type="submit"
               disabled={submitting || uploading || !uploadedUrl}
-              className="w-full h-12 bg-gray-900 text-white rounded-xl font-medium
-              hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed
+              className="w-full h-12 bg-[var(--brand)] text-white rounded-xl font-medium
+              hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed
               transition-colors flex items-center justify-center gap-2"
             >
               {submitting ? (

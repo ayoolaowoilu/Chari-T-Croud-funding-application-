@@ -23,6 +23,7 @@ import {
   User,
   Bell,
   BellOff,
+  Check,
 } from 'lucide-react';
 import NavBar from '@/app/components/layout/NavBar';
 import { DualRingSpinner } from '@/app/components/ui/loading';
@@ -101,7 +102,7 @@ function GallerySlider({
             whileTap={{ scale: 0.98 }}
           >
             <div
-              className={`w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'}`}
+              className={`w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img ? 'border-[var(--brand)] ring-2 ring-[var(--brand-soft)]' : 'border-gray-200 hover:border-gray-300'}`}
             >
               <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
             </div>
@@ -278,7 +279,7 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
             </p>
             <button
               onClick={() => setStage(2)}
-              className="text-sm text-blue-600 font-medium hover:text-blue-700"
+              className="text-sm text-[var(--brand)] font-medium hover:text-[var(--brand-hover)]"
             >
               Try Again
             </button>
@@ -295,7 +296,13 @@ function ReportModal({ campaignId, onClose }: { campaignId: number; onClose: () 
   );
 }
 
-function CommentSection({ campaignId }: { campaignId: number }) {
+function CommentSection({
+  campaignId,
+  noCardWrapper = false,
+}: {
+  campaignId: number;
+  noCardWrapper?: boolean;
+}) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comments[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -365,6 +372,7 @@ function CommentSection({ campaignId }: { campaignId: number }) {
 
   useEffect(() => {
     fetchComments(0, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
 
   const formatDate = (dateStr?: string) => {
@@ -383,254 +391,285 @@ function CommentSection({ campaignId }: { campaignId: number }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  return (
-    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
-      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+  const content = (
+    <>
+      {!noCardWrapper && (
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-blue-600" />
+            <MessageCircle className="w-5 h-5 text-[var(--brand)]" />
             Comments
           </h2>
           <span className="text-xs lg:text-sm text-gray-500">{totalCount} total</span>
         </div>
+      )}
 
-        {/* Comment Input */}
-        <div className="mb-6">
-          <div className="flex gap-3">
-            <div className="shrink-0">
-              {session?.user?.image ? (
-                <img
-                  src={session.user.image}
-                  alt=""
-                  className="w-9 h-9 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-                  <User className="w-4 h-4 text-blue-600" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={session ? 'Write a comment...' : 'Sign in to comment'}
-                rows={2}
-                disabled={!session || submitting}
-                className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-              />
-              <div className="flex items-center justify-between mt-2">
-                {!session && (
-                  <span className="text-xs text-gray-400">Sign in to leave a comment</span>
-                )}
-                <div className="flex-1" />
-                <button
-                  onClick={handleSubmit}
-                  disabled={!newComment.trim() || !session || submitting}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--brand)] rounded-xl hover:bg-[var(--brand-hover)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                >
-                  {submitting ? (
-                    <DualRingSpinner />
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      Post
-                    </>
-                  )}
-                </button>
+      {/* Comment Input */}
+      <div className="mb-6">
+        <div className="flex gap-3">
+          <div className="shrink-0">
+            {session?.user?.image ? (
+              <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center">
+                <User className="w-4 h-4 text-[var(--brand)]" />
               </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder={session ? 'Write a comment...' : 'Sign in to comment'}
+              rows={2}
+              disabled={!session || submitting}
+              className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/20 focus:border-[var(--brand)] resize-none disabled:bg-gray-100 disabled:text-gray-400"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+            />
+            <div className="flex items-center justify-between mt-2">
+              {!session && (
+                <span className="text-xs text-gray-400">Sign in to leave a comment</span>
+              )}
+              <div className="flex-1" />
+              <button
+                onClick={handleSubmit}
+                disabled={!newComment.trim() || !session || submitting}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--brand)] rounded-xl hover:bg-[var(--brand-hover)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {submitting ? (
+                  <DualRingSpinner />
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    Post
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Error State */}
-        {error && comments.length === 0 && (
-          <div className="text-center py-8">
-            <XCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
-            <button
-              onClick={() => fetchComments(0, false)}
-              className="text-sm text-blue-600 font-medium hover:text-blue-700"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Comments List */}
-        <div className="space-y-4">
-          <AnimatePresence>
-            {comments.map((comment, idx) => (
-              <motion.div
-                key={comment.identity_key || `${comment.user_id}-${idx}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="flex gap-3"
-              >
-                <div className="shrink-0">
-                  {comment.img_url ? (
-                    <img
-                      src={comment.img_url}
-                      alt=""
-                      className="w-9 h-9 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-xs font-bold text-gray-500">
-                        {(comment.name || 'A').charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {comment.name || 'Anonymous'}
-                      </span>
-                      <span className="text-xs text-gray-400">·</span>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(comment.created_at)}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap wrap-break-words">
-                      {comment.comment}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+      {/* Error State */}
+      {error && comments.length === 0 && (
+        <div className="text-center py-8">
+          <XCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+          <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
+          <button
+            onClick={() => fetchComments(0, false)}
+            className="text-sm text-[var(--brand)] font-medium hover:text-[var(--brand-hover)]"
+          >
+            Try Again
+          </button>
         </div>
+      )}
 
-        {/* Loading State */}
-        {loading && comments.length === 0 && (
-          <div className="py-8 flex justify-center">
-            <DualRingSpinner />
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && comments.length === 0 && (
-          <div className="text-center py-10">
-            <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No comments yet</p>
-            <p className="text-xs text-gray-400 mt-1">Be the first to share your thoughts</p>
-          </div>
-        )}
-
-        {/* Load More */}
-        {hasMore && comments.length > 0 && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={handleLoadMore}
-              disabled={loading}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition-colors"
+      {/* Comments List */}
+      <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+        <AnimatePresence>
+          {comments.map((comment, idx) => (
+            <motion.div
+              key={
+                comment.identity_key
+                  ? `${comment.identity_key}-${idx}`
+                  : `${comment.user_id || 'comment'}-${idx}`
+              }
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="flex gap-3"
             >
-              {loading ? 'Loading...' : 'Load more comments'}
-            </button>
-          </div>
-        )}
+              <div className="shrink-0">
+                {comment.img_url ? (
+                  <img src={comment.img_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+                    <span className="text-xs font-bold text-gray-500">
+                      {(comment.name || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-semibold text-gray-900">
+                      {comment.name || 'Anonymous'}
+                    </span>
+                    <span className="text-xs text-gray-400">·</span>
+                    <span className="text-xs text-gray-400">{formatDate(comment.created_at)}</span>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap wrap-break-words">
+                    {comment.comment}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Loading State */}
+      {loading && comments.length === 0 && (
+        <div className="py-8 flex justify-center">
+          <DualRingSpinner />
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && comments.length === 0 && (
+        <div className="text-center py-10">
+          <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-sm text-gray-500">No comments yet</p>
+          <p className="text-xs text-gray-400 mt-1">Be the first to share your thoughts</p>
+        </div>
+      )}
+
+      {/* Load More */}
+      {hasMore && comments.length > 0 && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleLoadMore}
+            disabled={loading}
+            className="text-sm font-medium text-[var(--brand)] hover:text-[var(--brand-hover)] disabled:text-gray-400 transition-colors"
+          >
+            {loading ? 'Loading...' : 'Load more comments'}
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  if (noCardWrapper) {
+    return <div className="flex flex-col h-full">{content}</div>;
+  }
+
+  return (
+    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
+      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+        {content}
       </div>
     </div>
   );
 }
 
 function SubscribersSection({
-  campaignId,
+  _campaignId,
   subscribers,
   subscribersCount,
   subscribersLoading,
   subscribersHasMore,
   onLoadMore,
+  noCardWrapper = false,
 }: {
-  campaignId: number;
+  _campaignId: number;
   subscribers: Subscribed[];
   subscribersCount: number;
   subscribersLoading: boolean;
   subscribersHasMore: boolean;
   onLoadMore: () => void;
+  noCardWrapper?: boolean;
 }) {
-  return (
-    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
-      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+  const content = (
+    <>
+      {!noCardWrapper && (
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg lg:text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Bell className="w-5 h-5 text-blue-600" />
+            <Bell className="w-5 h-5 text-[var(--brand)]" />
             Subscribers
           </h2>
           <span className="text-xs lg:text-sm text-gray-500">{subscribersCount} total</span>
         </div>
+      )}
 
-        {subscribersLoading && subscribers.length === 0 && (
-          <div className="py-8 flex justify-center">
-            <DualRingSpinner />
-          </div>
-        )}
+      {subscribersLoading && subscribers.length === 0 && (
+        <div className="py-8 flex justify-center">
+          <DualRingSpinner />
+        </div>
+      )}
 
-        {!subscribersLoading && subscribers.length === 0 && (
-          <div className="text-center py-8">
-            <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No subscribers yet</p>
-            <p className="text-xs text-gray-400 mt-1">Subscribe to get updates on this campaign</p>
-          </div>
-        )}
+      {!subscribersLoading && subscribers.length === 0 && (
+        <div className="text-center py-8">
+          <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">No subscribers yet</p>
+          <p className="text-xs text-gray-400 mt-1">Subscribe to get updates on this campaign</p>
+        </div>
+      )}
 
-        {subscribers.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3">
-            {subscribers.map((sub, idx) => (
-              <div
-                key={sub.identity_key || `${sub.user_id}-${idx}`}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
-              >
-                {sub.img_url ? (
-                  <img
-                    src={sub.img_url}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover shrink-0"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-blue-600">
-                      {(sub.name || 'A').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <span className="text-sm font-medium text-gray-800 truncate">
-                  {sub.name || 'Anonymous'}
-                </span>
-              </div>
-            ))}
+      {subscribers.length > 0 && (
+        <div className="bg-gray-50/50 rounded-xl p-6 border border-gray-100 mb-4">
+          <div className="flex flex-col gap-4">
+            <h3 className="text-base font-bold text-gray-950">
+              Joined by {subscribersCount} {subscribersCount === 1 ? 'subscriber' : 'subscribers'}
+            </h3>
+            <div className="flex flex-wrap -space-x-2 py-1 overflow-visible">
+              {subscribers.map((sub, idx) => (
+                <div
+                  key={
+                    sub.identity_key
+                      ? `${sub.identity_key}-${idx}`
+                      : `${sub.user_id || 'sub'}-${idx}`
+                  }
+                  className="relative group shrink-0"
+                  title={sub.name || 'Anonymous'}
+                >
+                  {sub.img_url ? (
+                    <img
+                      src={sub.img_url}
+                      alt={sub.name || 'Subscriber'}
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:z-10"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 border-2 border-white flex items-center justify-center shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:z-10">
+                      <span className="text-xs font-bold text-[var(--brand)]">
+                        {(sub.name || 'A').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {subscribersHasMore && subscribers.length > 0 && (
-          <div className="mt-4 text-center">
-            <button
-              onClick={onLoadMore}
-              disabled={subscribersLoading}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400 transition-colors"
-            >
-              {subscribersLoading ? 'Loading...' : 'Load more subscribers'}
-            </button>
-          </div>
-        )}
+      {subscribersHasMore && subscribers.length > 0 && (
+        <div className="mt-2 text-center">
+          <button
+            onClick={onLoadMore}
+            disabled={subscribersLoading}
+            className="text-xs font-semibold text-[var(--brand)] hover:text-[var(--brand-hover)] disabled:text-gray-400 transition-colors"
+          >
+            {subscribersLoading ? 'Loading...' : 'Show more subscribers'}
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  if (noCardWrapper) {
+    return <div className="flex flex-col h-full">{content}</div>;
+  }
+
+  return (
+    <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
+      <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
+        {content}
       </div>
     </div>
   );
 }
 
-export default function CampaignClient({ campaign }: { campaign: Campaign }) {
+export default function CampaignClient({ campaign }: { campaign: Campaign | null | undefined }) {
   const router = useRouter();
+  const { data: session } = useSession();
 
-  const [displayedMainImg, setDisplayedMainImg] = useState(campaign.main_img?.url || '');
+  // Safe initial states — do NOT access campaign here (it may be undefined)
+  const [displayedMainImg, setDisplayedMainImg] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [userCache, setUserCache] = useState<Record<number, { full_name: string; image: string }>>(
@@ -645,12 +684,13 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const [checkingSubscription, setCheckingSubscription] = useState(true);
   const [subscribeLoading, setSubscribeLoading] = useState(false);
   const [subscribers, setSubscribers] = useState<Subscribed[]>([]);
-  const [subscribersCount, setSubscribersCount] = useState<number>(campaign.subscribed_count ?? 0);
+  const [subscribersCount, setSubscribersCount] = useState<number>(0);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [subscribersPage, setSubscribersPage] = useState(0);
   const [subscribersHasMore, setSubscribersHasMore] = useState(false);
+  const [activeTab, setActiveTab] = useState<'donors' | 'subscribers' | 'comments'>('donors');
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  const { data: session } = useSession();
   const isCenter = campaign?._type === 'center';
 
   useEffect(() => {
@@ -661,23 +701,30 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
         })
         .catch(console.error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign?.center_id, isCenter]);
 
   useEffect(() => {
     if (!isCenter && campaign?.user_id && !userCache[campaign.user_id]) {
       GetUserDetailsDyId(campaign.user_id, false)
         .then((resp) => {
-          if (!resp.error) setUserCache((prev) => ({ ...prev, [campaign.user_id]: resp }));
+          if (!resp.error) setUserCache((prev) => ({ ...prev, [campaign.user_id!]: resp }));
         })
         .catch(console.error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign?.user_id, isCenter]);
 
   useEffect(() => {
     if (campaign?.main_img?.url) setDisplayedMainImg(campaign.main_img.url);
   }, [campaign?.main_img]);
 
+  useEffect(() => {
+    setSubscribersCount(campaign?.subscribed_count ?? 0);
+  }, [campaign?.subscribed_count]);
+
   const fetchSubscribers = async (pageNum = 0, append = false) => {
+    if (!campaign?.id) return;
     setSubscribersLoading(true);
     try {
       const resp = await Handle_subscribe('GET', { campaign_id: campaign.id }, pageNum);
@@ -696,7 +743,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   };
 
   const checkSubscription = async () => {
-    if (!session?.user?.id) {
+    if (!session?.user?.id || !campaign?.id) {
       setIsSubscribed(false);
       setCheckingSubscription(false);
       return;
@@ -716,7 +763,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   };
 
   const handle_subscribe = async () => {
-    if (!session) return;
+    if (!session || !campaign?.id) return;
     setSubscribeLoading(true);
     try {
       const resp = await Handle_subscribe('PUT', {
@@ -739,7 +786,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   };
 
   const handle_unsubscribe = async () => {
-    if (!session) return;
+    if (!session || !campaign?.id) return;
     setSubscribeLoading(true);
     try {
       const resp = await Handle_subscribe('UN_SUB', {
@@ -769,11 +816,29 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
 
   useEffect(() => {
     checkSubscription();
-  }, [session?.user?.id, campaign.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id, campaign?.id]);
 
   useEffect(() => {
     fetchSubscribers(0, false);
-  }, [campaign.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaign?.id]);
+
+  // Guard — comes AFTER all hooks so hook order is stable
+  if (!campaign) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <NavBar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <DualRingSpinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // From this point downward, campaign is guaranteed to exist
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -786,6 +851,8 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const shareToTwitter = (text: string, url: string) => {
@@ -831,9 +898,15 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
   const currencySymbols: Record<string, string> = { NG: '₦', USD: '$', EURO: '€' };
   const symbol = currencySymbols[campaign.currency] || '₦';
   const progressPercent = Math.min((campaign.raised / campaign.goal) * 100, 100);
-  const daysLeft = Math.ceil(
-    (Number(campaign?.date_to_completion) - Date.now()) / (1000 * 60 * 60 * 24),
-  );
+  const getDaysLeft = (val: number | string | undefined): number => {
+    if (val === undefined || val === null || val === '') return 0;
+    const num = Number(val);
+    if (!isNaN(num) && num > 0 && num < 10000) return Math.ceil(num);
+    const targetTime = !isNaN(num) ? num : new Date(String(val)).getTime();
+    if (isNaN(targetTime)) return 0;
+    return Math.ceil((targetTime - Date.now()) / (1000 * 60 * 60 * 24));
+  };
+  const daysLeft = getDaysLeft(campaign?.date_to_completion);
 
   const donorsList: Donor[] = Array.isArray(campaign.donors)
     ? campaign.donors
@@ -856,7 +929,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
 
   const user = isCenter ? centerCache[Number(campaign.center_id)!] : userCache[campaign.user_id];
   const userName = isCenter ? campaign.center_name : user?.full_name;
-  const userId = isCenter ? campaign.center_id : campaign.user_id;
+  const _userId = isCenter ? campaign.center_id : campaign.user_id;
 
   const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/cause?id=${campaign.id}&name=${campaign.name}`;
   const twitterText = `${campaign.name?.toUpperCase()} | Chari-T\n\n${campaign.details}\n\nDonate now: ${shareUrl}`;
@@ -893,7 +966,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
           <div className="flex items-center gap-3 mb-3">
             <button
               onClick={() => router.push(`/causes/get?category=${campaign.category}`)}
-              className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full uppercase tracking-wide hover:bg-blue-100 transition-colors"
+              className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-semibold rounded-full uppercase tracking-wide hover:bg-emerald-100 transition-colors"
             >
               {campaign.category}
             </button>
@@ -1007,7 +1080,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 <button
                   onClick={toggleSubscribe}
                   disabled={!session || subscribeLoading || checkingSubscription}
-                  className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}
+                  className={`shrink-0 flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}`}
                 >
                   {subscribeLoading ? (
                     <DualRingSpinner />
@@ -1064,30 +1137,44 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                     <span className="text-xs text-gray-400">Loading...</span>
                   )}
                   {isCenter && (
-                    <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                    <svg
+                      className="w-4 h-4 text-[var(--brand)]"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
                       <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" />
                     </svg>
                   )}
                 </div>
 
-                <div className="relative">
-                  <p
-                    className={`text-sm lg:text-base text-gray-600 leading-relaxed whitespace-pre-line ${isExpanded ? '' : 'max-h-36 lg:max-h-48 overflow-hidden'}`}
-                  >
-                    {isCenter ? campaign.details : campaign.story}
-                  </p>
-                  {!isExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent" />
-                  )}
-                </div>
-                {(isCenter ? campaign.details : campaign.story)?.length > 200 && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
-                  >
-                    {isExpanded ? 'Show less' : 'Read more'}
-                  </button>
-                )}
+                {(() => {
+                  const writeUp = isCenter
+                    ? campaign.details
+                    : campaign.story || campaign.details || '';
+                  const isLong = writeUp.length > 200;
+                  return (
+                    <>
+                      <div className="relative">
+                        <p
+                          className={`text-sm lg:text-base text-gray-600 leading-relaxed whitespace-pre-line ${isExpanded ? '' : 'max-h-36 lg:max-h-48 overflow-hidden'}`}
+                        >
+                          {writeUp}
+                        </p>
+                        {!isExpanded && isLong && (
+                          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                        )}
+                      </div>
+                      {isLong && (
+                        <button
+                          onClick={() => setIsExpanded(!isExpanded)}
+                          className="mt-3 text-sm font-semibold text-[var(--brand)] hover:text-[var(--brand-hover)]"
+                        >
+                          {isExpanded ? 'Show less' : 'Read more'}
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1154,70 +1241,142 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
               </div>
             </div>
 
-            {/* Top Donors */}
+            {/* Community Tabs (Top Donors, Subscribers, Comments) */}
             <div className="px-4 sm:px-0 py-6 lg:py-0 bg-white lg:bg-transparent border-t lg:border-0 border-gray-100">
               <div className="bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:p-8 lg:shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg lg:text-xl font-bold text-gray-900">Top Donors</h2>
-                  <span className="text-xs lg:text-sm text-gray-500">{totalDonors} total</span>
+                {/* Tab buttons */}
+                <div className="flex border-b border-gray-100 mb-6 gap-2">
+                  <button
+                    onClick={() => setActiveTab('donors')}
+                    className={`flex-1 pb-3 text-sm lg:text-base font-bold text-center border-b-2 transition-all ${
+                      activeTab === 'donors'
+                        ? 'border-[var(--brand)] text-[var(--brand)]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Donors ({totalDonors})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('subscribers')}
+                    className={`flex-1 pb-3 text-sm lg:text-base font-bold text-center border-b-2 transition-all ${
+                      activeTab === 'subscribers'
+                        ? 'border-[var(--brand)] text-[var(--brand)]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Subscribers ({subscribersCount})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('comments')}
+                    className={`flex-1 pb-3 text-sm lg:text-base font-bold text-center border-b-2 transition-all ${
+                      activeTab === 'comments'
+                        ? 'border-[var(--brand)] text-[var(--brand)]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Comments ({campaign.comments_count ?? 0})
+                  </button>
                 </div>
-                <div className="space-y-2">
-                  {sortedDonors.slice(0, 5).map((donor, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 lg:p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs lg:text-sm font-bold text-gray-600">
-                          {donor.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .slice(0, 2)}
-                        </div>
-                        <div>
-                          <p className="text-sm lg:text-base font-semibold text-gray-900">
-                            {donor.name}
+
+                {/* Tab Content */}
+                <div>
+                  {activeTab === 'donors' && (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg lg:text-xl font-bold text-gray-900">Top Donors</h2>
+                        <span className="text-xs lg:text-sm text-gray-500">
+                          {totalDonors} total
+                        </span>
+                      </div>
+                      {sortedDonors.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                          <p className="text-sm text-gray-500">No donors yet</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Be the first to donate and support this cause!
                           </p>
-                          <p className="text-[10px] lg:text-xs text-gray-500">Donor #{idx + 1}</p>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm lg:text-base font-bold text-gray-900">
-                          {symbol}
-                          {formatAmount(donor.amount)}
-                        </p>
-                        {idx === 0 && (
-                          <span className="text-[10px] text-amber-600 font-medium">Top donor</span>
-                        )}
-                      </div>
+                      ) : (
+                        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                          {sortedDonors.slice(0, 10).map((donor, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-3 lg:p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs lg:text-sm font-bold text-gray-600">
+                                  {donor.name
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')
+                                    .slice(0, 2)}
+                                </div>
+                                <div>
+                                  <p className="text-sm lg:text-base font-semibold text-gray-900">
+                                    {donor.name}
+                                  </p>
+                                  <p className="text-[10px] lg:text-xs text-gray-500">
+                                    Donor #{idx + 1}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm lg:text-base font-bold text-gray-900">
+                                  {symbol}
+                                  {formatAmount(donor.amount)}
+                                </p>
+                                {idx === 0 && (
+                                  <span className="text-[10px] text-amber-600 font-medium">
+                                    Top donor
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
+
+                  {activeTab === 'subscribers' && (
+                    <SubscribersSection
+                      _campaignId={Number(campaign.id)}
+                      subscribers={subscribers}
+                      subscribersCount={subscribersCount}
+                      subscribersLoading={subscribersLoading}
+                      subscribersHasMore={subscribersHasMore}
+                      onLoadMore={handleLoadMoreSubscribers}
+                      noCardWrapper
+                    />
+                  )}
+
+                  {activeTab === 'comments' && (
+                    <CommentSection campaignId={Number(campaign.id)} noCardWrapper />
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Subscribers */}
-            <SubscribersSection
-              campaignId={Number(campaign.id)}
-              subscribers={subscribers}
-              subscribersCount={subscribersCount}
-              subscribersLoading={subscribersLoading}
-              subscribersHasMore={subscribersHasMore}
-              onLoadMore={handleLoadMoreSubscribers}
-            />
-
-            {/* Comments Section */}
-            <CommentSection campaignId={Number(campaign.id)} />
 
             {/* Mobile share & report */}
             <div className="lg:hidden px-4 py-6 bg-white border-t border-gray-100">
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <button
                   onClick={() => copyToClipboard(shareUrl)}
-                  className="flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 active:bg-gray-50"
+                  className={`flex items-center justify-center gap-2 py-2.5 border rounded-xl text-sm font-medium transition-all ${
+                    copiedLink
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                      : 'border-gray-200 text-gray-700 active:bg-gray-50'
+                  }`}
                 >
-                  <Copy className="w-4 h-4" /> Copy
+                  {copiedLink ? (
+                    <>
+                      <Check className="w-4 h-4" /> Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" /> Copy
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => shareToTwitter(twitterText, shareUrl)}
@@ -1298,7 +1457,7 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 <button
                   onClick={toggleSubscribe}
                   disabled={!session || subscribeLoading || checkingSubscription}
-                  className={`w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}
+                  className={`w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isSubscribed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}`}
                 >
                   {subscribeLoading ? (
                     <DualRingSpinner />
@@ -1377,9 +1536,21 @@ export default function CampaignClient({ campaign }: { campaign: Campaign }) {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <button
                     onClick={() => copyToClipboard(shareUrl)}
-                    className="flex items-center justify-center py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors"
+                    className={`flex items-center justify-center py-2.5 border rounded-xl text-sm font-medium transition-all ${
+                      copiedLink
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                        : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                    }`}
                   >
-                    <Copy className="w-4 h-4 mr-1.5" /> Copy
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-4 h-4 mr-1.5" /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-1.5" /> Copy
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => shareToTwitter(twitterText, shareUrl)}

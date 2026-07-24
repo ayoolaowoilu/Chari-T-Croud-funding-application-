@@ -34,13 +34,26 @@ const XIcon = () => (
 
 const SocialButtons = () => {
   const search = useSearchParams();
-  const redirect = search.get('redir') || search.get('callbackUrl') || '/';
+  const goto = search.get('goto');
+  const redir =
+    search.get('redir') ||
+    search.get('redirect') ||
+    search.get('callbackUrl') ||
+    search.get('next');
+
+  let targetUrl = '/';
+  if (goto) {
+    targetUrl = goto.startsWith('/') ? goto : `/dashboard/donor?goto=${goto}`;
+  } else if (redir) {
+    targetUrl = redir;
+  }
+
   const [pending, setPending] = useState<string | null>(null);
 
   const handleSignIn = async (provider: string) => {
     try {
       setPending(provider);
-      await signIn(provider, { callbackUrl: redirect });
+      await signIn(provider, { callbackUrl: targetUrl });
     } catch {
       setPending(null);
     }

@@ -30,7 +30,8 @@ const Button: React.FC<ButtonProps> = ({
   const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
     primary:
       'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] focus-visible:ring-[var(--brand)] shadow-sm hover:shadow',
-    secondary: 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-900 shadow-sm',
+    secondary:
+      'bg-emerald-50 text-[var(--brand)] hover:bg-emerald-100 border border-emerald-200 focus-visible:ring-emerald-200 shadow-sm',
     outline:
       'border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-300 focus-visible:ring-[var(--brand)]',
     ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400',

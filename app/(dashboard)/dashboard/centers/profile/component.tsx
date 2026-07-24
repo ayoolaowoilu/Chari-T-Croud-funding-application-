@@ -415,7 +415,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                     setShowWelcome(false);
                     redirect(`/causes/cause?id=${latestCampaign.id}`);
                   }}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#0a66c2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#004182] hover:shadow-md active:scale-95 sm:gap-2 sm:px-5"
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-hover)] hover:shadow-md active:scale-95 sm:gap-2 sm:px-5"
                 >
                   <svg
                     className="h-3.5 w-3.5 sm:h-4 sm:w-4"
@@ -470,9 +470,9 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
             </button>
 
             <div className="mb-5 text-center sm:mb-6">
-              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#0a66c2]/10 sm:h-12 sm:w-12">
+              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 sm:h-12 sm:w-12">
                 <svg
-                  className="h-5 w-5 text-[#0a66c2] sm:h-6 sm:w-6"
+                  className="h-5 w-5 text-[var(--brand)] sm:h-6 sm:w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -507,7 +507,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                     value={donationAmount}
                     onChange={(e) => setDonationAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full rounded-xl border border-gray-300 py-3 pl-8 pr-4 text-lg font-semibold text-gray-900 outline-none transition-all focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20 sm:pl-9 sm:text-xl"
+                    className="w-full rounded-xl border border-gray-300 py-3 pl-8 pr-4 text-lg font-semibold text-gray-900 outline-none transition-all focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20 sm:pl-9 sm:text-xl"
                     min="100"
                     step="100"
                   />
@@ -521,7 +521,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                     onClick={() => setDonationAmount(amount)}
                     className={`rounded-lg py-2.5 text-xs font-medium transition-all duration-200 sm:text-sm ${
                       donationAmount === amount
-                        ? 'bg-[#0a66c2] text-white shadow-md'
+                        ? 'bg-[var(--brand)] text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -540,7 +540,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                     value={donorEmail}
                     onChange={(e) => setDonorEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20"
                     required
                   />
                 </div>
@@ -566,7 +566,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                 <button
                   onClick={() => setIsBlind(!isBlind)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-                    isBlind ? 'bg-[#0a66c2]' : 'bg-gray-300'
+                    isBlind ? 'bg-[var(--brand)]' : 'bg-gray-300'
                   }`}
                 >
                   <span
@@ -587,7 +587,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                     value={donorName}
                     onChange={(e) => setDonorName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-[#0a66c2] focus:ring-2 focus:ring-[#0a66c2]/20"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none transition-all focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20"
                     required={!isBlind}
                   />
                   <p className="mt-1 text-xs text-gray-400">
@@ -684,7 +684,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
               <div className="mt-3 flex gap-2 sm:mt-0 sm:gap-3">
                 <button
                   onClick={() => handleDonateClick()}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#0a66c2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#004182] hover:shadow-md active:scale-95 sm:gap-2 sm:px-5"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-hover)] hover:shadow-md active:scale-95 sm:gap-2 sm:px-5"
                 >
                   <svg
                     className="h-3.5 w-3.5 sm:h-4 sm:w-4"
@@ -746,7 +746,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
               {hasMoreAbout && (
                 <button
                   onClick={() => setAboutExpanded(!aboutExpanded)}
-                  className="mt-2 flex items-center gap-1 text-sm font-medium text-[#0a66c2] transition-colors hover:text-[#004182]"
+                  className="mt-2 flex items-center gap-1 text-sm font-medium text-[var(--brand)] transition-colors hover:text-[var(--brand-hover)]"
                 >
                   {aboutExpanded ? (
                     <>
@@ -854,13 +854,13 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                               <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">
                                 Raised
                               </p>
-                              <p className="text-base font-bold text-[#0a66c2] sm:text-lg">
+                              <p className="text-base font-bold text-[var(--brand)] sm:text-lg">
                                 {formatNaira(campaign.raised || 0)}
                               </p>
                             </div>
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0a66c2]/10">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50">
                               <svg
-                                className="h-4 w-4 text-[#0a66c2]"
+                                className="h-4 w-4 text-[var(--brand)]"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -877,7 +877,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
 
                           <button
                             onClick={() => redirect(`/causes/cause?id=${campaign.id}`)}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a66c2] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#004182] hover:shadow-lg hover:shadow-[#0a66c2]/20 active:scale-[0.98] sm:text-sm"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[var(--brand-hover)] hover:shadow-lg hover:shadow-[var(--brand)]/20 active:scale-[0.98] sm:text-sm"
                           >
                             <svg
                               className="h-4 w-4"
@@ -961,7 +961,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   href={`mailto:${center.email}`}
                   className="group flex items-center gap-2.5 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50 sm:gap-3"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[#0a66c2] group-hover:text-white sm:h-8 sm:w-8">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[var(--brand)] group-hover:text-white sm:h-8 sm:w-8">
                     <svg
                       className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                       fill="none"
@@ -978,7 +978,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] text-gray-500 sm:text-xs">Email</p>
-                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[#0a66c2] sm:text-sm">
+                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[var(--brand)] sm:text-sm">
                       {center.email}
                     </p>
                   </div>
@@ -988,7 +988,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   href={`tel:${center.phone}`}
                   className="group flex items-center gap-2.5 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50 sm:gap-3"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[#0a66c2] group-hover:text-white sm:h-8 sm:w-8">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[var(--brand)] group-hover:text-white sm:h-8 sm:w-8">
                     <svg
                       className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                       fill="none"
@@ -1005,7 +1005,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] text-gray-500 sm:text-xs">Phone</p>
-                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[#0a66c2] sm:text-sm">
+                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[var(--brand)] sm:text-sm">
                       {center.phone}
                     </p>
                   </div>
@@ -1017,7 +1017,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2.5 rounded-lg p-2 transition-all duration-200 hover:bg-gray-50 sm:gap-3"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[#0a66c2] group-hover:text-white sm:h-8 sm:w-8">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors duration-200 group-hover:bg-[var(--brand)] group-hover:text-white sm:h-8 sm:w-8">
                     <svg
                       className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                       fill="none"
@@ -1034,7 +1034,7 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] text-gray-500 sm:text-xs">Website</p>
-                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[#0a66c2] sm:text-sm">
+                    <p className="truncate text-xs font-medium text-gray-900 transition-colors duration-200 group-hover:text-[var(--brand)] sm:text-sm">
                       {center?.website?.replace(/^https?:\/\//, '')}
                     </p>
                   </div>
@@ -1075,13 +1075,13 @@ export default function CenterProfileClient({ centerId, initialCenter, initialEr
               <h2 className="text-base font-semibold text-gray-900 sm:text-lg">Impact</h2>
               <div className="mt-2 grid grid-cols-2 gap-2 sm:mt-3 sm:gap-3">
                 <div className="rounded-lg bg-gray-50 p-2.5 text-center transition-all duration-200 hover:bg-gray-100 sm:p-3">
-                  <p className="text-lg font-bold text-[#0a66c2] sm:text-xl">
+                  <p className="text-lg font-bold text-[var(--brand)] sm:text-xl">
                     {center.total_campaigns}
                   </p>
                   <p className="text-[11px] text-gray-500 sm:text-xs">Campaigns</p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-2.5 text-center transition-all duration-200 hover:bg-gray-100 sm:p-3">
-                  <p className="text-lg font-bold text-[#0a66c2] sm:text-xl">
+                  <p className="text-lg font-bold text-[var(--brand)] sm:text-xl">
                     {center.total_donators || 0}
                   </p>
                   <p className="text-[11px] text-gray-500 sm:text-xs">Donors</p>

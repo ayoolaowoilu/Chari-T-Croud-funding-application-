@@ -83,7 +83,6 @@ export async function compressImageIfNeeded(
  * Validates file before processing
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  // Check if it's an image
   if (!file.type.startsWith('image/')) {
     return {
       valid: false,
@@ -91,7 +90,6 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
     };
   }
 
-  // Check file type specifically
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
   if (!allowedTypes.includes(file.type)) {
     return {
@@ -100,7 +98,6 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
     };
   }
 
-  // Check for extremely large files (>20MB) - reject immediately
   if (file.size > 20 * 1024 * 1024) {
     return {
       valid: false,

@@ -831,7 +831,7 @@ export default function CenterRegistration() {
                   setStages(3);
                 }}
                 disabled={centers.length >= 5}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${centers.length >= 5 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-900'}`}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${centers.length >= 5 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] active:scale-95'}`}
               >
                 <svg
                   className="w-4 h-4"
@@ -1088,7 +1088,7 @@ export default function CenterRegistration() {
                         href={item.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                        className="text-sm text-[var(--brand)] hover:text-[var(--brand-hover)] hover:underline"
                       >
                         {item.website || 'Not provided'}
                       </a>
@@ -1142,7 +1142,7 @@ export default function CenterRegistration() {
                 disabled={!isVerified}
                 className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex-1 ${
                   isVerified
-                    ? 'bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-900'
+                    ? 'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] active:bg-[var(--brand)]'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
               >
