@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
     }
 
     query += ' ORDER BY id DESC LIMIT ?';
-    // fetch one extra row so we know whether there's a next page without a second query
     params.push(limit + 1);
 
     const [rows]: any = await db.query(query, params);

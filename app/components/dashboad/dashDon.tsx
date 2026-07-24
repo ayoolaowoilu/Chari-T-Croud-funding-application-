@@ -696,7 +696,6 @@ export default function Dash() {
     }
   }, [session?.user?.email, fetchDonations]);
 
-  // Loading state
   if (loading) {
     return (
       <div className="w-full min-h-0 p-4 sm:p-6 overflow-y-auto">
@@ -723,7 +722,6 @@ export default function Dash() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="w-full min-h-full flex items-center justify-center p-4 sm:p-6">

@@ -37,12 +37,6 @@ import {
 import { Campaign, Comments } from '@/app/lib/types';
 
 type Don = Campaign;
-interface FetchResponse {
-  data: Don[];
-  error?: string;
-  hasMore?: boolean;
-  nextCursor?: string | number;
-}
 
 type CampaignType = 'all' | 'normal' | 'center';
 type ViewMode = 'list' | 'block';
@@ -289,7 +283,7 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
           </button>
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
             <span
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-1.5 ${isCenter ? 'bg-emerald-600' : 'bg-blue-600'}`}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-1.5 ${isCenter ? 'bg-emerald-600' : 'bg-[var(--brand)]'}`}
             >
               {isCenter ? <Building2 className="w-3 h-3" /> : <User className="w-3 h-3" />}
               {isCenter ? 'Center' : 'Personal'}
@@ -349,7 +343,7 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2.5">
                     <motion.div
-                      className="bg-blue-600 h-full rounded-full"
+                      className="bg-[var(--brand)] h-full rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.6 }}
@@ -464,7 +458,7 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                   <p className="text-sm text-gray-500 mb-3">Failed to load subscribers</p>
                   <button
                     onClick={() => fetchSubscribers(0)}
-                    className="text-sm text-blue-600 font-medium hover:text-blue-700"
+                    className="text-sm text-[var(--brand)] font-medium hover:text-[var(--brand-hover)]"
                   >
                     Try Again
                   </button>
@@ -476,30 +470,33 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                    {subscribers.map((sub, idx) => (
-                      <div
-                        key={sub.identity_key || idx}
-                        className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-100"
-                      >
-                        {sub.img_url ? (
-                          <img
-                            src={sub.img_url}
-                            alt=""
-                            className="w-8 h-8 rounded-full object-cover shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-blue-600">
-                              {(sub.name || 'A').charAt(0).toUpperCase()}
-                            </span>
+                  <div className="bg-gray-50/50 rounded-xl p-6 border border-gray-100 mb-4">
+                    <div className="flex flex-col gap-4">
+                      <h3 className="text-base font-bold text-gray-955">Campaign Subscribers</h3>
+                      <div className="flex flex-wrap -space-x-2 py-1 overflow-visible">
+                        {subscribers.map((sub, idx) => (
+                          <div
+                            key={sub.identity_key ? `${sub.identity_key}-${idx}` : idx}
+                            className="relative group shrink-0"
+                            title={sub.name || 'Anonymous'}
+                          >
+                            {sub.img_url ? (
+                              <img
+                                src={sub.img_url}
+                                alt={sub.name || 'Subscriber'}
+                                className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:z-10"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-emerald-50 border-2 border-white flex items-center justify-center shadow-sm transition-all duration-200 group-hover:scale-110 group-hover:z-10">
+                                <span className="text-xs font-bold text-[var(--brand)]">
+                                  {(sub.name || 'A').charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        <span className="text-sm font-medium text-gray-800 truncate">
-                          {sub.name || 'Anonymous'}
-                        </span>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                   {/* server-driven pagination — shows for both normal and center campaigns since it's keyed off campaign_id, not type */}
                   <DetailPagination
@@ -531,8 +528,8 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                       className="w-9 h-9 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="w-4 h-4 text-blue-600" />
+                    <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center">
+                      <User className="w-4 h-4 text-[var(--brand)]" />
                     </div>
                   )}
                 </div>
@@ -543,13 +540,13 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                     placeholder={session ? 'Write a comment...' : 'Sign in to comment'}
                     rows={2}
                     disabled={!session || postingComment}
-                    className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-400"
+                    className="w-full px-3 py-2.5 text-black bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/20 focus:border-[var(--brand)] resize-none disabled:bg-gray-100 disabled:text-gray-400"
                   />
                   <div className="flex justify-end mt-2">
                     <button
                       onClick={handlePostComment}
                       disabled={!newComment.trim() || !session || postingComment}
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[var(--brand)] rounded-xl hover:bg-[var(--brand-hover)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     >
                       {postingComment ? (
                         <DualRingSpinner />
@@ -573,7 +570,7 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                   <p className="text-sm text-gray-500 mb-3">Failed to load comments</p>
                   <button
                     onClick={() => fetchComments(0)}
-                    className="text-sm text-blue-600 font-medium hover:text-blue-700"
+                    className="text-sm text-[var(--brand)] font-medium hover:text-[var(--brand-hover)]"
                   >
                     Try Again
                   </button>
@@ -588,7 +585,11 @@ function CampaignDetailsPanel({ campaign, onClose }: { campaign: Don; onClose: (
                   <div className="space-y-4">
                     {comments.map((comment, idx) => (
                       <div
-                        key={comment.identity_key || `${comment.user_id}-${idx}`}
+                        key={
+                          comment.identity_key
+                            ? `${comment.identity_key}-${idx}`
+                            : `${comment.user_id || 'comment'}-${idx}`
+                        }
                         className="flex gap-3"
                       >
                         <div className="shrink-0">
@@ -906,7 +907,7 @@ export default function YourCam() {
             <button
               onClick={() => setViewMode('list')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                ${viewMode === 'list' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                ${viewMode === 'list' ? 'bg-[var(--brand)] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <List className="w-4 h-4" />
               List
@@ -914,7 +915,7 @@ export default function YourCam() {
             <button
               onClick={() => setViewMode('block')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                ${viewMode === 'block' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                ${viewMode === 'block' ? 'bg-[var(--brand)] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
             >
               <LayoutGrid className="w-4 h-4" />
               Block
@@ -933,8 +934,8 @@ export default function YourCam() {
               <button
                 key={tab.key}
                 onClick={() => setActiveType(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                  ${activeType === tab.key ? 'bg-gray-900 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                  ${activeType === tab.key ? 'bg-[var(--brand)] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -1022,8 +1023,8 @@ export default function YourCam() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all
-                ${activeCategory === cat ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap
+                ${activeCategory === cat ? 'bg-[var(--brand)] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
             >
               {cat}
             </button>
@@ -1037,7 +1038,7 @@ export default function YourCam() {
             {activeType !== 'all' && (
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-medium border
-                ${activeType === 'normal' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
+                ${activeType === 'normal' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
               >
                 {activeType === 'normal' ? 'Personal' : 'Center'}
               </span>
@@ -1093,7 +1094,7 @@ export default function YourCam() {
                           Center
                         </div>
                       ) : (
-                        <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-sm flex items-center gap-1">
+                        <div className="px-3 py-1 bg-[var(--brand)] text-white text-xs font-semibold rounded-full shadow-sm flex items-center gap-1">
                           <User className="w-3 h-3" />
                           Personal
                         </div>
@@ -1150,7 +1151,7 @@ export default function YourCam() {
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
                           <span
-                            className={`px-2 py-0.5 rounded-md font-medium border ${isCenter ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}
+                            className={`px-2 py-0.5 rounded-md font-medium border ${isCenter ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
                           >
                             {item.category}
                           </span>
@@ -1166,7 +1167,7 @@ export default function YourCam() {
                         </div>
                         <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                           <motion.div
-                            className={`h-full rounded-full ${matured ? 'bg-red-500' : isCenter ? 'bg-emerald-600' : 'bg-blue-600'}`}
+                            className={`h-full rounded-full ${matured ? 'bg-red-500' : isCenter ? 'bg-emerald-600' : 'bg-[var(--brand)]'}`}
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -1300,7 +1301,7 @@ export default function YourCam() {
                             Center
                           </div>
                         ) : (
-                          <div className="px-2.5 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full shadow-sm flex items-center gap-1">
+                          <div className="px-2.5 py-1 bg-[var(--brand)] text-white text-xs font-semibold rounded-full shadow-sm flex items-center gap-1">
                             <User className="w-3 h-3" />
                             Personal
                           </div>
@@ -1335,7 +1336,7 @@ export default function YourCam() {
 
                       <div className="flex items-center gap-2 mt-3">
                         <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${isCenter ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${isCenter ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
                         >
                           {item.category}
                         </span>
@@ -1583,7 +1584,7 @@ export default function YourCam() {
                     </span>
                   )}
                   {editForm._type === 'normal' && (
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                       Personal
                     </span>
                   )}
@@ -1700,7 +1701,7 @@ export default function YourCam() {
                   <button
                     onClick={handleSaveEdit}
                     disabled={isSaving}
-                    className="px-5 py-2.5 text-sm font-medium bg-gray-900 text-white rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    className="px-5 py-2.5 text-sm font-medium bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                   >
                     {isSaving ? (
                       <>

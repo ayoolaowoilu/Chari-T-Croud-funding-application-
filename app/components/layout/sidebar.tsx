@@ -119,7 +119,7 @@ const SideBar: React.FC<SideBarProps> = ({ show, onClose, isAuthenticated }) => 
                   onClick={onClose}
                   className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3.5 py-3 hover:bg-white hover:border-slate-200 transition-colors"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                     <link.icon size={18} strokeWidth={1.75} />
                   </span>
                   <span className="min-w-0">

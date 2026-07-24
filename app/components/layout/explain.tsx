@@ -31,7 +31,6 @@ const Explain: React.FC<ExplainProps> = ({ topic, details, link, link_details })
     if (x + tooltipRect.width > viewportWidth - 16) {
       x = clientX - tooltipRect.width - gap;
     }
-    // Bottom overflow — flip above cursor
     if (y + tooltipRect.height > viewportHeight - 16) {
       y = clientY - tooltipRect.height - gap;
     }

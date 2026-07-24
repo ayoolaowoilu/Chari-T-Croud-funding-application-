@@ -148,7 +148,6 @@ async function sendMassMessagesIndividual(
   };
 }
 
-// Export for use in your application
 export {
   sendSingleEmail,
   sendMassMessages,

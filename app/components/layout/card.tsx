@@ -1,9 +1,8 @@
 'use client';
 
 import Button from '../ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
-import { redirect } from 'next/navigation';
-import { Clock, Users, MapPin, MoreVertical, Copy, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Users, MapPin, Copy, ShieldCheck, Check } from 'lucide-react';
 import { useState } from 'react';
 import { categoryLabel } from '@/app/lib/categories';
 
@@ -53,53 +52,6 @@ function safetyLabel(level?: string) {
   return level.replace(/_/g, ' ');
 }
 
-const CardMenu = ({ onCopyLink }: { onCopyLink: () => void }) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(!open);
-        }}
-        className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-colors flex items-center justify-center"
-        aria-label="More options"
-      >
-        <MoreVertical className="w-4 h-4 text-slate-600" />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 bottom-full mb-2 z-50 w-44 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden"
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  onCopyLink();
-                  setOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <Copy className="w-4 h-4 text-[var(--brand)]" />
-                Copy link
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 const CampaignCard: React.FC<Don> = ({
   img,
   title,
@@ -118,16 +70,31 @@ const CampaignCard: React.FC<Don> = ({
   centerName,
   isVerified: _isVerified,
 }) => {
+  const [copied, setCopied] = useState(false);
   const progressPct = Math.min(100, Math.max(0, (raised / goal) * 100));
   const symbol = currencySymbols[currency] || '₦';
   const isFullyFunded = progressPct >= 100;
-  const daysleftt = Math.floor((Number(daysLeft) - Date.now()) / (1000 * 60 * 60 * 24));
+  const calculateDaysLeft = (val: number | string | undefined): number => {
+    if (val === undefined || val === null || val === '') return 0;
+    const num = Number(val);
+    if (!isNaN(num) && num > 0 && num < 10000) {
+      return Math.ceil(num);
+    }
+    const targetTime = !isNaN(num) ? num : new Date(String(val)).getTime();
+    if (isNaN(targetTime)) return 0;
+    return Math.ceil((targetTime - Date.now()) / (1000 * 60 * 60 * 24));
+  };
+
+  const daysleftt = calculateDaysLeft(daysLeft);
   const isNearDeadline = daysLeft !== undefined && daysleftt <= 7 && daysleftt > 0;
   const isCenter = center_id !== null && center_id !== undefined;
 
-  const handleCopyLink = () => {
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const url = `${window.location.origin}/causes/cause?id=${id}`;
     navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -273,16 +240,24 @@ const CampaignCard: React.FC<Don> = ({
               variant="outline"
               size="md"
               className="flex-1 border-slate-200 hover:border-[var(--brand)] hover:text-[var(--brand)]"
-              onClick={() => window.location.href = `/causes/cause?id=${id}` }
+              onClick={() => (window.location.href = `/causes/cause?id=${id}`)}
             />
 
             <button
               type="button"
               onClick={handleCopyLink}
-              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-[var(--brand)] transition-colors flex items-center justify-center"
+              className={`p-2.5 rounded-xl border transition-colors flex items-center justify-center ${
+                copied
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                  : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-[var(--brand)] text-slate-600'
+              }`}
               aria-label="Copy link"
             >
-              <Copy className="w-4 h-4 text-slate-600" />
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>

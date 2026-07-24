@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
 
   // ---------- Image URLs ----------
   const baseUrl = process.env.API_URL || 'http://localhost:3000';
-  const logoSrc = `${baseUrl}/ct_logo1.png`;
   const bannerSrc = data.main_img?.url || `${baseUrl}/default-banner.png`;
 
   // ---------- Render ----------

@@ -317,7 +317,7 @@ export default function PaystackPopup({
                 </div>
                 <button
                   onClick={copyReference}
-                  className="flex items-center gap-2 text-blue-600 text-sm hover:text-blue-700 transition-colors"
+                  className="flex items-center gap-2 text-[var(--brand)] text-sm hover:text-[var(--brand-hover)] transition-colors"
                 >
                   {transaction?.reference || 'N/A'}
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -538,22 +538,26 @@ export default function PaystackPopup({
         </div>
       )}
 
-      {/* DARK donation stats */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-2 text-sm">
+      {/* Donation summary */}
+      <div className="bg-gray-50 rounded-xl p-3 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-slate-500">Donation Amount</span>
-          <span className="text-white">₦{safeAmount.toLocaleString()}</span>
+          <span className="text-gray-500">Donation Amount</span>
+          <span className="text-gray-900 font-semibold">₦{safeAmount.toLocaleString()}</span>
         </div>
         {safePlatformFee > 0 && (
           <>
             <div className="flex justify-between">
-              <span className="text-slate-500">Platform Fee</span>
-              <span className="text-amber-400">₦{safePlatformFee.toLocaleString()}</span>
+              <span className="text-gray-500">Platform Fee</span>
+              <span className="text-amber-600 font-semibold">
+                ₦{safePlatformFee.toLocaleString()}
+              </span>
             </div>
-            <div className="h-px bg-slate-800" />
+            <div className="h-px bg-gray-200" />
             <div className="flex justify-between">
-              <span className="text-slate-400">Campaign Receives</span>
-              <span className="text-emerald-400">₦{netToCampaign.toLocaleString()}</span>
+              <span className="text-gray-600 font-medium">Campaign Receives</span>
+              <span className="text-[var(--brand)] font-bold">
+                ₦{netToCampaign.toLocaleString()}
+              </span>
             </div>
           </>
         )}
@@ -563,7 +567,7 @@ export default function PaystackPopup({
         type="button"
         onClick={handlePayment}
         disabled={loading}
-        className="group relative w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 disabled:shadow-none overflow-hidden"
+        className="group relative w-full bg-[var(--brand)] hover:bg-[var(--brand-hover)] disabled:bg-teal-300 disabled:cursor-not-allowed text-white py-4 rounded-xl transition-all duration-300 shadow-md shadow-teal-100 hover:shadow-lg hover:shadow-teal-200/50 disabled:shadow-none overflow-hidden"
       >
         <div
           className={`absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full ${!loading ? 'group-hover:translate-x-full' : ''} transition-transform duration-1000`}

@@ -161,7 +161,7 @@ export default function Profile() {
     if (session?.user?.email) {
       fetchData();
     }
-  }, [session?.user?.email]);
+  }, [session?.user?.email, fetchData]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

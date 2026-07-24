@@ -52,6 +52,11 @@ const handler = NextAuth({
   },
   debug: process.env.NODE_ENV === 'development',
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async signIn({ account, profile }) {
       if (!profile?.email) return false;
 

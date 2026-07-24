@@ -3,21 +3,6 @@
 import Footer from '@/app/components/layout/footer';
 import NavBar from '@/app/components/layout/NavBar';
 
-// Explain component - returns a descriptive string
-function Explain({
-  topic,
-  details,
-  link,
-  link_details,
-}: {
-  topic: string;
-  details: string;
-  link: string;
-  link_details: string;
-}) {
-  return `${topic}: ${details} [${link_details}](${link})`;
-}
-
 const safetyRanks = [
   {
     label: 'Verified Safe',
@@ -150,13 +135,6 @@ function StepCard({
 }
 
 export default function HowItWorksPage() {
-  const impactExplanation = Explain({
-    topic: 'impact',
-    details: 'Real-world outcomes and success stories from donations.',
-    link: '/causes/get',
-    link_details: 'view causes',
-  });
-
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <NavBar />

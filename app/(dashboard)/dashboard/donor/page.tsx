@@ -167,7 +167,7 @@ function Sidebar({
                 ${
                   activeTab === item.id
                     ? 'bg-[var(--brand-soft)] text-[var(--brand)] shadow-sm'
-                    : 'text-gray-600 hover:bg-[var(--brand-soft)] hover:text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }
               `}
             >
@@ -277,7 +277,7 @@ function Sidebar({
                 ${
                   activeTab === item.id
                     ? 'bg-[var(--brand)] text-white shadow-lg shadow-[var(--brand)]/20 scale-[1.02]'
-                    : 'text-gray-600 hover:bg-[var(--brand-soft)] hover:text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }
               `}
             >

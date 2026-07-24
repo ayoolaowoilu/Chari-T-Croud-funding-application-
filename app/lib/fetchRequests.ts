@@ -514,7 +514,6 @@ const Handle_subscribe = async (
       }
 
       case 'CHECK': {
-        // Check whether a user is subscribed to a campaign
         res = await fetch(
           `${API_URL}${path}/check?identity_key=${data?.identity_key}&campaign_id=${data?.campaign_id}`,
         );
